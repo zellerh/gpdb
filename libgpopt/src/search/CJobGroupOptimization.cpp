@@ -160,8 +160,13 @@ CJobGroupOptimization::FScheduleGroupExpressions
 		// we consider only group expressions matching current optimization level,
 		// other group expressions will be optimized when damping current
 		// optimization level
-		if (psc->Peng()->FOptimizeChild(m_pgexprOrigin, pgexpr, m_poc, EolCurrent()))
+//		if (psc->Peng()->FOptimizeChild(m_pgexprOrigin, pgexpr, m_poc, EolCurrent()))
+		if (psc->Peng()->FOptimizeChild(m_pgexprOrigin, pgexpr, m_poc, EolCurrent()) &&
+			((m_pgexprOrigin == NULL) || (m_pgexprOrigin != NULL && (m_pgexprOrigin->Pop()->Eopid()!= COperator::EopPhysicalPartitionSelector || (m_pgexprOrigin->Pop()->Eopid() == COperator::EopPhysicalPartitionSelector && !(pgexpr->Pop()->Eopid() == COperator::EopPhysicalPartitionSelector))))))
+		
 		{
+//			CAutoTrace at(psc->PmpGlobal());
+//			at.Os() << "Optimization Request" << std::endl;
 			const ULONG ulOptRequests = CPhysical::PopConvert(pgexpr->Pop())->UlOptRequests();
 			for (ULONG ul = 0; ul < ulOptRequests; ul++)
 			{

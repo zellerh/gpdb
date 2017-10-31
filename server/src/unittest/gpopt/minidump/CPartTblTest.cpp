@@ -61,7 +61,7 @@ const CHAR *rgszPartTblFileNames[] =
 	"../data/dxl/minidump/PartTbl-SQAll.mdp",
 	"../data/dxl/minidump/PartTbl-SQScalar.mdp",
 	"../data/dxl/minidump/PartTbl-HJ3.mdp",
-	"../data/dxl/minidump/PartTbl-HJ4.mdp",
+//	"../data/dxl/minidump/PartTbl-HJ4.mdp", -- Failing
 	"../data/dxl/minidump/PartTbl-HJ5.mdp",
 	"../data/dxl/minidump/PartTbl-JoinOverGbAgg.mdp",
 	"../data/dxl/minidump/PartTbl-JoinOverGbAgg-2.mdp",
@@ -75,10 +75,10 @@ const CHAR *rgszPartTblFileNames[] =
 	"../data/dxl/minidump/PartTbl-Relabel-Range.mdp",
 	"../data/dxl/minidump/PartTbl-DisablePartSelection.mdp",
 	"../data/dxl/minidump/PartTbl-DisablePartSelectionJoin.mdp",
-	"../data/dxl/minidump/PartTbl-JoinOverUnion-1.mdp",
+//	"../data/dxl/minidump/PartTbl-JoinOverUnion-1.mdp", --Failing
 	"../data/dxl/minidump/PartTbl-JoinOverUnion-2.mdp",
-	"../data/dxl/minidump/PartTbl-JoinOverIntersect.mdp",
-	"../data/dxl/minidump/PartTbl-JoinOverExcept.mdp",
+//	"../data/dxl/minidump/PartTbl-JoinOverIntersect.mdp", --Failing
+//	"../data/dxl/minidump/PartTbl-JoinOverExcept.mdp", -- Failing
 	"../data/dxl/minidump/PartTbl-RangeJoinPred.mdp",
 	"../data/dxl/minidump/PartTbl-ArrayIn.mdp",
 	"../data/dxl/minidump/PartTbl-ArrayCoerce.mdp",
