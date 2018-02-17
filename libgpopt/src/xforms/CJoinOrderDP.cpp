@@ -200,16 +200,18 @@ CJoinOrderDP::AddJoinOrder
 	}
 	else
 	{
+		CDouble dmaxCost = 0.0;
 		// we have stored K expressions, evict worst expression
-		for (ULONG ul = 0; !fAddJoinOrder && ul < ulResults; ul++)
+		for (ULONG ul = 0; ul < ulResults; ul++)
 		{
 			CExpression *pexpr = (*m_pdrgpexprTopKOrders)[ul];
 			CDouble *pd = m_phmexprcost->PtLookup(pexpr);
 			GPOS_ASSERT(NULL != pd);
 
-			if (dCost < *pd)
+			if (dmaxCost < *pd && dCost < *pd)
 			{
 				// found a worse expression
+				dmaxCost = *pd;
 				fAddJoinOrder = true;
 				iReplacePos = ul;
 			}
