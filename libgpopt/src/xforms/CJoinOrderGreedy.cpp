@@ -44,7 +44,7 @@ CJoinOrderGreedy::CJoinOrderGreedy
 	CExpressionArray *pdrgpexprConjuncts
 	)
 	:
-	CJoinOrder(pmp, pdrgpexprComponents, pdrgpexprConjuncts),
+	CJoinOrder(pmp, pdrgpexprComponents, pdrgpexprConjuncts, true),
 	m_pcompResult(NULL)
 {
 #ifdef GPOS_DEBUG
@@ -131,7 +131,18 @@ CJoinOrderGreedy::GetStartingJoins()
 	{
 		for (ULONG ul2 = ul1+1; ul2 < m_ulComps; ul2++)
 		{
-			CJoinOrder::SComponent *pcompTemp = PcompCombine(m_rgpcomp[ul1], m_rgpcomp[ul2]);
+			SComponent *component_1 = m_rgpcomp[ul1];
+			SComponent *component_2 = m_rgpcomp[ul2];
+
+			if (!IsValidOuterJoinCombination(component_1, component_2))
+			{
+				continue;
+			}
+
+			CJoinOrder::SComponent *pcompTemp;
+
+			pcompTemp = PcompCombine(component_1,component_2);
+
 			// exclude cross joins to be considered as late as possible in the join order
 			if(CUtils::FCrossJoin(pcompTemp->m_pexpr))
 			{

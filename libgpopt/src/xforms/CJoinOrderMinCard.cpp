@@ -43,7 +43,7 @@ CJoinOrderMinCard::CJoinOrderMinCard
 	CExpressionArray *pdrgpexprConjuncts
 	)
 	:
-	CJoinOrder(mp, pdrgpexprComponents, pdrgpexprConjuncts),
+	CJoinOrder(mp, pdrgpexprComponents, pdrgpexprConjuncts, true),
 	m_pcompResult(NULL)
 {
 #ifdef GPOS_DEBUG
@@ -145,8 +145,16 @@ CJoinOrderMinCard::PexprExpand()
 				continue;
 			}
 
+			if (!IsValidOuterJoinCombination(m_pcompResult, pcompCurrent))
+			{
+				continue;
+			}
+
 			// combine component with current result and derive stats
-			CJoinOrder::SComponent *pcompTemp = PcompCombine(m_pcompResult, pcompCurrent);
+			CJoinOrder::SComponent *pcompTemp;
+
+			pcompTemp = PcompCombine(m_pcompResult, pcompCurrent);
+
 			DeriveStats(pcompTemp->m_pexpr);
 			CDouble rows = pcompTemp->m_pexpr->Pstats()->Rows();
 

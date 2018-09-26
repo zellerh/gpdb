@@ -11,7 +11,6 @@
 
 #include "gpos/base.h"
 #include "gpos/memory/CAutoMemoryPool.h"
-
 #include "gpopt/base/CUtils.h"
 #include "gpopt/operators/ops.h"
 #include "gpopt/operators/CNormalizer.h"
@@ -44,7 +43,7 @@ CXformExpandNAryJoin::CXformExpandNAryJoin
 					(
 					mp,
 					GPOS_NEW(mp) CLogicalNAryJoin(mp),
-					GPOS_NEW(mp) CExpression(mp, GPOS_NEW(mp) CPatternMultiLeaf(mp)),
+					GPOS_NEW(mp) CExpression(mp, GPOS_NEW(mp) CPatternMultiTree(mp)),
 					GPOS_NEW(mp) CExpression(mp, GPOS_NEW(mp) CPatternTree(mp))
 					)
 		)

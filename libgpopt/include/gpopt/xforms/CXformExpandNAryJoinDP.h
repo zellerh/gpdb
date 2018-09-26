@@ -79,6 +79,7 @@ namespace gpopt
 					CXformResult *pxfres,
 					CExpression *pexpr
 					) const;
+			BOOL IsApplyOnce() { return true; }
 
 	}; // class CXformExpandNAryJoinDP
 
