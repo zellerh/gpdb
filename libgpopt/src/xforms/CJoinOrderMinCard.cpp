@@ -14,6 +14,7 @@
 #include "gpos/io/COstreamString.h"
 #include "gpos/string/CWStringDynamic.h"
 
+#include "gpos/common/CAutoRef.h"
 #include "gpos/common/clibwrapper.h"
 #include "gpos/common/CBitSet.h"
 
@@ -86,16 +87,22 @@ CJoinOrderMinCard::MarkUsedEdges()
 	CExpression *pexpr = m_pcompResult->m_pexpr;
 	COperator::EOperatorId op_id = pexpr->Pop()->Eopid();
 	if (0 == pexpr->Arity() ||
-		(COperator::EopLogicalSelect != op_id && COperator::EopLogicalInnerJoin != op_id))
+		(COperator::EopLogicalSelect != op_id &&
+		 COperator::EopLogicalInnerJoin != op_id &&
+		 COperator::EopLogicalLeftOuterJoin != op_id))
 	{
 		// result component does not have a scalar child, e.g. a Get node
 		return;
 	}
 
 	CExpression *pexprScalar = (*pexpr) [pexpr->Arity() - 1];
-	CExpressionArray *pdrgpexpr = CPredicateUtils::PdrgpexprConjuncts(m_mp, pexprScalar);
-	const ULONG size = pdrgpexpr->Size();
+	CExpressionArray *pdrgpexprScalar = CPredicateUtils::PdrgpexprConjuncts(m_mp, pexprScalar);
+	const ULONG ulSizeScalar = pdrgpexprScalar->Size();
 
+	// Find the correct edge to mark as used.  All the conjucts of the edge expr
+	// must match some conjuct of the scalar expr of m_compResults for that edge
+	// to be marked as used. This way edges that contain multiple conjucts are
+	// also matched correctly.
 	for (ULONG ulEdge = 0; ulEdge < m_ulEdges; ulEdge++)
 	{
 		SEdge *pedge = m_rgpedge[ulEdge];
@@ -104,15 +111,42 @@ CJoinOrderMinCard::MarkUsedEdges()
 			continue;
 		}
 
-		for (ULONG ulPred = 0; ulPred < size; ulPred++)
+		CExpressionArray *pdrgpexprEdge = CPredicateUtils::PdrgpexprConjuncts(m_mp, pedge->m_pexpr);
+		const ULONG ulSizeEdge = pdrgpexprEdge->Size();
+
+#ifdef GPOS_DEBUG
+		CAutoRef<CBitSet> pbsScalarConjuctsMatched(GPOS_NEW(m_mp) CBitSet(m_mp));
+#endif
+		ULONG ulMatchCount = 0; // Count of edge predicate conjucts matched
+		// For each conjuct of the edge predicate
+		for (ULONG ulEdgePred = 0; ulEdgePred < ulSizeEdge; ++ulEdgePred)
 		{
-			if ((*pdrgpexpr)[ulPred] == pedge->m_pexpr)
+			// For each conjuct of the scalar predicate
+			for (ULONG ulScalarPred = 0; ulScalarPred < ulSizeScalar; ulScalarPred++)
 			{
-				pedge->m_fUsed = true;
+				if ((*pdrgpexprScalar)[ulScalarPred] == (*pdrgpexprEdge)[ulEdgePred])
+				{
+					// Count the number of edge predicate conjucts matched
+					ulMatchCount++;
+#ifdef GPOS_DEBUG
+					// Make sure each match is unique ie. each scalar conjuct matches
+					// only one edge conjunct
+					GPOS_ASSERT(!pbsScalarConjuctsMatched->Get(ulScalarPred));
+					pbsScalarConjuctsMatched->ExchangeSet(ulScalarPred);
+#endif
+					break;
+				}
 			}
 		}
+
+		if (ulMatchCount == ulSizeEdge)
+		{
+			// All the predicates of the edge was matched -> Mark it as used.
+			pedge->m_fUsed = true;
+		}
+		pdrgpexprEdge->Release();
 	}
-	pdrgpexpr->Release();
+	pdrgpexprScalar->Release();
 }
 
 //---------------------------------------------------------------------------
