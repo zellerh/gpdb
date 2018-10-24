@@ -144,8 +144,7 @@ CJoinOrderGreedy::MarkUsedEdges()
 		{
 			// All the predicates of the edge was matched -> Mark it as used.
 			pedge->m_fUsed = true;
-			m_ulNumUsedEdges--;
-		}
+					}
 		pdrgpexprEdge->Release();
 	}
 	pdrgpexprScalar->Release();
