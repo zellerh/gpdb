@@ -128,7 +128,7 @@ namespace gpopt
 			ULONG m_ulComps;
 
 			// should we optimize outer joins
-			BOOL m_include_outer_join_rels;
+			BOOL m_include_left_outer_join_rels;
 			
 			// compute cover of each edge
 			void ComputeEdgeCover();
@@ -166,7 +166,7 @@ namespace gpopt
 
 			BOOL IsValidOuterJoinCombination(SComponent *component_1, SComponent *component_2) const;
 
-			BOOL IsSameOuterJoin(SComponent *outer_component, SComponent *inner_component) const;
+			BOOL IsChildOfSameLOJ(SComponent *outer_component, SComponent *inner_component) const;
 
 	}; // class CJoinOrder
 

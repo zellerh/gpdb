@@ -81,7 +81,10 @@ namespace gpopt
 					CXformResult *pxfres,
 					CExpression *pexpr
 					) const;
-BOOL IsApplyOnce() { return true; }
+			BOOL IsApplyOnce()
+			{
+				return true;
+			}
 	}; // class CXformExpandNAryJoinGreedy
 
 }

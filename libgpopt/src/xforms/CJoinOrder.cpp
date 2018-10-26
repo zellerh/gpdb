@@ -257,13 +257,13 @@ CJoinOrder::CJoinOrder
 	m_ulEdges(0),
 	m_rgpcomp(NULL),
 	m_ulComps(0),
-	m_include_outer_join_rels (include_outer_join_rels)
+	m_include_left_outer_join_rels (include_outer_join_rels)
 {
 	typedef SComponent* Pcomp;
 	typedef SEdge* Pedge;
 	
-	ULONG nary_children = pdrgpexpr->Size();
-	INT outerJoins = 0;
+	const ULONG nary_children = pdrgpexpr->Size();
+	INT num_of_outer_joins = 0;
 
 	// Since we are using a static array, we need to know size of the array before hand
 	// e.g.
@@ -276,28 +276,28 @@ CJoinOrder::CJoinOrder
 	// |
 	// +--CScalarCmp (=)
 	//
-	// In above case the pdrgpexpr comes with two elemnts in it:
+	// In above case the pdrgpexpr comes with two elements in it:
 	//  - CLogicalGet "t1"
 	//  - CLogicalLeftOuterJoin
-	// We need to create compontnents out of "t1", "t4", "t5" and store them
+	// We need to create components out of "t1", "t4", "t5" and store them
 	// in m_rgcomp.
 	// total number of components = size of pdrgpexpr + no. of LOJs in it
 
 
-	if (m_include_outer_join_rels)
+	if (m_include_left_outer_join_rels)
 	{
 		for (ULONG ul = 0; ul < nary_children; ul++)
 		{
 			CExpression *pexprComp = (*pdrgpexpr)[ul];
 			if (COperator::EopLogicalLeftOuterJoin == pexprComp->Pop()->Eopid())
 			{
-				// TODO: handle nested case here
-				outerJoins++;
+				// we handle only one level of LOJ
+				num_of_outer_joins++;
 			}
 		}
 	}
 
-	m_ulComps = nary_children + outerJoins;
+	m_ulComps = nary_children + num_of_outer_joins;
 	m_rgpcomp = GPOS_NEW_ARRAY(mp, Pcomp, m_ulComps);
 
 	INT outerchild_index = 0;
@@ -307,7 +307,7 @@ CJoinOrder::CJoinOrder
 	for (ULONG ul = 0; ul < nary_children; ul++, component++)
 	{
 		CExpression *pexprComp = (*pdrgpexpr)[ul];
-		if (m_include_outer_join_rels &&
+		if (m_include_left_outer_join_rels &&
 			COperator::EopLogicalLeftOuterJoin == pexprComp->Pop()->Eopid())
 		{
 			CExpression *outer_child = (*pexprComp)[0];
@@ -485,13 +485,11 @@ CJoinOrder::PcompCombine
 		pexprInner->AddRef();
 		pexprOuter->AddRef();
 
-		if (IsSameOuterJoin(pcompOuter, pcompInner))
+		if (IsChildOfSameLOJ(pcompOuter, pcompInner))
 		{
-			// TODO increment outer child index for new component here
-			// component_outerchild_index = pcompOuter->GetOuterChildIndex() + 1;
 			pexpr = CUtils::PexprLogicalJoin<CLogicalLeftOuterJoin>(m_mp, pexprOuter, pexprInner, pexprScalar);
 		}
-		else if (IsSameOuterJoin(pcompInner, pcompOuter))
+		else if (IsChildOfSameLOJ(pcompInner, pcompOuter))
 		{
 			pexpr = CUtils::PexprLogicalJoin<CLogicalLeftOuterJoin>(m_mp, pexprInner, pexprOuter, pexprScalar);
 		}
@@ -511,11 +509,11 @@ CJoinOrder::PcompCombine
 		}
 	}
 
-	SComponent *result = GPOS_NEW(m_mp) SComponent(pexpr, pbs, edge_set);
-	result->SetOuterChildIndex(component_outerchild_index);
-	result->SetInnerChildIndex(component_innerchild_index);
+	SComponent *combinedComponent = GPOS_NEW(m_mp) SComponent(pexpr, pbs, edge_set);
+	combinedComponent->SetOuterChildIndex(component_outerchild_index);
+	combinedComponent->SetInnerChildIndex(component_innerchild_index);
 
-	return result;
+	return combinedComponent;
 }
 
 
@@ -645,7 +643,7 @@ const
 }
 
 BOOL
-CJoinOrder::IsSameOuterJoin
+CJoinOrder::IsChildOfSameLOJ
 	(
 		SComponent *outer_component,
 		SComponent *inner_component

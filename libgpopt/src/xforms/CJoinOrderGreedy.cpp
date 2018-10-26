@@ -103,7 +103,16 @@ CJoinOrderGreedy::MarkUsedEdges()
 	// Find the correct edge to mark as used.  All the conjucts of the edge expr
 	// must match some conjuct of the scalar expr of m_compResults for that edge
 	// to be marked as used. This way edges that contain multiple conjucts are
-	// also matched correctly.
+	// also matched correctly. e.g. sometimes we have an hyper-edge like below
+	//
+	// +--CScalarBoolOp (EboolopAnd)
+	//	|--CScalarCmp (=)
+	//	|  |--CScalarIdent "l_orderkey" (87)
+	//	|  +--CScalarIdent "l_orderkey" (41)
+	//	+--CScalarCmp (<>)
+	//	|--CScalarIdent "l_suppkey" (89)
+	//	+--CScalarIdent "l_suppkey" (43)
+
 	for (ULONG ulEdge = 0; ulEdge < m_ulEdges; ulEdge++)
 	{
 		SEdge *pedge = m_rgpedge[ulEdge];
@@ -144,7 +153,7 @@ CJoinOrderGreedy::MarkUsedEdges()
 		{
 			// All the predicates of the edge was matched -> Mark it as used.
 			pedge->m_fUsed = true;
-					}
+		}
 		pdrgpexprEdge->Release();
 	}
 	pdrgpexprScalar->Release();
@@ -313,13 +322,19 @@ CJoinOrderGreedy::PickBestJoin
 	SComponent *pcompBestComponent = NULL; // the component which gives minimum cardinality when joined with m_pcompResult
 	CDouble dMinRows = 0.0;
 	ULONG best_comp_idx = gpos::ulong_max;
+	SComponent *pcompBest = NULL;
 	
 	CBitSetIter iter(*candidate_comp_set);
 	while (iter.Advance())
 	{
 		SComponent *pcompCurrent = m_rgpcomp[iter.Bit()];
 		SComponent *pcompTemp = PcompCombine(m_pcompResult, pcompCurrent);
-		
+
+		if (!IsValidOuterJoinCombination(m_pcompResult, pcompCurrent))
+		{
+			continue;
+		}
+
 		DeriveStats(pcompTemp->m_pexpr);
 		CDouble dRows = pcompTemp->m_pexpr->Pstats()->Rows();
 		
@@ -329,15 +344,18 @@ CJoinOrderGreedy::PickBestJoin
 			dMinRows = dRows;
 			best_comp_idx = iter.Bit();
 			pcompBestComponent = pcompCurrent;
-			m_pcompResult->Release();
-			m_pcompResult = pcompTemp;
-			m_pcompResult->AddRef();
+			pcompTemp->AddRef();
+			CRefCount::SafeRelease(pcompBest);
+			pcompBest = pcompTemp;
 		}
 		pcompTemp->Release();
 	}
 
 	GPOS_ASSERT(gpos::ulong_max != best_comp_idx);
 	pcompBestComponent->m_fUsed = true;
+	GPOS_ASSERT(NULL != pcompBest);
+	m_pcompResult->Release();
+	m_pcompResult = pcompBest;
 	MarkUsedEdges();
 	
 	return best_comp_idx;
