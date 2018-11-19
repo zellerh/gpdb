@@ -95,11 +95,23 @@ alter system set synchronous_standby_names to '*';
 3: insert into standbywalrep_commit_blocking values (2);
 3&: commit;
 
+-- set synchronous_standby_names to ''
+alter system set synchronous_standby_names to '';
+
+-- reload to make synchronous_standby_names effective
+-1U: select pg_ctl((select datadir from gp_segment_configuration c where c.role='p' and c.content=-1), 'reload', NULL, NULL, NULL);
+
+-- should unblock and commit now that synchronous_standby_names set to ''
+3<:
+
 -- bring the standby back up
 -1U: select pg_ctl((select datadir from gp_segment_configuration c where c.role='m' and c.content=-1), 'start', (select port from gp_segment_configuration where content = -1 and preferred_role = 'm'), 0, (select dbid from gp_segment_configuration c where c.role='m' and c.content=-1));
 
--- should unblock and commit now that standby is back up and in-sync
-3<:
+-- set synchronous_standby_names to '*'
+alter system set synchronous_standby_names to '*';
+
+-- reload to make synchronous_standby_names effective
+-1U: select pg_ctl((select datadir from gp_segment_configuration c where c.role='p' and c.content=-1), 'reload', NULL, NULL, NULL);
 
 -- everything should be back to normal
 4: insert into standbywalrep_commit_blocking select i from generate_series(1,10)i;
