@@ -381,6 +381,7 @@ bool		optimizer_enable_hashjoin;
 bool		optimizer_enable_dynamictablescan;
 bool		optimizer_enable_indexscan;
 bool		optimizer_enable_tablescan;
+bool		optimizer_enable_agg_skew_avoidance;
 
 /* Optimizer plan enumeration related GUCs */
 bool		optimizer_enumerate_plans;
@@ -2515,6 +2516,17 @@ struct config_bool ConfigureNamesBool_gp[] =
 			GUC_NO_SHOW_ALL | GUC_NOT_IN_SAMPLE
 		},
 		&optimizer_enable_tablescan,
+		true,
+		NULL, NULL, NULL
+	},
+
+	{
+		{"optimizer_enable_agg_skew_avoidance", PGC_USERSET, DEVELOPER_OPTIONS,
+			gettext_noop("Force the optimizer to pick a plan that minimizes skew but adds an extra motion node when aggs are used."),
+			NULL,
+			GUC_NO_SHOW_ALL | GUC_NOT_IN_SAMPLE
+		},
+		&optimizer_enable_agg_skew_avoidance,
 		true,
 		NULL, NULL, NULL
 	},

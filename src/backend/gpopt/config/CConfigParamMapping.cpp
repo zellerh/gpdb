@@ -370,6 +370,13 @@ CConfigParamMapping::SConfigMappingElem CConfigParamMapping::m_elements[] =
 		&optimizer_array_constraints,
 		false, // m_negate_param
 		GPOS_WSZ_LIT("Allows the constraint framework to derive array constraints in the optimizer.")
+		},
+
+		{
+		EopttraceEnableAggSkewAvoidance,
+		&optimizer_enable_agg_skew_avoidance,
+		false, // m_negate_param
+		GPOS_WSZ_LIT("Force the optimizer to pick a plan that minimizes skew but adds an extra motion node when aggs are used.")
 		}
 };
 
