@@ -373,10 +373,10 @@ CConfigParamMapping::SConfigMappingElem CConfigParamMapping::m_elements[] =
 		},
 
 		{
-		EopttraceEnableAggSkewAvoidance,
-		&optimizer_enable_agg_skew_avoidance,
+		EopttraceForceAggSkewAvoidance,
+		&optimizer_force_agg_skew_avoidance,
 		false, // m_negate_param
-		GPOS_WSZ_LIT("Force the optimizer to pick a plan that minimizes skew but adds an extra motion node when aggs are used.")
+		GPOS_WSZ_LIT("Always pick a plan for aggregate distinct that minimizes skew.")
 		}
 };
 

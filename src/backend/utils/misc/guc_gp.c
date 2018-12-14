@@ -381,7 +381,6 @@ bool		optimizer_enable_hashjoin;
 bool		optimizer_enable_dynamictablescan;
 bool		optimizer_enable_indexscan;
 bool		optimizer_enable_tablescan;
-bool		optimizer_enable_agg_skew_avoidance;
 
 /* Optimizer plan enumeration related GUCs */
 bool		optimizer_enumerate_plans;
@@ -415,6 +414,7 @@ int			optimizer_cte_inlining_bound;
 bool		optimizer_force_multistage_agg;
 bool		optimizer_force_three_stage_scalar_dqa;
 bool		optimizer_force_expanded_distinct_aggs;
+bool		optimizer_force_agg_skew_avoidance;
 bool		optimizer_prune_computed_columns;
 bool		optimizer_push_requirements_from_consumer_to_producer;
 bool		optimizer_enforce_subplans;
@@ -2521,12 +2521,12 @@ struct config_bool ConfigureNamesBool_gp[] =
 	},
 
 	{
-		{"optimizer_enable_agg_skew_avoidance", PGC_USERSET, DEVELOPER_OPTIONS,
-			gettext_noop("Force the optimizer to pick a plan that minimizes skew but adds an extra motion node when aggs are used."),
+		{"optimizer_force_agg_skew_avoidance", PGC_USERSET, QUERY_TUNING_METHOD,
+			gettext_noop("Always pick a plan for aggregate distinct that minimizes skew."),
 			NULL,
 			GUC_NO_SHOW_ALL | GUC_NOT_IN_SAMPLE
 		},
-		&optimizer_enable_agg_skew_avoidance,
+		&optimizer_force_agg_skew_avoidance,
 		true,
 		NULL, NULL, NULL
 	},
