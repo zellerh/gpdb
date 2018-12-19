@@ -1205,7 +1205,14 @@ CdbTryOpenRelation(Oid relid, LOCKMODE reqmode, bool noWait, bool *lockUpgraded)
 			return NULL;
 
 		if (Gp_role == GP_ROLE_DISPATCH &&
-			RelationIsAppendOptimized(rel))
+			(RelationIsAppendOptimized(rel) ||
+			 /* FIXME: Temporarily add back the check for partitioned tables.
+			  * See Github issue https://github.com/greenplum-db/gpdb/issues/6488.
+			  * We need a permanent fix for this issue that makes sure
+			  * we get the right locks and handle conflicts with other
+			  * transactions in split updates.
+			  */
+			 GpPolicyIsPartitioned(rel->rd_cdbpolicy)))
 		{
 			lockmode = ExclusiveLock;
 			if (lockUpgraded != NULL)
@@ -1226,7 +1233,10 @@ CdbTryOpenRelation(Oid relid, LOCKMODE reqmode, bool noWait, bool *lockUpgraded)
 	 * okay.
 	 */
 	if (lockmode == RowExclusiveLock &&
-		Gp_role == GP_ROLE_DISPATCH && RelationIsAppendOptimized(rel))
+		Gp_role == GP_ROLE_DISPATCH &&
+		(RelationIsAppendOptimized(rel) ||
+		 /* FIXME: See above, adding check for partitioned table here as well */
+		 GpPolicyIsPartitioned(rel->rd_cdbpolicy)))
 	{
 		elog(ERROR, "relation \"%s\" concurrently updated", 
 			 RelationGetRelationName(rel));
