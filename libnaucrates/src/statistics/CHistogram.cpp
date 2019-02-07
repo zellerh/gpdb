@@ -1033,6 +1033,25 @@ CHistogram::CopyHistogram
 	return histogram_copy;
 }
 
+BOOL
+CHistogram::SupportsTextFilter
+(
+ CStatsPred::EStatsCmpType stats_cmp_type
+ )
+{
+	// is the scalar comparison type one of =, <>
+	switch (stats_cmp_type)
+	{
+		case CStatsPred::EstatscmptEq:
+		case CStatsPred::EstatscmptNEq:
+			return true;
+		default:
+			return false;
+	}
+}
+
+
+
 // is statistics comparison type supported for filter?
 BOOL
 CHistogram::SupportsFilter
