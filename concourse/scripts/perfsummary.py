@@ -24,6 +24,14 @@
 import sys
 import re
 import argparse
+import os
+
+# types of diffs in plans, by increasing severity
+NO_CHANGES   = 0
+COST_CHANGES = 1
+ROWS_CHANGES = 2
+PLAN_CHANGES = 3
+planDiffText = { NO_CHANGES: "", COST_CHANGES: "cost change found", ROWS_CHANGES: "row change found", PLAN_CHANGES: "plan change found" }
 
 # the state of multiple test suite queries executed in a log file
 class FileState:
@@ -164,7 +172,7 @@ class FileState:
 
         if len(myPlan) != len(basePlan):
             # plans are different (different number of lines)
-            return "plan change found"
+            return PLAN_CHANGES
 
         for l in range(len(myPlan)):
             myLine = myPlan[l]
@@ -187,14 +195,12 @@ class FileState:
                             plan_change_found = True
 
         if plan_change_found:
-            return "plan change found"
-        elif cost_change_found and rows_change_found:
-            return "cost and cardinality change found"
+            return PLAN_CHANGES
         elif rows_change_found:
-            return "row change found"
+            return ROWS_CHANGES
         elif cost_change_found:
-            return "cost change found"
-        return ""
+            return COST_CHANGES
+        return NO_CHANGES
 
     # print header for CSV file
     def printHeader(self, numFiles):
@@ -209,11 +215,24 @@ class FileState:
             print "%s, %s, %s, %s" % (q, self.query_explain_time_map[q], self.query_exe_time_map[q], self.query_comment_map[q])
 
     # print a CSV file with a comparison between a base file and a test file
-    def printComparison(self, base):
+    def printComparison(self, base, diffDir, diffThreshold, diffLevel):
         for q in self.query_id_list:
             planDiffs = self.comparePlans(base, q)
-            print "%s, %s, %s, %s, %s, %s, %s, %s" % (q, base.query_explain_time_map[q], self.query_explain_time_map[q], base.query_exe_time_map[q], self.query_exe_time_map[q], planDiffs, base.query_comment_map[q], self.query_comment_map[q])
-
+            print "%s, %s, %s, %s, %s, %s, %s, %s" % (q, base.query_explain_time_map[q], self.query_explain_time_map[q], base.query_exe_time_map[q], self.query_exe_time_map[q], planDiffText[planDiffs], base.query_comment_map[q], self.query_comment_map[q])
+            if int(diffLevel) <= int(planDiffs):
+                baseTime = float(base.query_exe_time_map[q])
+                testTime = float(self.query_exe_time_map[q])
+                if testTime > baseTime * (1+float(diffThreshold)/100.0):
+                    baseFileName = diffDir + "/base/" + q + ".plan"
+                    testFileName = diffDir + "/test/" + q + ".plan"
+                    with open(baseFileName, 'w') as fb:
+                        for line in base.query_explain_plan_map[q]:
+                            fb.write(line)
+                        fb.write("Execution time: %s\n" % base.query_exe_time_map[q])
+                    with open(testFileName, 'w') as ft:
+                        for line in self.query_explain_plan_map[q]:
+                            ft.write(line)
+                        ft.write("Execution time: %s\n" % self.query_exe_time_map[q])
             
 
 def main():
@@ -221,11 +240,38 @@ def main():
     parser.add_argument('log_file', nargs = '?', help='log file with explain/execute output')
     parser.add_argument('--baseLog',
                         help='specify a log file from a base version to compare to')
+    parser.add_argument('--diffDir',
+                        help='specify a directory to place diffs into')
+    parser.add_argument('--diffThreshold',
+                        help='specify a numerical threshold to record plan diffs with a performance regression of more than n percent')
+    parser.add_argument('--diffLevel',
+                        help='specify which diff files to generate: 1 = all diffs, 2 = ignore cost diffs, 3 = plan diffs only')
 
     args = parser.parse_args()
 
     inputfile = args.log_file
     basefile = args.baseLog
+    makeDiffs = (args.diffThreshold != None or args.diffLevel != None)
+    diffDir = ""
+    diffThreshold = -100
+    diffLevel = 4
+    if makeDiffs:
+        if args.diffDir == None:
+            print "Please specify a directory for the base and test plan files with the --diffDir <dir> options"
+            exit(1)
+        # remove trailing slash, if it exists
+        diffDir = re.sub(r'(.*)/$','\1', args.diffDir)
+        try:
+            os.mkdir(diffDir)
+            os.mkdir(diffDir + "/base")
+            os.mkdir(diffDir + "/test")
+        except:
+            print "Unable to create diff directory %s" % diffDir
+            exit(1)
+        if args.diffThreshold != None:
+            diffThreshold = args.diffThreshold
+        if args.diffLevel != None:
+            diffLevel = args.diffLevel
 
     if inputfile is None:
         print "Expected the name of a log file with test suite queries\n"
@@ -245,7 +291,7 @@ def main():
         testState.printme()
     else:
         testState.printHeader(2)
-        testState.printComparison(baseState)
+        testState.printComparison(baseState, diffDir, diffThreshold, diffLevel)
 
 if __name__== "__main__":
     main()
