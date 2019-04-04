@@ -270,6 +270,9 @@ def main():
             exit(1)
         if args.diffThreshold != None:
             diffThreshold = args.diffThreshold
+            if args.diffLevel == None:
+                # if only diffThreshold is specify, then default diffLevel to COST_CHANGES
+                args.diffLevel = COST_CHANGES
         if args.diffLevel != None:
             diffLevel = args.diffLevel
 
