@@ -222,7 +222,7 @@ class FileState:
             if int(diffLevel) <= int(planDiffs):
                 baseTime = float(base.query_exe_time_map[q])
                 testTime = float(self.query_exe_time_map[q])
-                if testTime > baseTime * (1+float(diffThreshold)/100.0):
+                if testTime > baseTime * (1+float(diffThreshold)/100.0) or testTime < 0:
                     baseFileName = diffDir + "/base/" + q + ".plan"
                     testFileName = diffDir + "/test/" + q + ".plan"
                     with open(baseFileName, 'w') as fb:
