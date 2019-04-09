@@ -107,10 +107,10 @@ def main():
     status = make()
     if status:
         return status
-    if not options.skip_tests:
-        status = run_tests()
-    if status:
-        return status
+    #if not options.skip_tests:
+    #    status = run_tests()
+    #if status:
+    #    return status
     status = install()
     if status:
         return status
