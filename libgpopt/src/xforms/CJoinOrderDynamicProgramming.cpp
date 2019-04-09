@@ -715,7 +715,7 @@ CJoinOrderDynamicProgramming::SearchBushyJoinOrders
 				break;
 			CBitSetArray *join_bitsets = (*join_levels)[join_level];
 			CBitSetArray *other_join_bitsets = (*join_levels)[other_join_level];
-			BitSetToExpressionArrayMap *bitset_bushy_join_exprs_map = SearchJoinOrders(join_bitsets, other_join_bitsets);
+			BitSetToExpressionArrayMap *bitset_bushy_join_exprs_map = SearchJoinOrders(join_bitsets, other_join_bitsets, true);
 			BitSetToExpressionArrayMap *interim_map = final_bushy_join_exprs_map;
 			final_bushy_join_exprs_map = MergeJoinExprsForBitSet(bitset_bushy_join_exprs_map, interim_map);
 			CRefCount::SafeRelease(interim_map);
@@ -747,7 +747,7 @@ CJoinOrderDynamicProgramming::PexprExpand()
 		ULONG previous_level = current_join_level - 1;
 		CBitSetArray *prev_lev_comps = (*join_level_bitsets)[previous_level];
 		// build linear "current_join_level" joins, with a "previous_level"-way join on one side and a non-join vertex on the other side
-		BitSetToExpressionArrayMap *bitset_join_exprs_map = SearchJoinOrders(prev_lev_comps, non_join_vertex_bitsets);
+		BitSetToExpressionArrayMap *bitset_join_exprs_map = SearchJoinOrders(prev_lev_comps, non_join_vertex_bitsets, true);
 		// build bushy trees - joins between two other joins
 		BitSetToExpressionArrayMap *bitset_bushy_join_exprs_map = SearchBushyJoinOrders(current_join_level, join_level_bitsets);
 
