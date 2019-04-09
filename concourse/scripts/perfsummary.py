@@ -241,7 +241,7 @@ def main():
     parser.add_argument('--baseLog',
                         help='specify a log file from a base version to compare to')
     parser.add_argument('--diffDir',
-                        help='specify a directory to place diffs into')
+                        help='request diff files to be created and specify a directory to place diffs into')
     parser.add_argument('--diffThreshold',
                         help='specify a numerical threshold to record plan diffs with a performance regression of more than n percent')
     parser.add_argument('--diffLevel',
@@ -251,14 +251,11 @@ def main():
 
     inputfile = args.log_file
     basefile = args.baseLog
-    makeDiffs = (args.diffThreshold != None or args.diffLevel != None)
+    makeDiffs = (args.diffDir != None)
     diffDir = ""
     diffThreshold = -100
     diffLevel = 4
     if makeDiffs:
-        if args.diffDir == None:
-            print "Please specify a directory for the base and test plan files with the --diffDir <dir> options"
-            exit(1)
         # remove trailing slash, if it exists
         diffDir = re.sub(r'(.*)/$','\1', args.diffDir)
         try:
@@ -271,10 +268,14 @@ def main():
         if args.diffThreshold != None:
             diffThreshold = args.diffThreshold
             if args.diffLevel == None:
-                # if only diffThreshold is specify, then default diffLevel to COST_CHANGES
+                # if only diffThreshold is specified, then default diffLevel to COST_CHANGES
                 args.diffLevel = COST_CHANGES
         if args.diffLevel != None:
             diffLevel = args.diffLevel
+    else:
+        if (args.diffThreshold != None or args.diffLevel != None):
+            print "Please specify the --diffDir option with a directory name to request diff files\n"
+            exit(1)
 
     if inputfile is None:
         print "Expected the name of a log file with test suite queries\n"
