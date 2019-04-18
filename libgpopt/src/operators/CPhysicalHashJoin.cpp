@@ -324,42 +324,38 @@ CPhysicalHashJoin::PdshashedMatching
 	const ULONG ulDlvrdSize = pdrgpexprDist->Size();
 	const ULONG ulSourceSize = pdrgpexprSource->Size();
 
-	CExpressionArray *pdrgpexprSourceNoCast = GPOS_NEW(mp) CExpressionArray(mp);
-	CExpressionArray *pdrgpexprTargetNoCast = GPOS_NEW(mp) CExpressionArray(mp);
-	for (ULONG ul = 0; ul < ulSourceSize; ul++)
-	{
-		CExpression *pexpr = CCastUtils::PexprWithoutBinaryCoercibleCasts((*pdrgpexprSource)[ul]);
-		pexpr->AddRef();
-		pdrgpexprSourceNoCast->Append(pexpr);
-
-		pexpr = CCastUtils::PexprWithoutBinaryCoercibleCasts((*pdrgpexprTarget)[ul]);
-		pexpr->AddRef();
-		pdrgpexprTargetNoCast->Append(pexpr);
-	}
-
 	// construct an array of target key expressions matching source key expressions
 	CExpressionArray *pdrgpexpr = GPOS_NEW(mp) CExpressionArray(mp);
+	CExpressionArrays *all_equiv_exprs = pdshashed->HashSpecEquivExprs();
 	for (ULONG ulDlvrdIdx = 0; ulDlvrdIdx < ulDlvrdSize; ulDlvrdIdx++)
 	{
-		CExpression *pexprDlvrd = CCastUtils::PexprWithoutBinaryCoercibleCasts((*pdrgpexprDist)[ulDlvrdIdx]);
+		CExpression *pexprDlvrd = (*pdrgpexprDist)[ulDlvrdIdx];
+		CExpressionArray *equiv_distribution_exprs = NULL;
+		if (NULL != all_equiv_exprs && all_equiv_exprs->Size() > 0)
+			equiv_distribution_exprs = (*all_equiv_exprs)[ulDlvrdIdx];
 		for (ULONG idx = 0; idx < ulSourceSize; idx++)
 		{
-			if (CUtils::Equals(pexprDlvrd, (*pdrgpexprSourceNoCast)[idx]))
+			BOOL fSuccess = false;
+			CExpression *source_expr = (*pdrgpexprSource)[idx];
+			fSuccess = CUtils::Equals(pexprDlvrd, source_expr);
+			if (!fSuccess)
+			{
+				// if failed to find a equal match in the source distribution expr
+				// array, check the equivalent exprs to find a match
+				fSuccess = CUtils::Contains(equiv_distribution_exprs, source_expr);
+			}
+			if (fSuccess)
 			{
 				// TODO: 02/21/2012 - ; source column may be mapped to multiple
 				// target columns (e.g. i=j and i=k);
 				// in this case, we need to generate multiple optimization requests to the target child
-				CExpression *pexprTarget = (*pdrgpexprTargetNoCast)[idx];
+				CExpression *pexprTarget = (*pdrgpexprTarget)[idx];
 				pexprTarget->AddRef();
 				pdrgpexpr->Append(pexprTarget);
 				break;
 			}
 		}
 	}
-
-	pdrgpexprSourceNoCast->Release();
-	pdrgpexprTargetNoCast->Release();
-
 	// check if we failed to compute required distribution
 	if (pdrgpexpr->Size() != ulDlvrdSize)
 	{
@@ -371,6 +367,11 @@ CPhysicalHashJoin::PdshashedMatching
 		}
 	}
 	GPOS_ASSERT(pdrgpexpr->Size() == ulDlvrdSize);
+	if (pdrgpexpr->Size() != ulDlvrdSize)
+	{
+		// it should never happen, but instead of creating wrong spec, raise an exception
+		GPOS_RAISE(CException::ExmaSystem, CException::ExmiAssert);
+	}
 
 	return GPOS_NEW(mp) CDistributionSpecHashed(pdrgpexpr, true /* fNullsCollocated */);
 }
@@ -541,8 +542,9 @@ CPhysicalHashJoin::PdshashedPassThru
 	if (fSubset)
 	{
 		// incoming request uses columns from outer child only, pass it through
-		pdshashedInput->AddRef();
-		return pdshashedInput;
+		// but create a copy
+		CDistributionSpecHashed *pdsHashedRequired = pdshashedInput->PdsHashedCopy(mp);
+		return pdsHashedRequired;
 	}
 
 	if (!fDisjoint)
@@ -588,7 +590,7 @@ CDistributionSpec *
 CPhysicalHashJoin::PdsRequiredRedistribute
 	(
 	IMemoryPool *mp,
-	CExpressionHandle &, // exprhdl
+	CExpressionHandle &exprhdl,
 	CDistributionSpec *, // pdsInput
 	ULONG  child_index,
 	CDrvdProp2dArray *pdrgpdpCtxt,
@@ -605,6 +607,23 @@ CPhysicalHashJoin::PdsRequiredRedistribute
 	// find the distribution delivered by first child
 	CDistributionSpec *pdsFirst = CDrvdPropPlan::Pdpplan((*pdrgpdpCtxt)[0])->Pds();
 	GPOS_ASSERT(NULL != pdsFirst);
+	
+	CDistributionSpec *pdsInputForMatch = NULL;
+	if (pdsFirst->Edt() == CDistributionSpec::EdtHashed)
+	{
+		// the spec of the first child is hashed spec, so create a copy
+		// (as we shouldn't modify the original object).
+		// add the equivalent exprs, so the PdsMatch can consider
+		// them while creating matching spec
+		CDistributionSpecHashed *pdsHashedFirstChild = CDistributionSpecHashed::PdsConvert(pdsFirst);
+		CDistributionSpecHashed *pdsHashed = pdsHashedFirstChild->PdsHashedCopy(mp);
+		pdsHashed->SetEquivHashExprs(mp, exprhdl);
+		pdsInputForMatch = pdsHashed;
+	}
+	else
+	{
+		pdsInputForMatch = pdsFirst;
+	}
 
 	// find the index of the first child
 	ULONG ulFirstChild = 0;
@@ -614,7 +633,13 @@ CPhysicalHashJoin::PdsRequiredRedistribute
 	}
 
 	// return a matching distribution request for the second child
-	return PdsMatch(mp, pdsFirst, ulFirstChild);
+	CDistributionSpec *pdsMatch = PdsMatch(mp, pdsInputForMatch, ulFirstChild);
+	if (pdsFirst->Edt() == CDistributionSpec::EdtHashed)
+	{
+		// if the input spec was created as a copy, release it
+		pdsInputForMatch->Release();
+	}
+	return pdsMatch;
 }
 
 
@@ -675,7 +700,13 @@ CPhysicalHashJoin::PdsRequired
 	if (ulOptReq < ulHashDistributeRequests)
 	{
 		// requests 1 .. N are (redistribute, redistribute)
-		return PdsRequiredRedistribute(mp, exprhdl, pdsInput, child_index, pdrgpdpCtxt, ulOptReq);
+		CDistributionSpec *pds = PdsRequiredRedistribute(mp, exprhdl, pdsInput, child_index, pdrgpdpCtxt, ulOptReq);
+		if (CDistributionSpec::EdtHashed == pds->Edt())
+		{
+			CDistributionSpecHashed *pdsHashed = CDistributionSpecHashed::PdsConvert(pds);
+			pdsHashed->SetEquivHashExprs(mp, exprhdl);
+		}
+		return pds;
 	}
 
 	if (ulOptReq == ulHashDistributeRequests ||
@@ -683,7 +714,13 @@ CPhysicalHashJoin::PdsRequired
 	{
 		// requests N+1, N+2 are (hashed/non-singleton, replicate)
 
-		return PdsRequiredReplicate(mp, exprhdl, pdsInput, child_index, pdrgpdpCtxt, ulOptReq);
+		CDistributionSpec *pds = PdsRequiredReplicate(mp, exprhdl, pdsInput, child_index, pdrgpdpCtxt, ulOptReq);
+		if (CDistributionSpec::EdtHashed == pds->Edt())
+		{
+			CDistributionSpecHashed *pdsHashed = CDistributionSpecHashed::PdsConvert(pds);
+			pdsHashed->SetEquivHashExprs(mp, exprhdl);
+		}
+		return pds;
 	}
 
 	GPOS_ASSERT(ulOptReq == ulHashDistributeRequests + 2);

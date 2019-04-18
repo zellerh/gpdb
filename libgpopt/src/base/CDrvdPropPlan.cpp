@@ -230,11 +230,26 @@ CDrvdPropPlan::Equals
 	)
 	const
 {
-	return m_pos->Matches(pdpplan->Pos()) &&
-			m_pds->Matches(pdpplan->Pds()) &&
+	BOOL success = m_pos->Matches(pdpplan->Pos()) &&
 			m_prs->Matches(pdpplan->Prs()) &&
 			m_ppim->Equals(pdpplan->Ppim()) &&
 			m_pcm->Equals(pdpplan->GetCostModel());
+
+	if (success)
+	{
+		if (m_pds->Edt() == CDistributionSpec::EdtHashed)
+		{
+			CDistributionSpecHashed *pds = CDistributionSpecHashed::PdsConvert(m_pds);
+			const CDistributionSpec *pdsInput = pdpplan->Pds();
+			return pds->Equals(pdsInput);
+		}
+		else
+		{
+			return m_pds->Matches(pdpplan->Pds());
+		}
+	}
+
+	return success;
 }
 
 //---------------------------------------------------------------------------

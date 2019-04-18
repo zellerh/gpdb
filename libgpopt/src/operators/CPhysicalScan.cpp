@@ -182,7 +182,7 @@ CPhysicalScan::PdshashedDeriveWithOuterRefs
 	BOOL fSuccess = true;
 	for (ULONG ul = 0; fSuccess && ul < size; ul++)
 	{
-		CExpression *pexpr = (*pdrgpexprHashed)[ul];
+		CExpression *pexpr = CCastUtils::PexprWithoutBinaryCoercibleCasts((*pdrgpexprHashed)[ul]);
 		CExpression *pexprMatching = CUtils::PexprMatchEqualityOrINDF(pexpr, pdrgpexpr);
 		fSuccess = (NULL != pexprMatching);
 		if (fSuccess)

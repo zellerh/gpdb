@@ -48,8 +48,7 @@ namespace gpopt
 						CleanupDelete<ULONG>, CleanupRelease<CExpressionArray> > CTEPredsMapIter;
 
 			// generate a conjunction of equality predicates between the columns in the given set
-			static
-			CExpression *PexprConjEqualityPredicates(IMemoryPool *mp, CColRefSet *pcrs);
+
 
 			// additional equality predicates are generated based on the equivalence
 			// classes in the constraint properties of the expression
@@ -237,6 +236,9 @@ namespace gpopt
 			// convert series of AND or OR comparisons into array IN expressions
 			static
 			CExpression *PexprConvert2In(IMemoryPool *mp, CExpression *pexpr);
+
+			static
+			CExpression *PexprConjEqualityPredicates(IMemoryPool *mp, CColRefSet *pcrs);
 
 	}; // class CExpressionPreprocessor
 }

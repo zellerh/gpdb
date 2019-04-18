@@ -70,6 +70,9 @@ namespace gpopt
             // add explicit casting on the input expression to the destination type
             static
             CExpression *PexprCast(IMemoryPool *mp, CMDAccessor *md_accessor, CExpression *pexpr, IMDId *mdid_dest);
+		
+			static
+			CExpression *PexprWithoutCasts(CExpression *pexpr);
 	}; // class CCastUtils
 
 } // namespace gpopt
