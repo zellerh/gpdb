@@ -92,7 +92,11 @@ class FileState:
             self.query_comment_map[query_id] = self.comment1
         else:
             self.query_comment_map[query_id] = self.comment2
-        self.query_explain_plan_map[query_id] = self.plans[seq_num]
+        if len(self.plans) > seq_num:
+            self.query_explain_plan_map[query_id] = self.plans[seq_num]
+        else:
+            self.query_explain_plan_map[query_id] = "error - no plan found"
+            self.query_comment_map[query_id] += "error - no plan found"
 
     # process a single line of a log file
     def processLogFileLine(self, line_lf):
