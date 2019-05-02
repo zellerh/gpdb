@@ -554,8 +554,8 @@ select b from t1_ncols union all select a from t2_ncols;
 select a+100, b, d from t1_ncols union select b, a+200, d from t2_ncols order by 1;
 select c, a from v1_ncols;
 
-with cte1(x, y, z, w) as (select a*100 aa, b, c, d from t1_ncols union select * from t2_ncols)
-select x.aa/100, x.c, y.c from cte1 join cte1 y on x.aa=y.b;
+with cte1(aa, b, c, d) as (select a*100, b, c, d from t1_ncols union select * from t2_ncols)
+select x.aa/100 aaa, x.c, y.c from cte1 x join cte1 y on x.aa=y.aa;
 
 --
 -- Clean up
