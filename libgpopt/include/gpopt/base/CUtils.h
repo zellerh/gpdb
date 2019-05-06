@@ -1088,16 +1088,16 @@ namespace gpopt
 				);
 
 			static
-			CExpression *GetJoinWithoutInferredPreds(IMemoryPool *mp, CExpression *join_expr);
-
-			static
-			BOOL CanRemoveInferredPredicates(COperator::EOperatorId op_id);
+			CExpression *MakeJoinWithoutInferredPreds(IMemoryPool *mp, CExpression *join_expr);
 		
 			static
 			BOOL Contains(const CExpressionArray *exprs, CExpression *expr_to_match);
 
 			static
 			BOOL Equals(const CExpressionArrays *exprs_arr, const CExpressionArrays *other_exprs_arr);
+
+			static
+			BOOL CanRemoveInferredPredicates(COperator::EOperatorId op_id);
 	}; // class CUtils
 
 	// hash set from expressions

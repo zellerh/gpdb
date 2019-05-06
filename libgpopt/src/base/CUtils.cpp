@@ -5193,7 +5193,7 @@ CUtils::PexprMatchEqualityOrINDF
 // from the input join expression, remove the inferred predicates
 // and return the new join expression without inferred predicate
 CExpression *
-CUtils::GetJoinWithoutInferredPreds
+CUtils::MakeJoinWithoutInferredPreds
 	(
 	IMemoryPool *mp,
 	CExpression *join_expr
@@ -5214,17 +5214,6 @@ CUtils::GetJoinWithoutInferredPreds
 	COperator *join_op = join_expr->Pop();
 	join_op->AddRef();
 	return GPOS_NEW(mp) CExpression(mp, join_op, left_child_expr, right_child_expr, scalar_expr_without_inferred_pred);
-}
-
-// operators from which the inferred predicates can be removed
-// NB: currently, only inner join is included, but we can add more later.
-BOOL
-CUtils::CanRemoveInferredPredicates
-	(
-	COperator::EOperatorId op_id
-	)
-{
-	return op_id == COperator::EopLogicalInnerJoin;
 }
 
 // check if the input expr array contains the expr
@@ -5283,5 +5272,16 @@ CUtils::Equals
 		equal = CUtils::Equals((*exprs_arr)[id], (*other_exprs_arr)[id]);
 	}
 	return equal;
+}
+
+// operators from which the inferred predicates can be removed
+// NB: currently, only inner join is included, but we can add more later.
+BOOL
+CUtils::CanRemoveInferredPredicates
+	(
+	COperator::EOperatorId op_id
+	)
+{
+	return op_id == COperator::EopLogicalInnerJoin;
 }
 // EOF

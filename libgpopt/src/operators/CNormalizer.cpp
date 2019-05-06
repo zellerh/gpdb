@@ -965,7 +965,7 @@ CNormalizer::PushThruJoin
 		BOOL has_subquery = CUtils::FHasSubqueryOrApply(pexprJoinWithInferredPred);
 		if (!has_subquery)
 		{
-			pexprJoinWithoutInferredPred = CUtils::GetJoinWithoutInferredPreds(mp, pexprJoinWithInferredPred);
+			pexprJoinWithoutInferredPred = CUtils::MakeJoinWithoutInferredPreds(mp, pexprJoinWithInferredPred);
 			pexprJoinWithInferredPred->Release();
 			*ppexprResult = pexprJoinWithoutInferredPred;
 			return;

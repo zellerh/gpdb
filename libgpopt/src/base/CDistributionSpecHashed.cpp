@@ -199,9 +199,9 @@ CDistributionSpecHashed::FMatchSubset
 	for (ULONG ulOuter = 0; ulOuter < ulOwnExprs; ulOuter++)
 	{
 		CExpression *pexprOwn = CCastUtils::PexprWithoutBinaryCoercibleCasts((*m_pdrgpexpr)[ulOuter]);
-		CExpressionArrays *all_equiv_exprs = m_equiv_hash_exprs;
 
 		BOOL fFound = false;
+		CExpressionArrays *equiv_hash_exprs = pdsHashed->HashSpecEquivExprs();
 		for (ULONG ulInner = 0; ulInner < ulOtherExprs; ulInner++)
 		{
 			CExpression *pexprOther = CCastUtils::PexprWithoutBinaryCoercibleCasts((*(pdsHashed->m_pdrgpexpr))[ulInner]);
@@ -211,11 +211,11 @@ CDistributionSpecHashed::FMatchSubset
 				break;
 			}
 
-			if (NULL != all_equiv_exprs && all_equiv_exprs->Size() > 0)
+			if (NULL != equiv_hash_exprs && equiv_hash_exprs->Size() > 0)
 			{
 				GPOS_ASSERT(false == fFound);
-				CExpressionArray *equiv_distribution_exprs = (*all_equiv_exprs)[ulOuter];
-				if (CUtils::Contains(equiv_distribution_exprs, pexprOther))
+				CExpressionArray *equiv_distribution_exprs = (*equiv_hash_exprs)[ulInner];
+				if (CUtils::Contains(equiv_distribution_exprs, pexprOwn))
 				{
 					fFound = true;
 					break;
@@ -602,13 +602,13 @@ CDistributionSpecHashed::SetEquivHashExprs
 			distribution_expr->AddRef();
 			equiv_distribution_exprs->Append(distribution_expr);
 
-			if (1 < distribution_expr_cols->Size())
+			if (1 != distribution_expr_cols->Size())
 			{
-				// if there are more than one columns in the distribution expr, there will be no
+				// if there are 0 or more than 1 column in the distribution expr, there will be no
 				// equivalent columns for the expr
+				equiv_distribution_all_exprs->Append(equiv_distribution_exprs);
 				continue;
 			}
-			GPOS_ASSERT(1 == distribution_expr_cols->Size());
 
 			// there is only one colref in the set
 			const CColRef *distribution_colref = distribution_expr_cols->PcrAny();
@@ -617,46 +617,28 @@ CDistributionSpecHashed::SetEquivHashExprs
 			// if there are equivalent columns, then we have a chance to create equivalent distribution exprs
 			if (NULL != equiv_cols)
 			{
-				// create a scalar expr with all the equivalent columns
-				CExpression *predicate_expr_with_inferred_quals = CExpressionPreprocessor::PexprConjEqualityPredicates(mp, equiv_cols);
-				// put all the scalar expr into an array
-				CExpressionArray *predicate_exprs = CPredicateUtils::PdrgpexprConjuncts(mp, predicate_expr_with_inferred_quals);
-
-				// colrefset to track what all exprs has already been considered, it helps avoiding duplicates
-				CColRefSet *processed_colrefs = GPOS_NEW(mp) CColRefSet(mp);
-				processed_colrefs->Include(distribution_colref);
-
-				// iterate over all the scalar expression to identify equivalent distribution expr
-				for (ULONG predicate_idx = 0; predicate_idx < predicate_exprs->Size(); predicate_idx++)
+				CColRefSetIter equiv_cols_iter(*equiv_cols);
+				while (equiv_cols_iter.Advance())
 				{
-					CExpression *predicate_expr = (*predicate_exprs)[predicate_idx];
-					if (!CUtils::FScalarCmp(predicate_expr))
+					CColRef *equiv_col = equiv_cols_iter.Pcr();
+					if (equiv_col == distribution_colref)
 					{
-						// if the predicate is anything other than scalar comparision,
-						// skip it. for instance: CScalarConst(1)
+						// skip the current distribution colref as we need to create the scalar
+						// condition with its equivalent colrefs
 						continue;
 					}
-
-					CColRefSet *scalar_condition_colrefset = CDrvdPropScalar::GetDrvdScalarProps(predicate_expr->PdpDerive())->PcrsUsed();
-					if (!scalar_condition_colrefset->FMember(distribution_colref))
-					{
-						// if the current distribution colref is not part of the generated predicate, skip it.
-						// we need to consider only the predicate expr which are made up of current
-						// distribution expr
-						continue;
-					}
-
+					CExpression *predicate_expr_with_inferred_quals = CUtils::PexprScalarEqCmp(mp, distribution_colref, equiv_col);
 					// add cast on the expressions if required, both the outer and inner hash exprs
 					// should be of the same data type else they may be hashed to different segments
-					CExpression *predicate_expr_with_casts = CCastUtils::PexprAddCast(mp, predicate_expr);
-					CExpression *original_predicate_expr = predicate_expr;
+					CExpression *predicate_expr_with_casts = CCastUtils::PexprAddCast(mp, predicate_expr_with_inferred_quals);
+					CExpression *original_predicate_expr = predicate_expr_with_inferred_quals;
 					if (predicate_expr_with_casts)
 					{
+						predicate_expr_with_inferred_quals->Release();
 						original_predicate_expr = predicate_expr_with_casts;
 					}
 					CExpression *left_distribution_expr = (*original_predicate_expr)[0];
 					CExpression *right_distribution_expr = (*original_predicate_expr)[1];
-
 					// if the predicate is a = b, and a is the current distribution expr,
 					// then the equivalent expr is b
 					CExpression *equiv_distribution_expr = NULL;
@@ -673,26 +655,18 @@ CDistributionSpecHashed::SetEquivHashExprs
 					if (equiv_distribution_expr)
 					{
 						CExpression *equiv_distribution_expr_without_bcc = CCastUtils::PexprWithoutBinaryCoercibleCasts(equiv_distribution_expr);
-						CColRefSet *distribution_expr_without_bcc_colrefset = CDrvdPropScalar::GetDrvdScalarProps(equiv_distribution_expr_without_bcc->PdpDerive())->PcrsUsed();
-						// check if the entry has already been processed
-						if (!processed_colrefs->FIntersects(distribution_expr_without_bcc_colrefset))
-						{
-							equiv_distribution_expr_without_bcc->AddRef();
-							equiv_distribution_exprs->Append(equiv_distribution_expr_without_bcc);
-							processed_colrefs->Include(distribution_expr_without_bcc_colrefset);
-						}
+						equiv_distribution_expr_without_bcc->AddRef();
+						equiv_distribution_exprs->Append(equiv_distribution_expr_without_bcc);
 					}
-					CRefCount::SafeRelease(predicate_expr_with_casts);
+					CRefCount::SafeRelease(original_predicate_expr);
 				}
-				processed_colrefs->Release();
-				predicate_exprs->Release();
-				predicate_expr_with_inferred_quals->Release();
 			}
 			equiv_distribution_all_exprs->Append(equiv_distribution_exprs);
+
 		}
-		m_equiv_hash_exprs = equiv_distribution_all_exprs;
-		GPOS_ASSERT(m_equiv_hash_exprs->Size() == m_pdrgpexpr->Size());
 	}
+	GPOS_ASSERT(equiv_distribution_all_exprs->Size() == m_pdrgpexpr->Size());
+	m_equiv_hash_exprs = equiv_distribution_all_exprs;
 }
 
 CDistributionSpecHashed *
