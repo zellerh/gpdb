@@ -474,6 +474,8 @@ extern double optimizer_nestloop_factor;
 extern double optimizer_sort_factor;
 
 /* Optimizer hints */
+extern double optimizer_bitmap_scan_init_cost;
+extern double optimizer_bitmap_scan_rebind_cost;
 extern int optimizer_array_expansion_threshold;
 extern int optimizer_join_order_threshold;
 extern int optimizer_join_order;

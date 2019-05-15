@@ -561,8 +561,10 @@ double		optimizer_sort_factor;
 
 /* Optimizer hints */
 int			optimizer_join_arity_for_associativity_commutativity;
-int			optimizer_array_expansion_threshold;
-int			optimizer_join_order_threshold;
+int         optimizer_array_expansion_threshold;
+double		optimizer_bitmap_scan_init_cost;
+double		optimizer_bitmap_scan_rebind_cost;
+int         optimizer_join_order_threshold;
 int			optimizer_join_order;
 int			optimizer_cte_inlining_bound;
 bool		optimizer_force_multistage_agg;
@@ -4171,13 +4173,33 @@ struct config_int ConfigureNamesInt_gp[] =
 	},
 
 	{
-		{"gp_gang_creation_retry_count", PGC_USERSET, GP_ARRAY_TUNING,
-			gettext_noop("After a gang-creation fails, retry the number of times if failure is retryable."),
-			gettext_noop("A value of zero disables retries."),
+		{"optimizer_bitmap_scan_init_cost", PGC_USERSET, QUERY_TUNING_METHOD,
+			gettext_noop("Override for one-time initialization cost for bitmap table scans."),
+			NULL,
+			GUC_NOT_IN_SAMPLE | GUC_NO_SHOW_ALL | GUC_UNIT_S
+		},
+		&optimizer_bitmap_scan_init_cost,
+		-1.0, -1.0, 10000.0, NULL, NULL
+	},
+
+	{
+		{"optimizer_bitmap_scan_rebind_cost", PGC_USERSET, QUERY_TUNING_METHOD,
+			gettext_noop("Override for cost per rebind for bitmap table scans."),
+			NULL,
 			GUC_NO_SHOW_ALL | GUC_NOT_IN_SAMPLE
 		},
-		&gp_gang_creation_retry_count,
-		5, 0, 128, NULL, NULL
+		&optimizer_bitmap_scan_rebind_cost,
+		-1.0, -1.0, 10000.0, NULL, NULL
+	},
+
+	{
+        {"gp_gang_creation_retry_count", PGC_USERSET, GP_ARRAY_TUNING,
+            gettext_noop("After a gang-creation fails, retry the number of times if failure is retryable."),
+            gettext_noop("A value of zero disables retries."),
+            GUC_NO_SHOW_ALL | GUC_NOT_IN_SAMPLE
+		},
+        &gp_gang_creation_retry_count,
+        5, 0, 128, NULL, NULL
 	},
 
 	{
@@ -4887,7 +4909,7 @@ struct config_real ConfigureNamesReal_gp[] =
 		&gp_statistics_sampling_threshold,
 		20000.0, 0.0, DBL_MAX, NULL, NULL
 	},
-
+	
 	{
 		{"gp_resqueue_priority_cpucores_per_segment", PGC_POSTMASTER, RESOURCES_MGM,
 			gettext_noop("Number of processing units associated with a segment."),
