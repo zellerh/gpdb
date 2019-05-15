@@ -5581,7 +5581,7 @@ struct config_string ConfigureNamesString_gp[] =
 	{
 		{"optimizer_join_order", PGC_USERSET, QUERY_TUNING_OTHER,
 			gettext_noop("Set optimizer join heuristic model."),
-			gettext_noop("Valid values are query, greedy, exhaustive and auto1"),
+			gettext_noop("Valid values are query, greedy, exhaustive and exhaustive2"),
 			GUC_NOT_IN_SAMPLE
 		},
 		&optimizer_join_order_str,
@@ -5864,10 +5864,10 @@ assign_optimizer_join_order_options(const char *newval, bool doit, GucSource sou
 		if (doit)
 			optimizer_join_order = JOIN_ORDER_EXHAUSTIVE_SEARCH;
 	}
-	else if (pg_strcasecmp(newval, "auto1") == 0)
+	else if (pg_strcasecmp(newval, "exhaustive2") == 0)
 	{
 		if (doit)
-			optimizer_join_order = JOIN_ORDER_AUTO1_SEARCH;
+			optimizer_join_order = JOIN_ORDER_EXHAUSTIVE2_SEARCH;
 	}
 	else
 	{
