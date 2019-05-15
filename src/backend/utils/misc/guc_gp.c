@@ -379,6 +379,8 @@ double		optimizer_sort_factor;
 /* Optimizer hints */
 int			optimizer_join_arity_for_associativity_commutativity;
 int         optimizer_array_expansion_threshold;
+double         optimizer_indexscaninit_cost;
+double         optimizer_indexscaninitrebind_cost;
 int         optimizer_join_order_threshold;
 int			optimizer_join_order;
 int			optimizer_cte_inlining_bound;
@@ -4200,6 +4202,28 @@ struct config_real ConfigureNamesReal_gp[] =
 		},
 		&gp_selectivity_damping_factor,
 		1.0, 1.0, DBL_MAX,
+		NULL, NULL, NULL
+	},
+	
+	{
+		{"optimizer_indexscaninit_cost", PGC_USERSET, QUERY_TUNING_METHOD,
+			gettext_noop("Item limit for expansion of arrays in WHERE clause for constraint derivation."),
+			NULL,
+			GUC_NO_SHOW_ALL | GUC_NOT_IN_SAMPLE
+		},
+		&optimizer_indexscaninit_cost,
+		431.0, 0.0, 10000.0,
+		NULL, NULL, NULL
+	},
+	
+	{
+		{"optimizer_indexscaninitrebind_cost", PGC_USERSET, QUERY_TUNING_METHOD,
+			gettext_noop("Item limit for expansion of arrays in WHERE clause for constraint derivation."),
+			NULL,
+			GUC_NO_SHOW_ALL | GUC_NOT_IN_SAMPLE
+		},
+		&optimizer_indexscaninitrebind_cost,
+		.0001, 0.0, 10000.0,
 		NULL, NULL, NULL
 	},
 
