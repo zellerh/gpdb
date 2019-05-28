@@ -448,8 +448,8 @@ COptTasks::CreateOptimizerConfig
 	ULONG cte_inlining_cutoff = (ULONG) optimizer_cte_inlining_bound;
 	ULONG join_arity_for_associativity_commutativity = (ULONG) optimizer_join_arity_for_associativity_commutativity;
 	ULONG array_expansion_threshold = (ULONG) optimizer_array_expansion_threshold;
-	DOUBLE indexscaninitrebind_cost = (DOUBLE) optimizer_indexscaninitrebind_cost;
-	DOUBLE indexscaninit_cost = (DOUBLE) optimizer_indexscaninit_cost;
+	DOUBLE bitmap_scan_init_cost = (DOUBLE) optimizer_bitmap_scan_init_cost;
+	DOUBLE bitmap_scan_rebind_cost = (DOUBLE) optimizer_bitmap_scan_rebind_cost;
 	ULONG join_order_threshold = (ULONG) optimizer_join_order_threshold;
 	ULONG broadcast_threshold = (ULONG) optimizer_penalize_broadcast_threshold;
 
@@ -468,8 +468,8 @@ COptTasks::CreateOptimizerConfig
 								broadcast_threshold,
 								false, /* don't create Assert nodes for constraints, we'll
 								      * enforce them ourselves in the executor */
-								indexscaninitrebind_cost,
-								indexscaninit_cost
+								bitmap_scan_rebind_cost,
+								bitmap_scan_init_cost
 								),
 						GPOS_NEW(mp) CWindowOids(OID(F_WINDOW_ROW_NUMBER), OID(F_WINDOW_RANK))
 						);
