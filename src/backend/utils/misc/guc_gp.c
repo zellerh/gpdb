@@ -4207,23 +4207,23 @@ struct config_real ConfigureNamesReal_gp[] =
 
 	{
 		{"optimizer_bitmap_scan_init_cost", PGC_USERSET, QUERY_TUNING_METHOD,
-			gettext_noop("One-time initialization cost for bitmap table scans."),
+			gettext_noop("Override for one-time initialization cost for bitmap table scans."),
 			NULL,
 			GUC_NO_SHOW_ALL | GUC_NOT_IN_SAMPLE
 		},
 		&optimizer_bitmap_scan_init_cost,
-		-1.0, 0.0, 10000.0,
+		-1.0, -1.0, 10000.0,
 		NULL, NULL, NULL
 	},
 
 	{
 		{"optimizer_bitmap_scan_rebind_cost", PGC_USERSET, QUERY_TUNING_METHOD,
-			gettext_noop("Cost per rebind for bitmap table scans."),
+			gettext_noop("Override for cost per rebind for bitmap table scans."),
 			NULL,
 			GUC_NO_SHOW_ALL | GUC_NOT_IN_SAMPLE
 		},
 		&optimizer_bitmap_scan_rebind_cost,
-		-1.0, 0.0, 10000.0,
+		-1.0, -1.0, 10000.0,
 		NULL, NULL, NULL
 	},
 
