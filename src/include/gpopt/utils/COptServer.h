@@ -23,7 +23,6 @@
 #include "gpos/common/CSyncHashtableAccessByIter.h"
 #include "gpos/common/CSyncHashtableIter.h"
 #include "gpos/net/CSocket.h"
-#include "gpos/sync/CSpinlock.h"
 #include "gpos/task/CTask.h"
 
 // forward declarations
