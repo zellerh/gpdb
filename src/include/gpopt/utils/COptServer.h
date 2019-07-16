@@ -91,18 +91,6 @@ namespace gpoptudfs
 
 			};
 
-			typedef CSyncHashtable<SConnectionDescriptor, ULONG_PTR, CSpinlockOS>
-				ConnectionHT;
-
-			typedef CSyncHashtableAccessByKey<SConnectionDescriptor, ULONG_PTR, CSpinlockOS>
-				ConnectionKeyAccessor;
-
-			typedef CSyncHashtableIter<SConnectionDescriptor, ULONG_PTR, CSpinlockOS>
-				ConnectionIter;
-
-			typedef CSyncHashtableAccessByIter<SConnectionDescriptor, ULONG_PTR, CSpinlockOS>
-				ConnectionIterAccessor;
-
 			// path where socket is initialized
 			const CHAR *m_socket_path;
 
