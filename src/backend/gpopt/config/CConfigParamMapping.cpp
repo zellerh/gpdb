@@ -549,6 +549,9 @@ CConfigParamMapping::PackConfigParamInBitset
 		traceflag_bitset->ExchangeSet(GPOPT_DISABLE_XFORM_TF(CXform::ExfExpandFullOuterJoin));
 	}
 
+	// aggregated memory allocation is disabled in 5X
+	traceflag_bitset->ExchangeSet(EtraceDisableAggregateMemoryAllocations);
+
 	return traceflag_bitset;
 }
 
