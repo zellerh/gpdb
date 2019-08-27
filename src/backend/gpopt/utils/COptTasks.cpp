@@ -41,6 +41,7 @@
 #include "gpos/io/COstreamFile.h"
 #include "gpos/io/COstreamString.h"
 #include "gpos/memory/CAutoMemoryPool.h"
+#include "gpos/memory/CMemoryPoolTracker.h"
 #include "gpos/task/CAutoTraceFlag.h"
 #include "gpos/common/CAutoP.h"
 
@@ -284,8 +285,6 @@ COptTasks::Execute
 
 	bool abort_flag = false;
 
-	CAutoMemoryPool amp(CAutoMemoryPool::ElcNone, CMemoryPoolManager::EatTracker, false /* fThreadSafe */);
-
 	gpos_exec_params params;
 	params.func = func;
 	params.arg = func_arg;
@@ -403,6 +402,10 @@ COptTasks::LoadSearchStrategy
 
 				search_strategy_arr = dxl_parse_handler->GetSearchStageArray();
 				search_strategy_arr->AddRef();
+			}
+			else
+			{
+				elog(DEBUG2, "\n[OPT]: Using default search strategy");
 			}
 		}
 	}
@@ -695,6 +698,19 @@ COptTasks::OptimizeTask
 
 		// set up relcache MD provider
 		CMDProviderRelcache *relcache_provider = GPOS_NEW(mp) CMDProviderRelcache(mp);
+
+		// now that trace flags are available, update our memory pool to use aggregated memory
+		// if that has been disabled (default in 5X)
+		if (GPOS_FTRACE(EtraceDisableAggregateMemoryAllocations))
+		{
+			CMemoryPoolTracker *mpt = dynamic_cast<CMemoryPoolTracker *>(mp);
+
+			GPOS_ASSERT(NULL != mpt);
+			if (NULL != mpt)
+			{
+				mpt->disable_aggregated_allocations();
+			}
+		}
 
 		{
 			// scope for MD accessor

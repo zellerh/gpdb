@@ -538,6 +538,11 @@ CConfigParamMapping::PackConfigParamInBitset
 		traceflag_bitset->ExchangeSet(GPOPT_DISABLE_XFORM_TF(CXform::ExfImplementFullOuterMergeJoin));
 	}
 
+	if (!optimizer_enable_aggregated_memory_allocation)
+	{
+		traceflag_bitset->ExchangeSet(EtraceDisableAggregateMemoryAllocations);
+	}
+
 	CBitSet *join_heuristic_bitset = NULL;
 	switch (optimizer_join_order)
 	{

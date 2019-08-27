@@ -347,6 +347,7 @@ bool		optimizer_enable_hashagg;
 bool		optimizer_enable_groupagg;
 bool		optimizer_expand_fulljoin;
 bool		optimizer_enable_mergejoin;
+bool		optimizer_enable_aggregated_memory_allocation;
 bool		optimizer_prune_unused_columns;
 
 /* Optimizer plan enumeration related GUCs */
@@ -2579,6 +2580,16 @@ struct config_bool ConfigureNamesBool_gp[] =
 		false,
 		NULL, NULL, NULL
 	},
+	{
+		{"optimizer_enable_aggregated_memory_allocation", PGC_USERSET, DEVELOPER_OPTIONS,
+			gettext_noop("Enables more efficient, aggregated memory allocations in ORCA."),
+			NULL,
+			GUC_NO_SHOW_ALL | GUC_NOT_IN_SAMPLE
+		},
+		&optimizer_enable_aggregated_memory_allocation,
+		true,
+		NULL, NULL, NULL
+	},
 
 	{
 		{"optimizer_sample_plans", PGC_USERSET, DEVELOPER_OPTIONS,
@@ -2818,7 +2829,7 @@ struct config_bool ConfigureNamesBool_gp[] =
 			GUC_NO_SHOW_ALL | GUC_NOT_IN_SAMPLE
 		},
 		&optimizer_use_gpdb_allocators,
-		false,
+		true,
 		NULL, NULL, NULL
 	},
 

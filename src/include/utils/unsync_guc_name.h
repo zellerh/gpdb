@@ -337,6 +337,7 @@
 		"optimizer_damping_factor_groupby",
 		"optimizer_damping_factor_join",
 		"optimizer_dpe_stats",
+		"optimizer_enable_aggregated_memory_allocation",
 		"optimizer_enable_assert_maxonerow",
 		"optimizer_enable_associativity",
 		"optimizer_enable_bitmapscan",
