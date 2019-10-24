@@ -340,13 +340,6 @@ class AnalyzeDb(Operation):
             else:
                 logger.warning("No valid state files directories exist. Exiting...")
 
-        if self.analyze_gucs is not None:
-            cmd = create_psql_command(self.dbname, self.analyze_gucs)
-            cmd.run()
-            if not cmd.was_successful():
-                logger.debug("GUCs not supported in this version: " + self.analyze_gucs)
-                self.analyze_gucs = ""
-
         if self.include_cols is not None:
             self.include_cols = self.include_cols.strip().split(',')
 
