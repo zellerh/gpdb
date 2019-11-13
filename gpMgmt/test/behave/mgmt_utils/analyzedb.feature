@@ -1494,8 +1494,6 @@ Feature: Incrementally analyze the database
         And "public.sales_1_prt_4" should appear in the latest state files
         And "public.sales_1_prt_3" should appear in the latest state files
 
-    # refresh root stats
-
     @analyzedb_core @analyzedb_partition_tables
     Scenario: Partition tables, (entries for some parts, dml on some parts, some parts)
         Given no state files exist for database "incr_analyze"
