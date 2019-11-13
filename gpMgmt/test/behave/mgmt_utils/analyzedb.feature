@@ -39,8 +39,8 @@ Feature: Incrementally analyze the database
     Scenario: Additional ignored arguments
         When the user runs "analyzedb -l -d incr_analyze xyz"
         Then analyzedb should print "\[WARNING]:-Please note that some of the arguments \(\['xyz']\) aren't valid and will be ignored" to stdout
-		When the user runs "analyzedb -l -d incr_analyze --skip_root_stats"
-		Then analyzedb should print "\[WARNING]:-The --skip_root_stats option is no longer supported and will be ignored." to stdout
+        When the user runs "analyzedb -l -d incr_analyze --skip_root_stats"
+        Then analyzedb should print "\[WARNING]:-The --skip_root_stats option is no longer supported and will be ignored." to stdout
 
     @analyzedb_UI
     Scenario: Mutually exclusive arguments
@@ -1614,8 +1614,6 @@ Feature: Incrementally analyze the database
         And "public.sales_1_prt_2" should appear in the latest state files
         And "public.sales_1_prt_4" should appear in the latest state files
         And "public.sales_1_prt_3" should appear in the latest state files
-
-    # refresh root stats
 
     @analyzedb_core @analyzedb_partition_tables
     Scenario: Partition tables, (entries for some parts, dml on some parts, some parts), use unsupported --skip_root_stats
