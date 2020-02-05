@@ -2727,7 +2727,7 @@ struct config_bool ConfigureNamesBool_gp[] =
 			GUC_NO_SHOW_ALL | GUC_NOT_IN_SAMPLE
 		},
 		&optimizer_dpe_stats,
-		true, NULL, NULL
+		false, NULL, NULL
 	},
 	{
 		{"optimizer_enable_indexjoin", PGC_USERSET, DEVELOPER_OPTIONS,
