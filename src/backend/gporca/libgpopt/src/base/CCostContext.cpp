@@ -144,6 +144,12 @@ CCostContext::FNeedsNewStats() const
 		return false;
 	}
 
+	if (!m_pdpplan->Ppim()->FContainsUnresolved())
+	{
+		// all partition selectors have been resolved at this level
+		return false;
+	}
+
 	CEnfdPartitionPropagation *pepp = Poc()->Prpp()->Pepp();
 
 	if (GPOS_FTRACE(EopttraceDeriveStatsForDPE) &&
