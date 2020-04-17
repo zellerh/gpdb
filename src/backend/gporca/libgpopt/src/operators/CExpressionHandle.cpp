@@ -547,17 +547,17 @@ CExpressionHandle::DeriveCostContextStats()
 		CPhysicalScan *popScan = CPhysicalScan::PopConvert(m_pgexpr->Pop());
 		IStatistics *pstatsDS = popScan->PstatsDerive(m_mp, *this, m_pcc->Poc()->Prpp(), m_pcc->Poc()->Pdrgpstat());
 
-		// Replace the group stats with our newly derived DPE stats, but only if they reduce
-		// the row count. Eliminating partitions can't possibly increase the row count. If
-		// the row count is higher, that's likely due to some heuristics in the estimation.
-		if (NULL == m_pstats ||
-			(NULL != pstatsDS && m_pstats->Rows() > pstatsDS->Rows()))
+		if (NULL == m_pstats || m_pstats->Rows() > pstatsDS->Rows())
 		{
+			// Replace the group stats with our newly derived DPE stats
 			CRefCount::SafeRelease(m_pstats);
 			m_pstats = pstatsDS;
 		}
 		else
 		{
+			// Eliminating partitions can't possibly increase the row count. If the row
+			// count is higher, that's likely due to some heuristics in the estimation.
+			pstatsDS->Release();
 			GPOS_DEBUG_COUNTER_BUMP("dpe_stats_discarded_as_too_high");
 		}
 
@@ -589,7 +589,6 @@ CExpressionHandle::DeriveCostContextStats()
 
 		// simply pass stats from first child
 		costContextStats = (*m_pdrgpstat)[0];
-		costContextStats->AddRef();
 	}
 	else
 	{
@@ -610,7 +609,6 @@ CExpressionHandle::DeriveCostContextStats()
 			IStatistics *stats = m_pgexpr->Pgroup()->PstatsCompute(m_pcc->Poc(), exprhdl, pgexprForStats);
 
 			GPOS_ASSERT(NULL != stats);
-			stats->AddRef();
 			costContextStats = stats;
 		}
 		else
