@@ -49,6 +49,7 @@
 #include "gpopt/search/CScheduler.h"
 #include "gpopt/search/CSchedulerContext.h"
 #include "gpopt/xforms/CXformFactory.h"
+#include "gpos/common/CDebugCounter.h"
 
 #include "naucrates/traceflags/traceflags.h"
 
@@ -614,6 +615,7 @@ CEngine::FSafeToPruneWithDPEStats
 		if (0 < pdprel->GetPartitionInfo()->UlConsumers())
 		{
 			// we cannot bound cost here because of possible DPE that can happen below the operator
+			GPOS_DEBUG_COUNTER_BUMP("cant_prune_dpe_below");
 			return false;
 		}
 
@@ -628,6 +630,7 @@ CEngine::FSafeToPruneWithDPEStats
 	if (0 < pdprelChild->GetPartitionInfo()->UlConsumers())
 	{
 		// we cannot bound cost here because of possible DPE that can happen for the unoptimized child
+		GPOS_DEBUG_COUNTER_BUMP("cant_prune_dpe_child");
 		return false;
 	}
 

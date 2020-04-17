@@ -881,7 +881,7 @@ CPhysical::PppsRequiredPushThruNAry
 			// for all the other cases, push the filter down.
 			if (!(1 == child_index &&
 				CUtils::FScalarNullTest(pexpr) &&
-				CUtils::FPhysicalOuterJoin(exprhdl.Pop()))
+				CUtils::FPhysicalOuterJoin(exprhdl.Pop())) // TODO: Does this need a check for full join??
 				)
 			{
 				pexpr->AddRef();

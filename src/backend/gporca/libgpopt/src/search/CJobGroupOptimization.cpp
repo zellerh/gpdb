@@ -20,6 +20,7 @@
 #include "gpopt/search/CJobQueue.h"
 #include "gpopt/search/CSchedulerContext.h"
 #include "gpopt/search/CScheduler.h"
+#include "gpos/common/CDebugCounter.h"
 
 #include "naucrates/traceflags/traceflags.h"
 
@@ -213,9 +214,11 @@ CJobGroupOptimization::FScheduleGroupExpressions
 		// optimization level
 		if (psc->Peng()->FOptimizeChild(m_pgexprOrigin, pgexpr, m_poc, EolCurrent()))
 		{
+			GPOS_DEBUG_COUNTER_BUMP("group_optimization_phys_expr");
 			const ULONG ulOptRequests = CPhysical::PopConvert(pgexpr->Pop())->UlOptRequests();
 			for (ULONG ul = 0; ul < ulOptRequests; ul++)
 			{
+				GPOS_DEBUG_COUNTER_BUMP("group_optimization_phys_expr_opt_req");
 				// schedule an optimization job for each request
 				CJobGroupExpressionOptimization::ScheduleJob(psc, pgexpr, m_poc, ul, this);
 			}

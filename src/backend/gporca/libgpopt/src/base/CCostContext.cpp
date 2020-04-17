@@ -12,6 +12,7 @@
 #include "gpos/base.h"
 #include "gpos/io/COstreamString.h"
 #include "gpos/string/CWStringDynamic.h"
+#include "gpos/common/CDebugCounter.h"
 #include "gpopt/base/CCostContext.h"
 #include "gpopt/base/CDistributionSpecHashed.h"
 
@@ -159,6 +160,7 @@ CCostContext::FNeedsNewStats() const
 	{
 		// context is attached to a dynamic scan that went through
 		// partition elimination in another part of the plan
+		GPOS_DEBUG_COUNTER_BUMP("dpe_stats_for_dyn_scan");
 		return true;
 	}
 
@@ -174,6 +176,10 @@ CCostContext::FNeedsNewStats() const
 		fDeriveStats = pccChild->FOwnsStats();
 	}
 
+	if (fDeriveStats)
+	{
+		GPOS_DEBUG_COUNTER_BUMP("dpe_stats_for_owned_stats");
+	}
 	return fDeriveStats;
 }
 
