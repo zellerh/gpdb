@@ -23,6 +23,7 @@
 #include "gpopt/search/CJobTransformation.h"
 #include "gpopt/search/CScheduler.h"
 #include "gpopt/search/CSchedulerContext.h"
+#include "gpos/common/CDebugCounter.h"
 
 
 using namespace gpopt;
@@ -244,6 +245,8 @@ CJobGroupExpressionOptimization::Init
 	m_prppCTEProducer = prppCTEProducer;
 	m_fScheduledCTEOptimization = false;
 
+	GPOS_DEBUG_COUNTER_BUMP("group_expression_optimization_tasks");
+
 	CJob::SetInit();
 }
 
@@ -429,6 +432,8 @@ CJobGroupExpressionOptimization::ComputeCurrentChildRequirements
 	CSchedulerContext *psc
 	)
 {
+	GPOS_DEBUG_COUNTER_BUMP("group_expression_optimization_child_context_attempts");
+
 	// derive plan properties of previous child group
 	if (m_ulChildIndex != m_pexprhdlPlan->UlFirstOptimizedChildIndex())
 	{
@@ -472,6 +477,10 @@ CJobGroupExpressionOptimization::ScheduleChildGroupsJobs
 {
 	GPOS_ASSERT(!FChildrenScheduled());
 
+	BOOL waitForOptimizationOfNextChild = false;
+
+	while (!FChildrenScheduled() && !waitForOptimizationOfNextChild)
+	{
 	CGroup *pgroupChild = (*m_pgexpr)[m_ulChildIndex];
 	if (pgroupChild->FScalar())
 	{
@@ -481,7 +490,7 @@ CJobGroupExpressionOptimization::ScheduleChildGroupsJobs
 			SetChildrenScheduled();
 		}
 
-		return;
+		continue;
 	}
 
 	ComputeCurrentChildRequirements(psc);
@@ -489,8 +498,18 @@ CJobGroupExpressionOptimization::ScheduleChildGroupsJobs
 	{
 		return;
 	}
-	m_pexprhdlPlan->Prpp(m_ulChildIndex)->AddRef();
 
+	// check to see whether we already found the solution to our required plan properties
+	COptimizationContext *pocChild = NULL;
+//	COptimizationContext *pocChild = pgroupChild->PocLookupBest
+//			(
+//			 psc->GetGlobalMemoryPool(),
+//			 psc->Peng()->UlSearchStages(),
+//			 m_pexprhdlPlan->Prpp(m_ulChildIndex)
+//			);
+
+	if (NULL == pocChild)
+	{
 	// use current stats for optimizing current child
 	IStatisticsArray *stats_ctxt = GPOS_NEW(psc->GetGlobalMemoryPool()) IStatisticsArray(psc->GetGlobalMemoryPool());
 	CUtils::AddRefAppend<IStatistics, CleanupStats>(stats_ctxt, m_pdrgpstatCurrentCtxt);
@@ -508,6 +527,8 @@ CJobGroupExpressionOptimization::ScheduleChildGroupsJobs
 		prprel = m_pexprhdlRel->GetReqdRelationalProps(m_ulChildIndex);
 	}
 	GPOS_ASSERT(NULL != prprel);
+
+	m_pexprhdlPlan->Prpp(m_ulChildIndex)->AddRef();
 	prprel->AddRef();
 
 	// schedule optimization job for current child group
@@ -530,8 +551,18 @@ CJobGroupExpressionOptimization::ScheduleChildGroupsJobs
 		return;
 	}
 
+	GPOS_DEBUG_COUNTER_BUMP("group_expression_optimization_child_opt_jobs");
+
 	CJobGroupOptimization::ScheduleJob(psc, pgroupChild, m_pgexpr, pocChild, this);
 	pocChild->Release();
+	// we need to wait for this new job to complete before continuing
+	waitForOptimizationOfNextChild = true;
+
+	}
+	else
+	{
+		GPOS_DEBUG_COUNTER_BUMP("reuse_of_existing_context");
+	}
 
 	// advance to next child
 	if (!m_pexprhdlPlan->FNextChildIndex(&m_ulChildIndex))
@@ -539,6 +570,7 @@ CJobGroupExpressionOptimization::ScheduleChildGroupsJobs
 		// child group optimization is complete
 		SetChildrenScheduled();
 	}
+	} // while
 }
 
 
