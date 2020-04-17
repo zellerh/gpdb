@@ -146,6 +146,12 @@ CCostContext::FNeedsNewStats() const
 
 	CEnfdPartitionPropagation *pepp = Poc()->Prpp()->Pepp();
 
+	if (!m_pdpplan->Ppim()->FContainsUnresolved())
+	{
+		// all partition selectors have been resolved at this level
+		return false;
+	}
+
 	if (GPOS_FTRACE(EopttraceDeriveStatsForDPE) &&
 		CUtils::FPhysicalScan(pop) &&
 		CPhysicalScan::PopConvert(pop)->FDynamicScan() &&
