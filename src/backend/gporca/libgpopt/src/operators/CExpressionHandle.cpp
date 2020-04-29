@@ -564,7 +564,9 @@ CExpressionHandle::DeriveCostContextStats()
 		return;
 	}
 
-	IStatistics *costContextStats = m_pstats;
+	// release current stats since we will derive new stats
+	CRefCount::SafeRelease(m_pstats);
+	m_pstats = NULL;
 
 	// load stats from child cost context(s) -- these may be different from child groups stats
 	CRefCount::SafeRelease(m_pdrgpstat);
@@ -587,38 +589,35 @@ CExpressionHandle::DeriveCostContextStats()
 	{
 		GPOS_ASSERT(1 == m_pdrgpstat->Size());
 
-		// simply pass stats from first child
-		costContextStats = (*m_pdrgpstat)[0];
-	}
-	else
-	{
-		if (m_pcc->Pdpplan()->Ppim()->FContainsUnresolved())
-		{
-			// derive stats using the best logical expression with the same children as attached physical operator
-			CGroupExpression *pgexprForStats = m_pcc->PgexprForStats();
-			GPOS_ASSERT(NULL != pgexprForStats);
+		// copy stats from first child
+		(*m_pdrgpstat)[0]->AddRef();
+		m_pstats = (*m_pdrgpstat)[0];
 
-			CExpressionHandle exprhdl(m_mp);
-			exprhdl.Attach(pgexprForStats);
-			exprhdl.DeriveProps(NULL /*pdpctxt*/);
-			m_pdrgpstat->AddRef();
-			exprhdl.m_pdrgpstat = m_pdrgpstat;
-			exprhdl.ComputeReqdProps(m_pcc->Poc()->GetReqdRelationalProps(), 0 /*ulOptReq*/);
-
-			GPOS_ASSERT(NULL == exprhdl.m_pstats);
-			IStatistics *stats = m_pgexpr->Pgroup()->PstatsCompute(m_pcc->Poc(), exprhdl, pgexprForStats);
-
-			GPOS_ASSERT(NULL != stats);
-			costContextStats = stats;
-		}
+		return;
 	}
 
-	if (costContextStats != m_pstats)
-	{
-		costContextStats->AddRef();
-		CRefCount::SafeRelease(m_pstats);
-		m_pstats = costContextStats;
-	}
+	// derive stats using the best logical expression with the same children as attached physical operator
+	CGroupExpression *pgexprForStats = m_pcc->PgexprForStats();
+	GPOS_ASSERT(NULL != pgexprForStats);
+
+	CExpressionHandle exprhdl(m_mp);
+	exprhdl.Attach(pgexprForStats);
+	exprhdl.DeriveProps(NULL /*pdpctxt*/);
+	m_pdrgpstat->AddRef();
+	exprhdl.m_pdrgpstat = m_pdrgpstat;
+	exprhdl.ComputeReqdProps(m_pcc->Poc()->GetReqdRelationalProps(), 0 /*ulOptReq*/);
+
+	GPOS_ASSERT(NULL == exprhdl.m_pstats);
+	IStatistics *stats = m_pgexpr->Pgroup()->PstatsCompute(m_pcc->Poc(), exprhdl, pgexprForStats);
+
+	// copy stats to main handle
+	GPOS_ASSERT(NULL == m_pstats);
+	GPOS_ASSERT(NULL != stats);
+
+	stats->AddRef();
+	m_pstats = stats;
+
+	GPOS_ASSERT(m_pstats != NULL);
 }
 
 
