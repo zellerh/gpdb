@@ -533,6 +533,9 @@ CExpressionHandle::DeriveCostContextStats()
 	{
 		// there is no need to derive stats,
 		// stats are copied from owner group
+		// (note that m_pdrgpstat may not contain the correct DPE
+		// stats of children, but it is used only for deriving the
+		// stats, which we don't need to do anymore)
 
 		return;
 	}
