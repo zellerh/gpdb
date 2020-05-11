@@ -1171,6 +1171,26 @@ op_volatile(Oid opno)
 }
 
 /*
+ * op_ndv_preserving
+ *
+ *		Given op id, return whether it's one of a list of NDV-preserving
+ *		operators (estimated NDV of output is similar to that of the input,
+ *		assuming only one of the inputs is a variable, the others are constant).
+ */
+bool
+op_ndv_preserving(Oid opno)
+{
+	switch (opno)
+	{
+		// for now, we consider only concatenation
+		case OID_TEXT_CONCAT_OP:
+			return true;
+		default:
+			return false;
+	}
+}
+
+/*
  * get_commutator
  *
  *		Returns the corresponding commutator of an operator.
@@ -1916,6 +1936,28 @@ func_data_access(Oid funcid)
 
 	Assert(!isnull);
 	return result;
+}
+
+/*
+ * func_ndv_preserving
+ *		Given procedure id, return whether it's one of a list of NDV-preserving
+		functions (estimated NDV of output is similar to that of the input).
+ */
+bool
+func_ndv_preserving(Oid funcid)
+{
+	switch (funcid)
+	{
+		// for now, these are the functions we consider for this optimization
+		case LOWER_OID:
+		case LTRIM_SPACE_OID:
+		case BTRIM_SPACE_OID:
+		case RTRIM_SPACE_OID:
+		case UPPER_OID:
+			return true;
+		default:
+			return false;
+	}
 }
 
 /*				---------- RELATION CACHE ----------					 */

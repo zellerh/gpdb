@@ -603,6 +603,20 @@ gpdb::FuncStrict
 	return false;
 }
 
+bool
+gpdb::FuncNDVPreserving
+	(
+	Oid funcid
+	)
+{
+	GP_WRAP_START;
+	{
+		return func_ndv_preserving(funcid);
+	}
+	GP_WRAP_END;
+	return false;
+}
+
 char
 gpdb::FuncStability
 	(
@@ -2043,6 +2057,21 @@ gpdb::IsOpStrict
 	{
 		/* catalog tables: pg_operator, pg_proc */
 		return op_strict(opno);
+	}
+	GP_WRAP_END;
+	return false;
+}
+
+bool
+gpdb::IsOpNDVPreserving
+	(
+	Oid opno
+	)
+{
+	GP_WRAP_START;
+	{
+		/* catalog tables: pg_operator, pg_proc */
+		return op_ndv_preserving(opno);
 	}
 	GP_WRAP_END;
 	return false;
