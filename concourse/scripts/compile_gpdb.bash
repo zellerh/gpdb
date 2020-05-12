@@ -190,9 +190,9 @@ function export_gpdb_clients() {
 function build_xerces()
 {
     OUTPUT_DIR="gpdb_src/gpAux/ext/${BLD_ARCH}"
-    mkdir -p xerces_download/concourse
-    cp -r gpdb_src/src/backend/gporca/concourse/xerces-c xerces_download/concourse
-    /usr/bin/python xerces_download/concourse/xerces-c/build_xerces.py --output_dir=${OUTPUT_DIR}
+    mkdir -p xerces_patch/concourse
+    cp -r gpdb_src/src/backend/gporca/concourse/xerces-c xerces_patch/concourse
+    /usr/bin/python xerces_patch/concourse/xerces-c/build_xerces.py --output_dir=${OUTPUT_DIR}
     rm -rf build
 }
 

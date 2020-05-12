@@ -35,7 +35,7 @@ def get_xerces_source():
     local_src.close()
     file_hash = hashlib.sha256(open('xerces_src.tar.gz','rb').read()).hexdigest()
     actual_hash = ""
-    with open('xerces_download/concourse/xerces-c/xerces-c-3.1.2.tar.gz.sha256', 'r') as f:
+    with open('xerces_patch/concourse/xerces-c/xerces-c-3.1.2.tar.gz.sha256', 'r') as f:
         actual_hash = f.read().strip()
     if file_hash != actual_hash:
         return 1
