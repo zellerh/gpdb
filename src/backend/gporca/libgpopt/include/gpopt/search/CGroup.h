@@ -522,6 +522,9 @@ namespace gpopt
 			// lookup the best context across all stages for the given required properties
 			COptimizationContext *PocLookupBest(CMemoryPool *mp, ULONG ulSearchStages, CReqdPropPlan *prpp);
 
+			// find a context by id
+			COptimizationContext *Ppoc(ULONG id) const;
+
 			// insert given context into contexts hash table
 			COptimizationContext *PocInsert(COptimizationContext *poc);
 
