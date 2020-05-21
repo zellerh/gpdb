@@ -604,7 +604,7 @@ gpdb::FuncStrict
 }
 
 bool
-gpdb::FuncNDVPreserving
+gpdb::IsFuncNDVPreserving
 	(
 	Oid funcid
 	)

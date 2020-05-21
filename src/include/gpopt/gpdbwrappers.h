@@ -202,7 +202,7 @@ namespace gpdb {
 	bool FuncStrict(Oid funcid);
 
 	// does this preserve the NDVs of its inputs?
-	bool FuncNDVPreserving(Oid funcid);
+	bool IsFuncNDVPreserving(Oid funcid);
 
 	// stability property of given function
 	char FuncStability(Oid funcid);
