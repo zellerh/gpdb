@@ -609,12 +609,20 @@ gpdb::IsFuncNDVPreserving
 	Oid funcid
 	)
 {
-	GP_WRAP_START;
+	// Given a function oid, return whether it's one of a list of NDV-preserving
+	// functions (estimated NDV of output is similar to that of the input)
+	switch (funcid)
 	{
-		return func_ndv_preserving(funcid);
+		// for now, these are the functions we consider for this optimization
+		case LOWER_OID:
+		case LTRIM_SPACE_OID:
+		case BTRIM_SPACE_OID:
+		case RTRIM_SPACE_OID:
+		case UPPER_OID:
+			return true;
+		default:
+			return false;
 	}
-	GP_WRAP_END;
-	return false;
 }
 
 char
@@ -2068,13 +2076,16 @@ gpdb::IsOpNDVPreserving
 	Oid opno
 	)
 {
-	GP_WRAP_START;
+	switch (opno)
 	{
-		/* catalog tables: pg_operator, pg_proc */
-		return op_ndv_preserving(opno);
+		// for now, we consider only the concatenation op as NDV-preserving
+		// (note that we do additional checks later, e.g. col || 'const' is
+		// NDV-preserving, while col1 || col2 is not)
+		case OID_TEXT_CONCAT_OP:
+			return true;
+		default:
+			return false;
 	}
-	GP_WRAP_END;
-	return false;
 }
 
 void
