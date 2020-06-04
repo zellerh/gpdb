@@ -12262,8 +12262,8 @@ SELECT DISTINCT L1.c, L1.lid
 FROM t55 L1 CROSS JOIN META
 WHERE L1.lid = int4in(unknownout(meta.load_id));
 NOTICE:  Table doesn't have 'DISTRIBUTED BY' clause. Creating a NULL policy entry.
-                                                     QUERY PLAN                                                     
---------------------------------------------------------------------------------------------------------------------
+                                                      QUERY PLAN                                                      
+----------------------------------------------------------------------------------------------------------------------
  Result  (cost=0.00..431.10 rows=1 width=8)
    Output: c, lid
    ->  Redistribute Motion 3:3  (slice1; segments: 3)  (cost=0.00..431.08 rows=1 width=8)
@@ -12291,7 +12291,7 @@ NOTICE:  Table doesn't have 'DISTRIBUTED BY' clause. Creating a NULL policy entr
                                              ->  Result  (cost=0.00..0.00 rows=1 width=1)
                                                    Output: '99'
  Optimizer: Pivotal Optimizer (GPORCA)
- Settings: optimizer_cte_inlining_bound=1000, optimizer_join_order=query, optimizer_metadata_caching=on
+ Settings: optimizer=on, optimizer_cte_inlining_bound=1000, optimizer_join_order=query, optimizer_metadata_caching=on
 (28 rows)
 
 CREATE TABLE TP AS
