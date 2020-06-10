@@ -207,7 +207,7 @@ CQueryMutators::NormalizeGroupByProjList
 		}
 	}
 
-	derived_table_query->targetList = context.m_derived_table_tlist;
+	derived_table_query->targetList = context.m_lower_table_tlist;
 	new_query->targetList = target_list_copy;
 
 	ReassignSortClause(new_query, derived_table_query);
@@ -536,7 +536,7 @@ CQueryMutators::FixGroupingCols
 {
 	GPOS_ASSERT(NULL != node);
 
-	ULONG arity = gpdb::ListLength(context->m_derived_table_tlist) + 1;
+	ULONG arity = gpdb::ListLength(context->m_lower_table_tlist) + 1;
 
 	// fix any outer references in the grouping column expression
 	Node *expr = (Node *) RunGroupingColMutator(node, context);
@@ -547,7 +547,7 @@ CQueryMutators::FixGroupingCols
 	new_target_entry->ressortgroupref = orginal_target_entry->ressortgroupref;
 	new_target_entry->resjunk = false;
 
-	context->m_derived_table_tlist = gpdb::LAppend(context->m_derived_table_tlist, new_target_entry);
+	context->m_lower_table_tlist = gpdb::LAppend(context->m_lower_table_tlist, new_target_entry);
 
 	Var *new_var = gpdb::MakeVar
 			(
@@ -762,7 +762,7 @@ CQueryMutators::RunExtractAggregatesMutator
 			var->varlevelsup = 0;
 			TargetEntry *found_tle =
 				gpdb::FindFirstMatchingMemberInTargetList((Node*) var,
-													  context->m_derived_table_tlist);
+													  context->m_lower_table_tlist);
 
 			if (NULL == found_tle)
 			{
@@ -857,14 +857,14 @@ CQueryMutators::MakeVarInDerivedTable
 	GPOS_ASSERT(IsA(node, Aggref) || IsA(node, GroupingFunc) || IsA(node, Var));
 
 	// Append a new target entry for the node to the derived target list ...
-	const ULONG attno = gpdb::ListLength(context->m_derived_table_tlist) + 1;
+	const ULONG attno = gpdb::ListLength(context->m_lower_table_tlist) + 1;
 	TargetEntry *tle = NULL;
 	if (IsA(node, Aggref) || IsA(node, GroupingFunc))
 		tle = GetTargetEntryForAggExpr(context->m_mp, context->m_mda, node, attno);
 	else if (IsA(node, Var))
 		tle = gpdb::MakeTargetEntry((Expr*) node, (AttrNumber) attno, NULL, false);
 
-	context->m_derived_table_tlist = gpdb::LAppend(context->m_derived_table_tlist, tle);
+	context->m_lower_table_tlist = gpdb::LAppend(context->m_lower_table_tlist, tle);
 
 	// ... and return a Var referring to it in its stead
 	// NB: Since the new tle is appended at the top query level, Var::varlevelsup
@@ -893,7 +893,7 @@ CQueryMutators::FindNodeInGroupByTargetList
 	GPOS_ASSERT(NULL != context);
 	
 	TargetEntry *found_tle =
-		gpdb::FindFirstMatchingMemberInTargetList(node, context->m_derived_table_tlist);
+		gpdb::FindFirstMatchingMemberInTargetList(node, context->m_lower_table_tlist);
 
 	if (NULL != found_tle)
 	{
@@ -1402,7 +1402,7 @@ CQueryMutators::EliminateDistinctClause
 //
 //	@doc:
 //		Check whether the window operator's project list only contains
-//		window functions and columns used in the window specification
+//		window functions, vars, or expressions used in the window specification
 //---------------------------------------------------------------------------
 BOOL
 CQueryMutators::NeedsProjListWindowNormalization
@@ -1434,62 +1434,70 @@ CQueryMutators::NeedsProjListWindowNormalization
 }
 
 //---------------------------------------------------------------------------
-//	@function:
-//		CQueryMutators::NormalizeWindowProjList
+//  CQueryMutators::NormalizeWindowProjList
 //
-//	@doc:
-// 		Flatten expressions in project list to contain only window functions and
-//		columns used in the window specification
+//  Flatten expressions in project list to contain only window functions,
+//  columns (vars) and columns (vars) used in the window specifications.
+//  This is a restriction in Orca and DXL, that we don't support a mix of
+//  window functions and general expressions in a target list.
 //
-//		ORGINAL QUERY:
-//			SELECT row_number() over() + rank() over(partition by a+b order by a-b) from foo
+//  ORGINAL QUERY:
+//    SELECT row_number() over() + rank() over(partition by a+b order by a-b) from foo
 //
-// 		NEW QUERY:
-//			SELECT rn+rk from (SELECT row_number() over() as rn, rank() over(partition by a+b order by a-b) as rk FROM foo) foo_new
+//  NEW QUERY:
+//    SELECT rn+rk from (SELECT row_number() over() as rn, rank() over(partition by a+b order by a-b) as rk FROM foo) foo_new
 //---------------------------------------------------------------------------
 Query *
 CQueryMutators::NormalizeWindowProjList
 	(
 	CMemoryPool *mp,
 	CMDAccessor *md_accessor,
-	const Query *query
+	const Query *original_query
 	)
 {
-	Query *query_copy = (Query *) gpdb::CopyObject(const_cast<Query*>(query));
+	Query *query_copy = (Query *) gpdb::CopyObject(const_cast<Query*>(original_query));
 
-	if (!NeedsProjListWindowNormalization(query))
+	if (!NeedsProjListWindowNormalization(original_query))
 	{
 		return query_copy;
 	}
 
 	// we do not fix target list of the derived table since we will be mutating it below
-	// to ensure that it does not have operations with window function
-	Query *new_query = ConvertToDerivedTable(query_copy, false /*should_fix_target_list*/, true /*should_fix_having_qual*/);
+	// to ensure that it does not have window functions
+	Query *upper_query = ConvertToDerivedTable(query_copy, false /*should_fix_target_list*/, true /*should_fix_having_qual*/);
 	gpdb::GPDBFree(query_copy);
 
-	GPOS_ASSERT(1 == gpdb::ListLength(new_query->rtable));
-	Query *derived_table_query = (Query *) ((RangeTblEntry *) gpdb::ListNth(new_query->rtable, 0))->subquery;
+	GPOS_ASSERT(1 == gpdb::ListLength(upper_query->rtable));
+	Query *lower_query = (Query *) ((RangeTblEntry *) gpdb::ListNth(upper_query->rtable, 0))->subquery;
 
-	SContextGrpbyPlMutator context(mp, md_accessor, derived_table_query, NULL);
+	SContextGrpbyPlMutator context(mp, md_accessor, lower_query, NULL);
 	ListCell *lc = NULL;
-	List *target_entries = derived_table_query->targetList;
+	List *target_entries = lower_query->targetList;
 	ForEach (lc, target_entries)
 	{
+		// If this target entry is referenced in a window spec, is a var or is a window function,
+		// add it to the lower target list. Adjust the outer refs to ancestors of the orginal
+		// query by adding one to the varlevelsup. Add a var to the upper target list to refer
+		// to it.
+		//
+		// Any other target entries, add them to the upper target list, and ensure that any vars
+		// they reference in the current scope are produced by the lower query and are adjusted
+		// to refer to the new, single RTE of the upper query.
 		TargetEntry *target_entry  = (TargetEntry*) lfirst(lc);
-		const ULONG ulResNoNew = gpdb::ListLength(new_query->targetList) + 1;
+		const ULONG ulResNoNew = gpdb::ListLength(upper_query->targetList) + 1;
 
-		if (CTranslatorUtils::IsReferencedInWindowSpec(target_entry, query->windowClause))
+		if (CTranslatorUtils::IsReferencedInWindowSpec(target_entry, original_query->windowClause))
 		{
 			// insert the target list entry used in the window specification as is
-			if (!target_entry->resjunk || CTranslatorUtils::IsSortingColumn(target_entry, query->sortClause))
+			if (!target_entry->resjunk || CTranslatorUtils::IsSortingColumn(target_entry, original_query->sortClause))
 			{
 				TargetEntry *new_target_entry = (TargetEntry *) gpdb::CopyObject(target_entry);
 				{
 					SContextIncLevelsupMutator context(0, false);
 					new_target_entry->expr = (Expr *) RunIncrLevelsUpMutator((Node *)new_target_entry->expr, &context);
 				}
-				new_target_entry->resno = gpdb::ListLength(context.m_derived_table_tlist) + 1;
-				context.m_derived_table_tlist = gpdb::LAppend(context.m_derived_table_tlist, new_target_entry);
+				new_target_entry->resno = gpdb::ListLength(context.m_lower_table_tlist) + 1;
+				context.m_lower_table_tlist = gpdb::LAppend(context.m_lower_table_tlist, new_target_entry);
 
 				// if the target list entry used in the window specification is present
 				// in the query output then add it to the target list of the new top level query
@@ -1509,7 +1517,7 @@ CQueryMutators::NormalizeWindowProjList
 				new_target_entry_copy->ressortgroupref = new_target_entry->ressortgroupref;
 				new_target_entry->resjunk = false;
 
-				new_query->targetList = gpdb::LAppend(new_query->targetList, new_target_entry_copy);
+				upper_query->targetList = gpdb::LAppend(upper_query->targetList, new_target_entry_copy);
 			}
 			else
 			{
@@ -1521,8 +1529,8 @@ CQueryMutators::NormalizeWindowProjList
 					SContextIncLevelsupMutator context(0, false);
 					new_target_entry->expr = (Expr *) RunIncrLevelsUpMutator((Node *)new_target_entry->expr, &context);
 				}
-				new_target_entry->resno = gpdb::ListLength(context.m_derived_table_tlist) + 1;
-				context.m_derived_table_tlist = gpdb::LAppend(context.m_derived_table_tlist, new_target_entry);			}
+				new_target_entry->resno = gpdb::ListLength(context.m_lower_table_tlist) + 1;
+				context.m_lower_table_tlist = gpdb::LAppend(context.m_lower_table_tlist, new_target_entry);			}
 		}
 		else
 		{
@@ -1530,15 +1538,15 @@ CQueryMutators::NormalizeWindowProjList
 			Expr *pexprNew = (Expr*) RunWindowProjListMutator( (Node*) target_entry->expr, &context);
 			TargetEntry *new_target_entry = gpdb::MakeTargetEntry(pexprNew, ulResNoNew, target_entry->resname, target_entry->resjunk);
 			new_target_entry->ressortgroupref = target_entry->ressortgroupref;
-			new_query->targetList = gpdb::LAppend(new_query->targetList, new_target_entry);
+			upper_query->targetList = gpdb::LAppend(upper_query->targetList, new_target_entry);
 		}
 	}
-	derived_table_query->targetList = context.m_derived_table_tlist;
+	lower_query->targetList = context.m_lower_table_tlist;
 
-	GPOS_ASSERT(gpdb::ListLength(new_query->targetList) <= gpdb::ListLength(query->targetList));
-	ReassignSortClause(new_query, derived_table_query);
+	GPOS_ASSERT(gpdb::ListLength(upper_query->targetList) <= gpdb::ListLength(original_query->targetList));
+	ReassignSortClause(upper_query, lower_query);
 
-	return new_query;
+	return upper_query;
 }
 
 //---------------------------------------------------------------------------
@@ -1561,7 +1569,7 @@ CQueryMutators::RunWindowProjListMutator
 		return NULL;
 	}
 
-	const ULONG resno = gpdb::ListLength(context->m_derived_table_tlist) + 1;
+	const ULONG resno = gpdb::ListLength(context->m_lower_table_tlist) + 1;
 
 	if (0 == context->m_current_query_level)
 	{
@@ -1609,7 +1617,7 @@ CQueryMutators::RunWindowProjListMutator
 									CTranslatorUtils::CreateMultiByteCharStringFromWCString(str->GetBuffer()),
 									false /* resjunk */
 									);
-			context->m_derived_table_tlist = gpdb::LAppend(context->m_derived_table_tlist, target_entry);
+			context->m_lower_table_tlist = gpdb::LAppend(context->m_lower_table_tlist, target_entry);
 
 			// return a variable referring to the new derived table's corresponding target list entry
 			Var *new_var = gpdb::MakeVar
@@ -1649,7 +1657,7 @@ CQueryMutators::RunWindowProjListMutator
 			var->varlevelsup = 0;
 			TargetEntry *found_tle =
 			gpdb::FindFirstMatchingMemberInTargetList((Node*) var,
-													  context->m_derived_table_tlist);
+													  context->m_lower_table_tlist);
 
 			if (NULL == found_tle)
 			{

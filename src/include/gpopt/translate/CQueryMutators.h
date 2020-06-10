@@ -68,8 +68,8 @@ namespace gpdxl
 				// original query
 				Query *m_query;
 
-				// the new target list of the group by (derived) query
-				List *m_derived_table_tlist;
+				// the new target list of the group by or window (lower) query
+				List *m_lower_table_tlist;
 
 				// the current query level
 				ULONG m_current_query_level;
@@ -95,7 +95,7 @@ namespace gpdxl
 					m_mp(mp),
 					m_mda(mda),
 					m_query(query),
-					m_derived_table_tlist(derived_table_tlist),
+					m_lower_table_tlist(derived_table_tlist),
 					m_current_query_level(0),
 					m_agg_levels_up(gpos::ulong_max),
 					m_is_mutating_agg_arg(false),
@@ -192,7 +192,7 @@ namespace gpdxl
 
 			// flatten expressions in window operation project list
 			static
-			Query *NormalizeWindowProjList(CMemoryPool *mp, CMDAccessor *md_accessor, const Query *query);
+			Query *NormalizeWindowProjList(CMemoryPool *mp, CMDAccessor *md_accessor, const Query *original_query);
 
 			// traverse the project list to extract all window functions in an arbitrarily complex project element
 			static
