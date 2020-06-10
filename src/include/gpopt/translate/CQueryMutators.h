@@ -232,7 +232,7 @@ namespace gpdxl
 
 			// traverse the expression and fix the levels up of any CTE
 			static
-			Node *RunFixCTELevelsUpMutator(Node *node, SContextIncLevelsupMutator *context);
+			BOOL RunFixCTELevelsUpWalker(Node *node, SContextIncLevelsupMutator *context);
 
 			// mutate the grouping columns, fix levels up when necessary
 			static
