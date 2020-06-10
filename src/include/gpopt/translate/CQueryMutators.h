@@ -271,9 +271,6 @@ namespace gpdxl
 			static
 			void ReassignSortClause(Query *top_level_query, Query *derive_table_query);
 
-			static
-			BOOL HasOuterRefs(Node *node, void *context);
-
 	};
 }
 #endif // GPDXL_CWalkerUtils_H
