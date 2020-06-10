@@ -1184,35 +1184,42 @@ CQueryMutators::GetTargetEntryColName
 //---------------------------------------------------------------------------
 // CQueryMutators::ConvertToDerivedTable
 //
-// Convert Query into two nested Query structs and return the new upper query.
+// Convert "original_query" into two nested Query structs
+// and return the new upper query.
+//
+//                              upper_query
+//    original_query    ===>        |
+//                              lower_query
 //
 // - The result lower Query has:
 //    * The original rtable, join tree, groupClause, WindowClause, etc.,
 //      with modified varlevelsup and ctelevelsup fields, as needed
-//    * The original targetList, either modified or unmodified, depending on
-//      should_fix_target_list
-//    * The original modified havingQual, if should_fix_having_qual is false
+//    * The original targetList, either modified or unmodified,
+//      depending on should_fix_target_list
+//    * The original havingQual, either modified or unmodified,
+//      depending on should_fix_having_qual
+//
 // - The result upper Query has:
 //    * a single RTE, pointing to the lower query
 //    * the CTE list of the original query
 //      (CTE levels in original have been fixed up)
-//    * the unmodified original havingQual, if should_fix_having_qual is true
 //    * an empty target list
 //
 //---------------------------------------------------------------------------
 Query *
 CQueryMutators::ConvertToDerivedTable
 	(
-	const Query *query,
+	const Query *original_query,
 	BOOL should_fix_target_list,
 	BOOL should_fix_having_qual
 	)
 {
 	// Step 1: Make a copy of the original Query, this will become the lower query
 
-	Query *query_copy = (Query *) gpdb::CopyObject(const_cast<Query*>(query));
+	Query *query_copy = (Query *) gpdb::CopyObject(const_cast<Query*>(original_query));
 
 	// Step 2: Remove things from the query copy that will go in the new, upper Query object
+	//         or won't be modified
 
 	Node *having_qual = NULL;
 	if (!should_fix_having_qual)
@@ -1230,15 +1237,17 @@ CQueryMutators::ConvertToDerivedTable
 
 	// Step 3: fix outer references and CTE levels
 
-	// increment varlevelsup in the lower query where they point to a Query that is an ancestor of the original query
-	Query *derived_table_query;
+	// increment varlevelsup in the lower query where they point to a Query
+	// that is an ancestor of the original query
+	Query *lower_query;
 	{
-		SContextIncLevelsupMutator context(0, should_fix_target_list);
-		derived_table_query = gpdb::MutateQueryTree
+		SContextIncLevelsupMutator context1(0, should_fix_target_list);
+
+		lower_query = gpdb::MutateQueryTree
 										(
 										 query_copy,
 										 (MutatorWalkerFn) RunIncrLevelsUpMutator,
-										 &context,
+										 &context1,
 										 0 // flags
 										);
 	}
@@ -1248,14 +1257,20 @@ CQueryMutators::ConvertToDerivedTable
 	// as well as those listed before the current query level are accordingly adjusted in the new
 	// derived table.
 	{
-		SContextIncLevelsupMutator context(0 /*starting level */, should_fix_target_list);
+		SContextIncLevelsupMutator context2(0 /*starting level */, should_fix_target_list);
+
 		(void) gpdb::WalkQueryTree
 						(
-						 derived_table_query,
+						 lower_query,
 						 (ExprWalkerFn) RunFixCTELevelsUpWalker,
-						 &context,
+						 &context2,
 						 QTW_EXAMINE_RTES
 						);
+	}
+
+	if (NULL != having_qual)
+	{
+		lower_query->havingQual = having_qual;
 	}
 
 	// Step 4: Create a new, single range table entry for the upper query
@@ -1263,41 +1278,35 @@ CQueryMutators::ConvertToDerivedTable
 	RangeTblEntry *rte = MakeNode(RangeTblEntry);
 	rte->rtekind = RTE_SUBQUERY;
 
-	rte->subquery = derived_table_query;
+	rte->subquery = lower_query;
 	rte->inFromCl = true;
 	rte->subquery->cteList = NIL;
-
-	// Step 5: Create the new upper Query
-
-	if (NULL != having_qual)
-	{
-		derived_table_query->havingQual = having_qual;
-	}
 
 	// create a new range table reference for the new RTE
 	RangeTblRef *rtref = MakeNode(RangeTblRef);
 	rtref->rtindex = 1;
 
-	// create a new top-level query with the new RTE in its from clause
-	Query *new_query = MakeNode(Query);
+	// Step 5: Create a new upper query with the new RTE in its from clause
 
-	new_query->cteList = original_cte_list;
-	new_query->rtable = gpdb::LAppend(new_query->rtable, rte);
-	new_query->intoPolicy = into_policy;
-	new_query->parentStmtType = derived_table_query->parentStmtType;
-	derived_table_query->parentStmtType = PARENTSTMTTYPE_NONE;
+	Query *upper_query = MakeNode(Query);
+
+	upper_query->cteList = original_cte_list;
+	upper_query->rtable = gpdb::LAppend(upper_query->rtable, rte);
+	upper_query->intoPolicy = into_policy;
+	upper_query->parentStmtType = lower_query->parentStmtType;
+	lower_query->parentStmtType = PARENTSTMTTYPE_NONE;
 
 	FromExpr *fromexpr = MakeNode(FromExpr);
 	fromexpr->quals = NULL;
 	fromexpr->fromlist = gpdb::LAppend(fromexpr->fromlist, rtref);
 
-	new_query->jointree = fromexpr;
-	new_query->commandType = CMD_SELECT;
+	upper_query->jointree = fromexpr;
+	upper_query->commandType = CMD_SELECT;
 
-	GPOS_ASSERT(1 == gpdb::ListLength(new_query->rtable));
-	GPOS_ASSERT(false == new_query->hasWindowFuncs);
+	GPOS_ASSERT(1 == gpdb::ListLength(upper_query->rtable));
+	GPOS_ASSERT(false == upper_query->hasWindowFuncs);
 
-	return new_query;
+	return upper_query;
 }
 
 //---------------------------------------------------------------------------
@@ -1411,7 +1420,9 @@ CQueryMutators::NeedsProjListWindowNormalization
 	{
 		TargetEntry *target_entry  = (TargetEntry*) lfirst(lc);
 
-		if (!CTranslatorUtils::IsWindowSpec( (Node *) target_entry->expr, query->windowClause, query->targetList) && !IsA(target_entry->expr, WindowFunc) && !IsA(target_entry->expr, Var))
+		if (!CTranslatorUtils::IsReferencedInWindowSpec(target_entry, query->windowClause) &&
+			!IsA(target_entry->expr, WindowFunc) &&
+			!IsA(target_entry->expr, Var))
 		{
 			// computed columns in the target list that is not
 			// used in the order by or partition by of the window specification(s)

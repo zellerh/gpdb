@@ -261,7 +261,7 @@ namespace gpdxl
 
 			// make the input query into a derived table and return a new root query
 			static
-			Query *ConvertToDerivedTable(const Query *query, BOOL should_fix_target_list, BOOL should_fix_having_qual);
+			Query *ConvertToDerivedTable(const Query *original_query, BOOL should_fix_target_list, BOOL should_fix_having_qual);
 
 			// eliminate distinct clause
 			static

@@ -295,10 +295,6 @@ namespace gpdxl
 			static
 			TargetEntry *GetWindowSpecTargetEntry(Node *node, List *window_clause_list, List *target_list);
 
-			// check if the expression has a matching target entry that is a window spec
-			static
-			BOOL IsWindowSpec(Node *node, List *window_clause_list, List *target_list);
-
 			// create a scalar const value expression for the given int8 value
 			static
 			CDXLNode *CreateDXLProjElemFromInt8Const(CMemoryPool *mp, CMDAccessor *md_accessor, INT val);

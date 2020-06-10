@@ -1831,30 +1831,7 @@ CTranslatorUtils::GetWindowSpecTargetEntry
 
 //---------------------------------------------------------------------------
 //	@function:
-//		CTranslatorUtils::IsWindowSpec
-//
-//	@doc:
-//		Check if the expression has a matching target entry that is a window spec
-//---------------------------------------------------------------------------
-BOOL
-CTranslatorUtils::IsWindowSpec
-	(
-	Node *node,
-	List *window_clause_list,
-	List *target_list
-	)
-{
-	GPOS_ASSERT(NULL != node);
-	
-	TargetEntry *window_spec = GetWindowSpecTargetEntry(node, window_clause_list, target_list);
-
-	return (NULL != window_spec);
-}
-
-
-//---------------------------------------------------------------------------
-//	@function:
-//		CTranslatorUtils::IsWindowSpec
+//		CTranslatorUtils::IsReferencedInWindowSpec
 //
 //	@doc:
 //		Check if the TargetEntry is a used in the window specification
