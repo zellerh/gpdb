@@ -1472,7 +1472,7 @@ CQueryMutators::NormalizeWindowProjList
 	GPOS_ASSERT(1 == gpdb::ListLength(upper_query->rtable));
 	Query *lower_query = (Query *) ((RangeTblEntry *) gpdb::ListNth(upper_query->rtable, 0))->subquery;
 
-	SContextGrpbyPlMutator context(mp, md_accessor, lower_query, NULL);
+	SContextGrpbyPlMutator projlist_context(mp, md_accessor, lower_query, NULL);
 	ListCell *lc = NULL;
 	List *target_entries = lower_query->targetList;
 	ForEach (lc, target_entries)
@@ -1495,11 +1495,11 @@ CQueryMutators::NormalizeWindowProjList
 			{
 				TargetEntry *new_target_entry = (TargetEntry *) gpdb::CopyObject(target_entry);
 				{
-					SContextIncLevelsupMutator context(0, false);
-					new_target_entry->expr = (Expr *) RunIncrLevelsUpMutator((Node *)new_target_entry->expr, &context);
+					SContextIncLevelsupMutator level_context1(0, false);
+					new_target_entry->expr = (Expr *) RunIncrLevelsUpMutator((Node *)new_target_entry->expr, &level_context1);
 				}
-				new_target_entry->resno = gpdb::ListLength(context.m_lower_table_tlist) + 1;
-				context.m_lower_table_tlist = gpdb::LAppend(context.m_lower_table_tlist, new_target_entry);
+				new_target_entry->resno = gpdb::ListLength(projlist_context.m_lower_table_tlist) + 1;
+				projlist_context.m_lower_table_tlist = gpdb::LAppend(projlist_context.m_lower_table_tlist, new_target_entry);
 
 				// if the target list entry used in the window specification is present
 				// in the query output then add it to the target list of the new top level query
@@ -1528,22 +1528,22 @@ CQueryMutators::NormalizeWindowProjList
 				// varlevelsup of outer refs.
 				TargetEntry *new_target_entry = (TargetEntry *) gpdb::CopyObject(target_entry);
 				{
-					SContextIncLevelsupMutator context(0, false);
-					new_target_entry->expr = (Expr *) RunIncrLevelsUpMutator((Node *)new_target_entry->expr, &context);
+					SContextIncLevelsupMutator level_context2(0, false);
+					new_target_entry->expr = (Expr *) RunIncrLevelsUpMutator((Node *)new_target_entry->expr, &level_context2);
 				}
-				new_target_entry->resno = gpdb::ListLength(context.m_lower_table_tlist) + 1;
-				context.m_lower_table_tlist = gpdb::LAppend(context.m_lower_table_tlist, new_target_entry);			}
+				new_target_entry->resno = gpdb::ListLength(projlist_context.m_lower_table_tlist) + 1;
+				projlist_context.m_lower_table_tlist = gpdb::LAppend(projlist_context.m_lower_table_tlist, new_target_entry);			}
 		}
 		else
 		{
 			// normalize target list entry
-			Expr *pexprNew = (Expr*) gpdb::MutateExpressionTree((Node*) target_entry->expr, (MutatorWalkerFn) RunWindowProjListMutator, &context);
+			Expr *pexprNew = (Expr*) gpdb::MutateExpressionTree((Node*) target_entry->expr, (MutatorWalkerFn) RunWindowProjListMutator, &projlist_context);
 			TargetEntry *new_target_entry = gpdb::MakeTargetEntry(pexprNew, ulResNoNew, target_entry->resname, target_entry->resjunk);
 			new_target_entry->ressortgroupref = target_entry->ressortgroupref;
 			upper_query->targetList = gpdb::LAppend(upper_query->targetList, new_target_entry);
 		}
 	}
-	lower_query->targetList = context.m_lower_table_tlist;
+	lower_query->targetList = projlist_context.m_lower_table_tlist;
 
 	GPOS_ASSERT(gpdb::ListLength(upper_query->targetList) <= gpdb::ListLength(original_query->targetList));
 	ReassignSortClause(upper_query, lower_query);
