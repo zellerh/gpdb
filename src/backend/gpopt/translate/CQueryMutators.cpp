@@ -1575,8 +1575,8 @@ CQueryMutators::RunWindowProjListMutator
 	{
 		if (IsA(node, WindowFunc))
 		{
-			// insert window operator into the derived table
-			// and refer to it in the top-level query's target list
+			// insert window operator into the lower table
+			// and refer to it in the upper query's target list
 			WindowFunc *window_func = FlatCopyWindowFunc((WindowFunc *)node);
 
 			// get the function name and add it to the target list
@@ -1590,8 +1590,11 @@ CQueryMutators::RunWindowProjListMutator
 			BOOL is_arg = context->m_is_mutating_window_arg;
 			context->m_is_mutating_window_arg = true;
 
+			// all the arguments of the window function remain in the lower query, together
+			// with the window function itself
 			ForEach (lc, ((WindowFunc *)node)->args)
 			{
+				// TODO: Why do we call the mutator here, won't that happen by the caller also???
 				Node *arg = (Node*) lfirst(lc);
 				GPOS_ASSERT(NULL != arg);
 				// traverse each argument and fix levels up when needed
@@ -1619,7 +1622,8 @@ CQueryMutators::RunWindowProjListMutator
 									);
 			context->m_lower_table_tlist = gpdb::LAppend(context->m_lower_table_tlist, target_entry);
 
-			// return a variable referring to the new derived table's corresponding target list entry
+			// return a variable referring to the lower table's corresponding target list entry,
+			// to be used in the upper query's target list
 			Var *new_var = gpdb::MakeVar
 									(
 									1,
@@ -1648,7 +1652,6 @@ CQueryMutators::RunWindowProjListMutator
 		// from those outer refs, therefore we also don't have to change anything.
 		if (var->varlevelsup == context->m_current_query_level && !context->m_is_mutating_window_arg)
 		{
-
 			// For other top-level references, correct their varno & varattno, since
 			// they now must refer to the target list of the derived query - whose
 			// target list may be different from the original query.
@@ -1681,6 +1684,7 @@ CQueryMutators::RunWindowProjListMutator
 		return (Node *) var;
 	}
 
+	// TODO: Remove this
 	if (IsA(node, SubLink))
 	{
 		SubLink *old_sublink = (SubLink *) node;
