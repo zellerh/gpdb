@@ -1399,12 +1399,15 @@ CQueryMutators::EliminateDistinctClause
 }
 
 //---------------------------------------------------------------------------
-//	@function:
-//		CQueryMutators::NeedsProjListWindowNormalization
+// CQueryMutators::NeedsProjListWindowNormalization
 //
-//	@doc:
-//		Check whether the window operator's project list only contains
-//		window functions, vars, or expressions used in the window specification
+// Check whether the window operator's project list only contains
+// window functions, vars, or expressions used in the window specification.
+// Examples of queries that will be normalized:
+//   select rank() over(...) -1
+//   select rank() over(order by a), a+b
+//   select (SQ), rank over(...)
+// Some of these, e.g. the second one, may not strictly need normalization.
 //---------------------------------------------------------------------------
 BOOL
 CQueryMutators::NeedsProjListWindowNormalization
@@ -1464,6 +1467,11 @@ CQueryMutators::NormalizeWindowProjList
 		return query_copy;
 	}
 
+	// Postgres doesn't seem to mix grouping and window functions in the same Query node,
+	// if it would, we would need some additional checks here
+	GPOS_ASSERT(NULL == original_query->distinctClause);
+	GPOS_ASSERT(NULL == original_query->groupClause);
+
 	// we do not fix target list of the derived table since we will be mutating it below
 	// to ensure that it does not have window functions
 	Query *upper_query = ConvertToDerivedTable(query_copy, false /*should_fix_target_list*/, true /*should_fix_having_qual*/);
@@ -1490,59 +1498,65 @@ CQueryMutators::NormalizeWindowProjList
 
 		if (CTranslatorUtils::IsReferencedInWindowSpec(target_entry, original_query->windowClause))
 		{
-			// insert the target list entry used in the window specification as is
-			if (!target_entry->resjunk || CTranslatorUtils::IsSortingColumn(target_entry, original_query->sortClause))
-			{
-				TargetEntry *new_target_entry = (TargetEntry *) gpdb::CopyObject(target_entry);
-				{
-					SContextIncLevelsupMutator level_context1(0, false);
-					new_target_entry->expr = (Expr *) RunIncrLevelsUpMutator((Node *)new_target_entry->expr, &level_context1);
-				}
-				new_target_entry->resno = gpdb::ListLength(projlist_context.m_lower_table_tlist) + 1;
-				projlist_context.m_lower_table_tlist = gpdb::LAppend(projlist_context.m_lower_table_tlist, new_target_entry);
+			// This entry is used in the group by or order by of a window spec.
+			// Since these clauses refer to their argument by ressortgroupref, it must
+			// be preserved in the lower target list, so insert the entire Expr of
+			// the TargetEntry into the lower target list, using the same ressortgroupref
+			// and also preserving the resjunk attribute.
+			SContextIncLevelsupMutator level_context(0, true);
+			TargetEntry *lower_target_entry = (TargetEntry *) gpdb::MutateExpressionTree
+														(
+														 (Node *) target_entry,
+														 (MutatorWalkerFn) RunIncrLevelsUpMutator,
+														 &level_context
+														);
 
-				// if the target list entry used in the window specification is present
-				// in the query output then add it to the target list of the new top level query
+			lower_target_entry->resno = gpdb::ListLength(projlist_context.m_lower_table_tlist) + 1;
+			projlist_context.m_lower_table_tlist = gpdb::LAppend(projlist_context.m_lower_table_tlist, lower_target_entry);
+
+			BOOL is_sorting_col = CTranslatorUtils::IsSortingColumn(target_entry, original_query->sortClause);
+
+			if (!target_entry->resjunk || is_sorting_col)
+			{
+				// the target list entry is present in the query output or it is used in the ORDER BY,
+				// so add it to the target list of the new upper Query
 				Var *new_var = gpdb::MakeVar
 										(
 										1,
-										new_target_entry->resno,
+										lower_target_entry->resno,
 										gpdb::ExprType((Node*) target_entry->expr),
 										gpdb::ExprTypeMod((Node*) target_entry->expr),
 										0 // query levels up
 										);
-				TargetEntry *new_target_entry_copy = gpdb::MakeTargetEntry((Expr*) new_var, ulResNoNew, target_entry->resname, target_entry->resjunk);
+				TargetEntry *upper_target_entry = gpdb::MakeTargetEntry((Expr*) new_var, ulResNoNew, target_entry->resname, target_entry->resjunk);
 
-				// Copy the resortgroupref and resjunk information for the top-level target list entry
-				// Set target list entry of the derived table to be non-resjunked
-				new_target_entry_copy->resjunk = new_target_entry->resjunk;
-				new_target_entry_copy->ressortgroupref = new_target_entry->ressortgroupref;
-				new_target_entry->resjunk = false;
-
-				upper_query->targetList = gpdb::LAppend(upper_query->targetList, new_target_entry_copy);
-			}
-			else
-			{
-				// This target entry is not required to be output, so we just insert it into the
-				// derived table. Since we are moving it down by a level, we need to fix the
-				// varlevelsup of outer refs.
-				TargetEntry *new_target_entry = (TargetEntry *) gpdb::CopyObject(target_entry);
+				if (is_sorting_col)
 				{
-					SContextIncLevelsupMutator level_context2(0, false);
-					new_target_entry->expr = (Expr *) RunIncrLevelsUpMutator((Node *)new_target_entry->expr, &level_context2);
+					upper_target_entry->ressortgroupref = lower_target_entry->ressortgroupref;
 				}
-				new_target_entry->resno = gpdb::ListLength(projlist_context.m_lower_table_tlist) + 1;
-				projlist_context.m_lower_table_tlist = gpdb::LAppend(projlist_context.m_lower_table_tlist, new_target_entry);			}
+				// Set target list entry of the derived table to be non-resjunked, since we need it in the upper
+				lower_target_entry->resjunk = false;
+
+				upper_query->targetList = gpdb::LAppend(upper_query->targetList, upper_target_entry);
+			}
 		}
 		else
 		{
-			// normalize target list entry
-			Expr *pexprNew = (Expr*) gpdb::MutateExpressionTree((Node*) target_entry->expr, (MutatorWalkerFn) RunWindowProjListMutator, &projlist_context);
-			TargetEntry *new_target_entry = gpdb::MakeTargetEntry(pexprNew, ulResNoNew, target_entry->resname, target_entry->resjunk);
-			new_target_entry->ressortgroupref = target_entry->ressortgroupref;
-			upper_query->targetList = gpdb::LAppend(upper_query->targetList, new_target_entry);
+			// push any window functions in the target entry into the lower target list
+			// and also add any needed vars to the lower target list
+			target_entry->resno = ulResNoNew;
+			TargetEntry *upper_target_entry = (TargetEntry *) gpdb::MutateExpressionTree
+																		(
+																		 (Node*) target_entry,
+																		 (MutatorWalkerFn) RunWindowProjListMutator,
+																		 &projlist_context
+																		);
+			upper_query->targetList = gpdb::LAppend(upper_query->targetList, upper_target_entry);
 		}
 	}
+
+	// once we finish the above loop, the context has accumulated all the needed vars,
+	// window spec expressions and window functions for the lower targer list
 	lower_query->targetList = projlist_context.m_lower_table_tlist;
 
 	GPOS_ASSERT(gpdb::ListLength(upper_query->targetList) <= gpdb::ListLength(original_query->targetList));
@@ -1594,7 +1608,7 @@ CQueryMutators::RunWindowProjListMutator
 
 		TargetEntry *target_entry = gpdb::MakeTargetEntry
 								(
-								(Expr*) gpdb::CopyObject(window_func),
+								(Expr *) window_func,
 								(AttrNumber) resno,
 								CTranslatorUtils::CreateMultiByteCharStringFromWCString(str->GetBuffer()),
 								false /* resjunk */
