@@ -1531,11 +1531,16 @@ CQueryMutators::NormalizeWindowProjList
 		}
 		else
 		{
-			// normalize target list entry
-			Expr *pexprNew = (Expr*) RunWindowProjListMutator( (Node*) target_entry->expr, &projlist_context);
-			TargetEntry *new_target_entry = gpdb::MakeTargetEntry(pexprNew, ulResNoNew, target_entry->resname, target_entry->resjunk);
-			new_target_entry->ressortgroupref = target_entry->ressortgroupref;
-			upper_query->targetList = gpdb::LAppend(upper_query->targetList, new_target_entry);
+			// push any window functions in the target entry into the lower target list
+			// and also add any needed vars to the lower target list
+			target_entry->resno = ulResNoNew;
+			TargetEntry *upper_target_entry = (TargetEntry *) gpdb::MutateExpressionTree
+																		(
+																		 (Node*) target_entry,
+																		 (MutatorWalkerFn) RunWindowProjListMutator,
+																		 &projlist_context
+																		);
+			upper_query->targetList = gpdb::LAppend(upper_query->targetList, upper_target_entry);
 		}
 	}
 	lower_query->targetList = projlist_context.m_lower_table_tlist;
@@ -1570,149 +1575,89 @@ CQueryMutators::RunWindowProjListMutator
 
 	const ULONG resno = gpdb::ListLength(context->m_lower_table_tlist) + 1;
 
-	if (0 == context->m_current_query_level)
+	if (IsA(node, WindowFunc) && 0 == context->m_current_query_level)
 	{
-		if (IsA(node, WindowFunc))
-		{
-			// insert window operator into the derived table
-			// and refer to it in the top-level query's target list
-			WindowFunc *window_func = FlatCopyWindowFunc((WindowFunc *)node);
+		// This is a window function that needs to be executed in the lower Query.
 
-			// get the function name and add it to the target list
-			CMDIdGPDB *mdid_func = GPOS_NEW(context->m_mp) CMDIdGPDB(window_func->winfnoid);
-			const CWStringConst *str = CMDAccessorUtils::PstrWindowFuncName(context->m_mda, mdid_func);
-			mdid_func->Release();
+		// Insert window function as a new TargetEntry into the lower target list
+		// (requires incrementing varlevelsup on its arguments).
+		// Create a var that refers to the newly created lower TargetEntry and return
+		// that, to be used instead of the window function in the upper TargetEntry.
 
-			ListCell *lc = NULL;
-			List *new_args = NIL;
+		// make a copy of the tree and increment varlevelsup, using a different mutator
+		SContextIncLevelsupMutator levelsUpContext(context->m_current_query_level, true);
+		WindowFunc *window_func = (WindowFunc *) expression_tree_mutator(node, (MutatorWalkerFn) RunIncrLevelsUpMutator, &levelsUpContext);
+		GPOS_ASSERT(IsA(window_func, WindowFunc));
 
-			BOOL is_arg = context->m_is_mutating_window_arg;
-			context->m_is_mutating_window_arg = true;
+		// get the function name and create a new target entry for window_func
+		CMDIdGPDB *mdid_func = GPOS_NEW(context->m_mp) CMDIdGPDB(window_func->winfnoid);
+		const CWStringConst *str = CMDAccessorUtils::PstrWindowFuncName(context->m_mda, mdid_func);
+		mdid_func->Release();
 
-			ForEach (lc, ((WindowFunc *)node)->args)
-			{
-				Node *arg = (Node*) lfirst(lc);
-				GPOS_ASSERT(NULL != arg);
-				// traverse each argument and fix levels up when needed
-				new_args = gpdb::LAppend
-				(
-				 new_args,
-				 gpdb::MutateQueryOrExpressionTree
-				 (
-				  arg,
-				  (MutatorWalkerFn) RunWindowProjListMutator,
-				  (void *) context,
-				  0 // mutate into cte-lists
-				  )
-				 );
-			}
-			context->m_is_mutating_window_arg = is_arg;
-			window_func->args = new_args;
+		TargetEntry *target_entry = gpdb::MakeTargetEntry
+								(
+								(Expr *) window_func,
+								(AttrNumber) resno,
+								CTranslatorUtils::CreateMultiByteCharStringFromWCString(str->GetBuffer()),
+								false /* resjunk */
+								);
+		context->m_lower_table_tlist = gpdb::LAppend(context->m_lower_table_tlist, target_entry);
 
-			TargetEntry *target_entry = gpdb::MakeTargetEntry
-									(
-									(Expr*) gpdb::CopyObject(window_func),
-									(AttrNumber) resno,
-									CTranslatorUtils::CreateMultiByteCharStringFromWCString(str->GetBuffer()),
-									false /* resjunk */
-									);
-			context->m_lower_table_tlist = gpdb::LAppend(context->m_lower_table_tlist, target_entry);
+		// return a variable referring to the lower table's corresponding target entry,
+		// to be used somewhere in the upper query's target list
+		Var *new_var = gpdb::MakeVar
+								(
+								1,
+								(AttrNumber) resno,
+								gpdb::ExprType(node),
+								gpdb::ExprTypeMod(node),
+								0 // query levelsup
+								);
 
-			// return a variable referring to the new derived table's corresponding target list entry
-			Var *new_var = gpdb::MakeVar
-									(
-									1,
-									(AttrNumber) resno,
-									gpdb::ExprType(node),
-									gpdb::ExprTypeMod(node),
-									0 // query levelsup
-									);
-
-			return (Node*) new_var;
-		}
+		return (Node*) new_var;
 	}
 
-	if (IsA(node, Var))
+	if (IsA(node, Var) && ((Var *) node)->varlevelsup == context->m_current_query_level)
 	{
+		// This is a Var referencing the original query scope. It now needs to reference
+		// the new upper query scope.
+		// Since the rtable of the upper Query is different from that of the original
+		// Query, calculate the new varno (always 1) and varattno to use.
 		Var *var = (Var *) gpdb::CopyObject(node);
 
-		// Handle other top-level outer references in the project element.
-		// There are three cases:
-		// var->varlevelsup < context->m_current_query_level: The outer reference
-		// is within the subquery, no need to make any change.
-		// var->varlevelsup == context->m_current_query_level: The outer reference is to
-		// the scope of the query being transformed. This needs a modification, see below.
-		// var->varlevelsup > context->m_current_query_level: The outer reference is referencing
-		// a value above our current scope. The new place for the var is the same difference
-		// from those outer refs, therefore we also don't have to change anything.
-		if (var->varlevelsup == context->m_current_query_level && !context->m_is_mutating_window_arg)
+		// Set varlevelsup to 0 temporarily while searching in the target list
+		var->varlevelsup = 0;
+		TargetEntry *found_tle =
+		gpdb::FindFirstMatchingMemberInTargetList((Node*) var,
+												  context->m_lower_table_tlist);
+
+		if (NULL == found_tle)
 		{
-
-			// For other top-level references, correct their varno & varattno, since
-			// they now must refer to the target list of the derived query - whose
-			// target list may be different from the original query.
-
-			// Set varlevelsup to 0 temporarily while searching in the target list
-			var->varlevelsup = 0;
-			TargetEntry *found_tle =
-			gpdb::FindFirstMatchingMemberInTargetList((Node*) var,
-													  context->m_lower_table_tlist);
-
-			if (NULL == found_tle)
-			{
-				Node *var_copy = (Node*) gpdb::CopyObject(var);
-				return (Node *) MakeVarInDerivedTable(var_copy, context);
-			}
-
-			var->varno = 1;  // derived query is the only table in FROM expression
-			var->varattno = found_tle->resno;
-			var->varlevelsup = context->m_current_query_level;  // reset varlevels up
-			found_tle->resjunk = false;
-
-			return (Node*) var;
+			// this var is not yet provided by the lower target list, so
+			// create a new TargetEntry for it
+			Node *var_copy = (Node*) gpdb::CopyObject(var);
+			return (Node *) MakeVarInDerivedTable(var_copy, context);
 		}
 
-		if (context->m_is_mutating_window_arg)
-		{
-			return (Node *) IncrLevelsUpIfOuterRef((Var*) node);
-		}
+		var->varno = 1;  // derived query is the only table in FROM expression
+		var->varattno = found_tle->resno;
+		var->varlevelsup = context->m_current_query_level;  // reset varlevels up
+		found_tle->resjunk = false;
 
-		return (Node *) var;
+		return (Node*) var;
 	}
 
-	if (IsA(node, SubLink))
+	if (IsA(node, Query))
 	{
-		SubLink *old_sublink = (SubLink *) node;
-
-		SubLink *new_sublink = MakeNode(SubLink);
-		new_sublink->subLinkType = old_sublink->subLinkType;
-		new_sublink->location = old_sublink->location;
-		new_sublink->operName = (List *) gpdb::CopyObject(old_sublink->operName);
-
-		new_sublink->testexpr =	gpdb::MutateQueryOrExpressionTree
-		(
-		 old_sublink->testexpr,
-		 (MutatorWalkerFn) RunWindowProjListMutator,
-		 (void *) context,
-		 0 // mutate into cte-lists
-		 );
+		// recurse into Query nodes
 		context->m_current_query_level++;
-
-		GPOS_ASSERT(IsA(old_sublink->subselect, Query));
-
-		new_sublink->subselect = gpdb::MutateQueryOrExpressionTree
-		(
-		 old_sublink->subselect,
-		 (MutatorWalkerFn) RunWindowProjListMutator,
-		 (void *) context,
-		 0 // mutate into cte-lists
-		 );
+		Query *result = query_tree_mutator((Query *) node, (MutatorWalkerFn) RunWindowProjListMutator, context, 0);
 		context->m_current_query_level--;
 
-		return (Node *) new_sublink;
+		return (Node *) result;
 	}
 
-	return gpdb::MutateExpressionTree(node, (MutatorWalkerFn) CQueryMutators::RunWindowProjListMutator, context);
+	return expression_tree_mutator(node, (MutatorWalkerFn) CQueryMutators::RunWindowProjListMutator, context);
 }
 
 //---------------------------------------------------------------------------
