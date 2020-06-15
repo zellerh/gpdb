@@ -285,7 +285,7 @@ namespace gpdxl
 			BOOL IsSortingColumn(const TargetEntry *target_entry, List *sort_clause_list); 
 			// check to see if the target list entry is used in the window reference
 			static
-			BOOL IsWindowSpec(const TargetEntry *target_entry, List *window_clause_list);
+			BOOL IsReferencedInWindowSpec(const TargetEntry *target_entry, List *window_clause_list);
 
 			// extract a matching target entry that is a window spec
 			static
