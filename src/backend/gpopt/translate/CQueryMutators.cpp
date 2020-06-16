@@ -134,7 +134,7 @@ CQueryMutators::ShouldFallback
 		return false;
 	}
 
-	return gpdb::WalkExpressionTree(node, (FallbackWalkerFn) CQueryMutators::ShouldFallback, context);
+	return gpdb::WalkExpressionTree(node, (ExprWalkerFn) CQueryMutators::ShouldFallback, context);
 }
 
 
@@ -284,14 +284,13 @@ CQueryMutators::RunIncrLevelsUpMutator
 
 
 //---------------------------------------------------------------------------
-//	@function:
-//		CQueryMutators::RunFixCTELevelsUpMutator
+// CQueryMutators::RunFixCTELevelsUpWalker
 //
-//	@doc:
-//		Increment any the query levels up of any CTE range table reference by one
+// Increment CTE range table reference by one if it refers to
+// an ancestor of the original Query node (level 0 in the context)
 //---------------------------------------------------------------------------
-Node *
-CQueryMutators::RunFixCTELevelsUpMutator
+BOOL
+CQueryMutators::RunFixCTELevelsUpWalker
 	(
 	Node *node,
 	SContextIncLevelsupMutator *context
@@ -299,82 +298,48 @@ CQueryMutators::RunFixCTELevelsUpMutator
 {
 	if (NULL == node)
 	{
-		return NULL;
+		return false;
 	}
 
-	// recurse into query structure
-	if (IsA(node, Query))
+	if (IsA(node, RangeTblEntry))
 	{
-		Query *query = gpdb::MutateQueryTree
-								(
-								(Query *) node,
-								(MutatorWalkerFn) CQueryMutators::RunFixCTELevelsUpMutator,
-								context,
-								1 // flag -- do not mutate range table entries
-								);
-
-		List *rtable = query->rtable;
-		ListCell *lc = NULL;
-		ForEach (lc, rtable)
+		RangeTblEntry *rte = (RangeTblEntry *) node;
+		if (RTE_CTE == rte->rtekind  && NeedsLevelsUpCorrection(context, rte->ctelevelsup))
 		{
-			RangeTblEntry *rte = (RangeTblEntry *) lfirst(lc);
-			if (RTE_CTE == rte->rtekind  && NeedsLevelsUpCorrection(context, rte->ctelevelsup))
-			{
-				// fix the levels up for CTE range table entry when needed
-				// the walker in GPDB does not walk range table entries of type CTE
-				rte->ctelevelsup++;
-			}
-
-			if (RTE_SUBQUERY == rte->rtekind)
-			{
-				Query *subquery = rte->subquery;
-				// since we did not walk inside derived tables
-				context->m_current_query_level++;
-				rte->subquery = (Query *) RunFixCTELevelsUpMutator( (Node *) subquery, context);
-				context->m_current_query_level--;
-				gpdb::GPDBFree(subquery);
-			}
+			// fix the levels up for CTE range table entry when needed
+			// the walker in GPDB does not walk range table entries of type CTE
+			rte->ctelevelsup++;
 		}
 
-		return (Node *) query;
+		// always return false, as we want to continue fixing up RTEs
+		return false;
 	}
 
-	if (IsA(node, CommonTableExpr))
+	// recurse into query structure, incrementing the query level
+	if (IsA(node, Query))
 	{
-		CommonTableExpr *cte = (CommonTableExpr *) gpdb::CopyObject(node);
-		GPOS_ASSERT(IsA(cte->ctequery, Query));
-
-		Query *cte_query = (Query *) cte->ctequery;
-		cte->ctequery = NULL;
-
 		context->m_current_query_level++;
-		cte->ctequery = RunFixCTELevelsUpMutator((Node *) cte_query, context);
+		BOOL result = query_tree_walker
+								(
+								(Query *) node,
+								(ExprWalkerFn) CQueryMutators::RunFixCTELevelsUpWalker,
+								context,
+								QTW_EXAMINE_RTES // flags - visite RTEs
+								);
 		context->m_current_query_level--;
 
-		gpdb::GPDBFree(cte_query);
-
-		return (Node *) cte;
+		return result;
 	}
 
-	// recurse into a query attached to sublink
-	if (IsA(node, SubLink))
+	if (IsA(node, TargetEntry) &&
+		!context->m_should_fix_top_level_target_list &&
+		0 == context->m_current_query_level)
 	{
-		SubLink *sublink = (SubLink *) gpdb::CopyObject(node);
-		GPOS_ASSERT(IsA(sublink->subselect, Query));
-
-		Query *sublink_query = (Query *) sublink->subselect;
-		sublink->subselect = NULL;
-
-		context->m_current_query_level++;
-		sublink->subselect = RunFixCTELevelsUpMutator((Node *) sublink_query, context);
-		context->m_current_query_level--;
-
-		gpdb::GPDBFree(sublink_query);
-
-		return (Node *) sublink;
+		// skip the top-level target list, if requested
+		return false;
 	}
 
-	return gpdb::MutateExpressionTree(node, (MutatorWalkerFn) CQueryMutators::RunFixCTELevelsUpMutator, context);
+	return expression_tree_walker(node, (ExprWalkerFn) CQueryMutators::RunFixCTELevelsUpWalker, context);
 }
 
 //---------------------------------------------------------------------------
@@ -1238,6 +1203,9 @@ CQueryMutators::ConvertToDerivedTable
 		query_copy->havingQual = NULL;
 	}
 
+	List *original_cte_list = query_copy->cteList;
+	query_copy->cteList = NIL;
+
 	// fix outer references
 	Query *lower_query;
 	{
@@ -1250,16 +1218,17 @@ CQueryMutators::ConvertToDerivedTable
 	// is re-assigned to the new top-level query. The references to the ctes listed in the old query
 	// as well as those listed before the current query level are accordingly adjusted in the new
 	// derived table.
-	List *original_cte_list = lower_query->cteList;
-	lower_query->cteList = NIL;
-
-	Query *new_derived_table_query;
 	{
-		SContextIncLevelsupMutator context(0 /*starting level */, should_fix_target_list);
-		new_derived_table_query  = (Query *) RunFixCTELevelsUpMutator( (Node *) lower_query, &context);
+		SContextIncLevelsupMutator context2(0 /*starting level */, should_fix_target_list);
+
+		(void) gpdb::WalkQueryOrExpressionTree
+						(
+						 (Node *) lower_query,
+						 (ExprWalkerFn) RunFixCTELevelsUpWalker,
+						 &context2,
+						 QTW_EXAMINE_RTES
+						);
 	}
-	gpdb::GPDBFree(lower_query);
-	lower_query = new_derived_table_query;
 
 	// create a range table entry for the query node
 	RangeTblEntry *rte = MakeNode(RangeTblEntry);

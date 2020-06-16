@@ -53,7 +53,7 @@ namespace gpdxl
 	class CQueryMutators
 	{
 		typedef Node *(*MutatorWalkerFn) ();
-		typedef BOOL (*FallbackWalkerFn) ();
+		typedef BOOL (*ExprWalkerFn) ();
 
 		typedef struct SContextGrpbyPlMutator
 		{
@@ -232,7 +232,7 @@ namespace gpdxl
 
 			// traverse the expression and fix the levels up of any CTE
 			static
-			Node *RunFixCTELevelsUpMutator(Node *node, SContextIncLevelsupMutator *context);
+			BOOL RunFixCTELevelsUpWalker(Node *node, SContextIncLevelsupMutator *context);
 
 			// mutate the grouping columns, fix levels up when necessary
 			static
