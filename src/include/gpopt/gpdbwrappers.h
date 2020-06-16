@@ -507,9 +507,6 @@ namespace gpdb {
 	// modify a query or an expression tree
 	Node *MutateQueryOrExpressionTree(Node *node, Node *(*mutator)(), void *context, int flags);
 
-	// the part of MutateQueryTree that processes a query's rangetable
-	List *MutateRangeTable(List *rtable, Node *(*mutator)(), void *context, int flags);
-
 	// check whether the part with the given oid is the root of a partition table
 	bool RelPartIsRoot(Oid relid);
 	
