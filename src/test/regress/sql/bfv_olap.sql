@@ -392,6 +392,37 @@ select cn, sum(qty) from sale group by rollup(cn,vn) having sum(qty)=1;
 select cn, sum(qty) from sale group by rollup(cn,vn) having sum(qty)=1144;
 
 
+--
+-- Test a query with window function over an aggregate, and a subquery.
+--
+-- Github Issue https://github.com/greenplum-db/gpdb/issues/10143
+create table t1_github_issue_10143(
+  base_ym varchar(6),
+  code varchar(5),
+  name varchar(60)
+);
+
+create table t2_github_issue_10143(
+  base_ym varchar(6),
+  dong varchar(8),
+  code varchar(6),
+  salary numeric(18)
+);
+
+insert into t1_github_issue_10143 values ('a', 'acode', 'aname');
+insert into t2_github_issue_10143 values ('a', 'adong', 'acode', 1000);
+insert into t2_github_issue_10143 values ('b', 'bdong', 'bcode', 1100);
+
+explain select (select name from t1_github_issue_10143 where code = a.code limit 1) as dongnm
+,sum(sum(a.salary)) over()
+from t2_github_issue_10143 a
+group by a.code;
+
+select (select name from t1_github_issue_10143 where code = a.code limit 1) as dongnm
+,sum(sum(a.salary)) over()
+from t2_github_issue_10143 a
+group by a.code;
+
 -- CLEANUP
 -- start_ignore
 drop schema bfv_olap cascade;
