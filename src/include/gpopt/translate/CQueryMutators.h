@@ -68,7 +68,7 @@ namespace gpdxl
 				// original query
 				Query *m_query;
 
-				// the new target list of the group by (derived) query
+				// the new target list of the group by or window (lower) query
 				List *m_lower_table_tlist;
 
 				// the current query level

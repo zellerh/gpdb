@@ -498,7 +498,7 @@ namespace gpdb {
 	// query or expression tree walker
 	bool WalkQueryOrExpressionTree(Node *node, bool(*walker)(), void *context, int flags);
 
-	// modify a query tree
+	// modify the components of a Query tree
 	Query *MutateQueryTree(Query *query, Node *(*mutator)(), void *context, int flags);
 
 	// modify an expression tree
