@@ -41,7 +41,7 @@
 /* GPORCA entry point */
 extern PlannedStmt * GPOPTOptimizedPlan(Query *parse, bool *had_unexpected_failure);
 
-static Query *transformGroupedWindows(Query *qry);
+static Node *transformGroupedWindows(Node *node, void *context);
 
 static Plan *remove_redundant_results(PlannerInfo *root, Plan *plan);
 static Node *remove_redundant_results_mutator(Node *node, void *);
@@ -143,11 +143,10 @@ optimize_query(Query *parse, ParamListInfo boundParams)
 	pqueryCopy = fold_constants(root, pqueryCopy, boundParams, GPOPT_MAX_FOLDED_CONSTANT_SIZE);
 
 	/*
-	 * If the query mixes window functions and aggregates, we need to
+	 * If any Query in the tree mixes window functions and aggregates, we need to
 	 * transform it such that the grouped query appears as a subquery
 	 */
-	if (pqueryCopy->hasWindowFuncs && (pqueryCopy->groupClause || pqueryCopy->hasAggs))
-		pqueryCopy = transformGroupedWindows(pqueryCopy);
+	pqueryCopy = (Query *) transformGroupedWindows((Node *) pqueryCopy, NULL);
 
 	/* Ok, invoke ORCA. */
 	result = GPOPTOptimizedPlan(pqueryCopy, &fUnexpectedFailure);
@@ -443,6 +442,9 @@ push_down_expr_mutator(Node *node, List *child_tlist)
  * modify the input Query node, qry, in place for Q'.  (Since qry is
  * also the input, Q, be careful not to destroy values before we're
  * done with them.
+ *
+ * The function is structured as a mutator, so that we can transform
+ * all of the Query nodes in the entire tree, bottom-up.
  */
 
 /* Context for transformGroupedWindows() which mutates components
@@ -481,10 +483,26 @@ static Alias *make_replacement_alias(Query *qry, const char *aname);
 static char *generate_positional_name(AttrNumber attrno);
 static List *generate_alternate_vars(Var *var, grouped_window_ctx * ctx);
 
-static Query *
-transformGroupedWindows(Query *qry)
+static Node *
+transformGroupedWindows(Node *node, void *context)
 {
-	Query	   *subq;
+	if (node == NULL)
+		return NULL;
+
+	if (IsA(node, Query))
+	{
+		// do a depth-first recursion into any subqueries
+		Query *qry = (Query *) query_tree_mutator((Query *) node, transformGroupedWindows, context, 0);
+
+		Assert(IsA(qry, Query));
+
+		/*
+		 * we are done if this query doesn't have both window functions and group by/aggregates
+		 */
+		if (!qry->hasWindowFuncs || !(qry->groupClause || qry->hasAggs))
+			return (Node *) qry;
+
+		Query	   *subq;
 	RangeTblEntry *rte;
 	RangeTblRef *ref;
 	Alias	   *alias;
@@ -495,9 +513,6 @@ transformGroupedWindows(Query *qry)
 	Assert(qry->commandType == CMD_SELECT);
 	Assert(!PointerIsValid(qry->utilityStmt));
 	Assert(qry->returningList == NIL);
-
-	if (!qry->hasWindowFuncs || !(qry->groupClause || qry->hasAggs))
-		return qry;
 
 	/*
 	 * Make the new subquery (Q'').  Note that (per SQL:2003) there can't be
@@ -626,7 +641,13 @@ transformGroupedWindows(Query *qry)
 
 	discard_grouped_window_context(&ctx);
 
-	return qry;
+		return (Node *) qry;
+	}
+
+	/*
+	 * for all other node types, just keep walking the tree
+	 */
+	return expression_tree_mutator(node, transformGroupedWindows, context);
 }
 
 
@@ -969,6 +990,11 @@ grouped_window_mutator(Node *node, void *context)
 					 errmsg("unresolved grouping key in window query"),
 					 errhint("You might need to use explicit aliases and/or to refer to grouping keys in the same way throughout the query, or turn optimizer=off.")));
 		}
+	}
+	else if (IsA(node, SubLink))
+	{
+		/* put the subquery into Q'' */
+		result = (Node *) var_for_gw_expr(ctx, node, true);
 	}
 	else
 	{
