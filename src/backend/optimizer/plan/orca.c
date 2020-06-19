@@ -503,143 +503,143 @@ transformGroupedWindows(Node *node, void *context)
 			return (Node *) qry;
 
 		Query	   *subq;
-	RangeTblEntry *rte;
-	RangeTblRef *ref;
-	Alias	   *alias;
-	bool		hadSubLinks = qry->hasSubLinks;
+		RangeTblEntry *rte;
+		RangeTblRef *ref;
+		Alias	   *alias;
+		bool		hadSubLinks = qry->hasSubLinks;
 
-	grouped_window_ctx ctx;
+		grouped_window_ctx ctx;
 
-	Assert(qry->commandType == CMD_SELECT);
-	Assert(!PointerIsValid(qry->utilityStmt));
-	Assert(qry->returningList == NIL);
+		Assert(qry->commandType == CMD_SELECT);
+		Assert(!PointerIsValid(qry->utilityStmt));
+		Assert(qry->returningList == NIL);
 
-	/*
-	 * Make the new subquery (Q'').  Note that (per SQL:2003) there can't be
-	 * any window functions called in the WHERE, GROUP BY, or HAVING clauses.
-	 */
-	subq = makeNode(Query);
-	subq->commandType = CMD_SELECT;
-	subq->querySource = QSRC_PARSER;
-	subq->canSetTag = true;
-	subq->utilityStmt = NULL;
-	subq->resultRelation = 0;
-	subq->hasAggs = qry->hasAggs;
-	subq->hasWindowFuncs = false;	/* reevaluate later */
-	subq->hasSubLinks = qry->hasSubLinks;	/* reevaluate later */
+		/*
+		 * Make the new subquery (Q'').  Note that (per SQL:2003) there can't be
+		 * any window functions called in the WHERE, GROUP BY, or HAVING clauses.
+		 */
+		subq = makeNode(Query);
+		subq->commandType = CMD_SELECT;
+		subq->querySource = QSRC_PARSER;
+		subq->canSetTag = true;
+		subq->utilityStmt = NULL;
+		subq->resultRelation = 0;
+		subq->hasAggs = qry->hasAggs;
+		subq->hasWindowFuncs = false;	/* reevaluate later */
+		subq->hasSubLinks = qry->hasSubLinks;	/* reevaluate later */
 
-	/* Core of subquery input table expression: */
-	subq->rtable = qry->rtable; /* before windowing */
-	subq->jointree = qry->jointree; /* before windowing */
-	subq->targetList = NIL;		/* fill in later */
+		/* Core of subquery input table expression: */
+		subq->rtable = qry->rtable; /* before windowing */
+		subq->jointree = qry->jointree; /* before windowing */
+		subq->targetList = NIL;		/* fill in later */
 
-	subq->returningList = NIL;
-	subq->groupClause = qry->groupClause;	/* before windowing */
-	subq->groupingSets = qry->groupingSets; /* before windowing */
-	subq->havingQual = qry->havingQual; /* before windowing */
-	subq->windowClause = NIL;	/* by construction */
-	subq->distinctClause = NIL; /* after windowing */
-	subq->sortClause = NIL;		/* after windowing */
-	subq->limitOffset = NULL;	/* after windowing */
-	subq->limitCount = NULL;	/* after windowing */
-	subq->rowMarks = NIL;
-	subq->setOperations = NULL;
+		subq->returningList = NIL;
+		subq->groupClause = qry->groupClause;	/* before windowing */
+		subq->groupingSets = qry->groupingSets; /* before windowing */
+		subq->havingQual = qry->havingQual; /* before windowing */
+		subq->windowClause = NIL;	/* by construction */
+		subq->distinctClause = NIL; /* after windowing */
+		subq->sortClause = NIL;		/* after windowing */
+		subq->limitOffset = NULL;	/* after windowing */
+		subq->limitCount = NULL;	/* after windowing */
+		subq->rowMarks = NIL;
+		subq->setOperations = NULL;
 
-	/*
-	 * Check if there is a window function in the join tree. If so we must
-	 * mark hasWindowFuncs in the sub query as well.
-	 */
-	if (contain_window_function((Node *) subq->jointree))
-		subq->hasWindowFuncs = true;
+		/*
+		 * Check if there is a window function in the join tree. If so we must
+		 * mark hasWindowFuncs in the sub query as well.
+		 */
+		if (contain_window_function((Node *) subq->jointree))
+			subq->hasWindowFuncs = true;
 
-	/*
-	 * Make the single range table entry for the outer query Q' as a wrapper
-	 * for the subquery (Q'') currently under construction.
-	 */
-	rte = makeNode(RangeTblEntry);
-	rte->rtekind = RTE_SUBQUERY;
-	rte->subquery = subq;
-	rte->alias = NULL;			/* fill in later */
-	rte->eref = NULL;			/* fill in later */
-	rte->inFromCl = true;
-	rte->requiredPerms = ACL_SELECT;
+		/*
+		 * Make the single range table entry for the outer query Q' as a wrapper
+		 * for the subquery (Q'') currently under construction.
+		 */
+		rte = makeNode(RangeTblEntry);
+		rte->rtekind = RTE_SUBQUERY;
+		rte->subquery = subq;
+		rte->alias = NULL;			/* fill in later */
+		rte->eref = NULL;			/* fill in later */
+		rte->inFromCl = true;
+		rte->requiredPerms = ACL_SELECT;
 
-	/*
-	 * Default? rte->inh = 0; rte->checkAsUser = 0;
-	 */
+		/*
+		 * Default? rte->inh = 0; rte->checkAsUser = 0;
+		 */
 
-	/*
-	 * Make a reference to the new range table entry .
-	 */
-	ref = makeNode(RangeTblRef);
-	ref->rtindex = 1;
+		/*
+		 * Make a reference to the new range table entry .
+		 */
+		ref = makeNode(RangeTblRef);
+		ref->rtindex = 1;
 
-	/*
-	 * Set up context for mutating the target list.  Careful. This is trickier
-	 * than it looks.  The context will be "primed" with grouping targets.
-	 */
-	init_grouped_window_context(&ctx, qry);
+		/*
+		 * Set up context for mutating the target list.  Careful. This is trickier
+		 * than it looks.  The context will be "primed" with grouping targets.
+		 */
+		init_grouped_window_context(&ctx, qry);
 
-	/*
-	 * Begin rewriting the outer query in place.
-	 */
-	qry->hasAggs = false;		/* by construction */
-	/* qry->hasSubLinks -- reevaluate later. */
+		/*
+		 * Begin rewriting the outer query in place.
+		 */
+		qry->hasAggs = false;		/* by construction */
+		/* qry->hasSubLinks -- reevaluate later. */
 
-	/* Core of outer query input table expression: */
-	qry->rtable = list_make1(rte);
-	qry->jointree = (FromExpr *) makeNode(FromExpr);
-	qry->jointree->fromlist = list_make1(ref);
-	qry->jointree->quals = NULL;
-	/* qry->targetList -- to be mutated from Q to Q' below */
+		/* Core of outer query input table expression: */
+		qry->rtable = list_make1(rte);
+		qry->jointree = (FromExpr *) makeNode(FromExpr);
+		qry->jointree->fromlist = list_make1(ref);
+		qry->jointree->quals = NULL;
+		/* qry->targetList -- to be mutated from Q to Q' below */
 
-	qry->groupClause = NIL;		/* by construction */
-	qry->groupingSets = NIL;	/* by construction */
-	qry->havingQual = NULL;		/* by construction */
+		qry->groupClause = NIL;		/* by construction */
+		qry->groupingSets = NIL;	/* by construction */
+		qry->havingQual = NULL;		/* by construction */
 
-	/*
-	 * Mutate the Q target list and windowClauses for use in Q' and, at the
-	 * same time, update state with info needed to assemble the target list
-	 * for the subquery (Q'').
-	 */
-	qry->targetList = (List *) grouped_window_mutator((Node *) qry->targetList, &ctx);
-	qry->windowClause = (List *) grouped_window_mutator((Node *) qry->windowClause, &ctx);
-	qry->hasSubLinks = checkExprHasSubLink((Node *) qry->targetList);
+		/*
+		 * Mutate the Q target list and windowClauses for use in Q' and, at the
+		 * same time, update state with info needed to assemble the target list
+		 * for the subquery (Q'').
+		 */
+		qry->targetList = (List *) grouped_window_mutator((Node *) qry->targetList, &ctx);
+		qry->windowClause = (List *) grouped_window_mutator((Node *) qry->windowClause, &ctx);
+		qry->hasSubLinks = checkExprHasSubLink((Node *) qry->targetList);
 
-	/*
-	 * New subquery fields
-	 */
-	subq->targetList = ctx.subtlist;
-	subq->groupClause = ctx.subgroupClause;
-	subq->groupingSets = ctx.subgroupingSets;
+		/*
+		 * New subquery fields
+		 */
+		subq->targetList = ctx.subtlist;
+		subq->groupClause = ctx.subgroupClause;
+		subq->groupingSets = ctx.subgroupingSets;
 
-	/*
-	 * We always need an eref, but we shouldn't really need a filled in alias.
-	 * However, view deparse (or at least the fix for MPP-2189) wants one.
-	 */
-	alias = make_replacement_alias(subq, "Window");
-	rte->eref = copyObject(alias);
-	rte->alias = alias;
+		/*
+		 * We always need an eref, but we shouldn't really need a filled in alias.
+		 * However, view deparse (or at least the fix for MPP-2189) wants one.
+		 */
+		alias = make_replacement_alias(subq, "Window");
+		rte->eref = copyObject(alias);
+		rte->alias = alias;
 
-	/*
-	 * Accommodate depth change in new subquery, Q''.
-	 */
-	IncrementVarSublevelsUpInTransformGroupedWindows((Node *) subq, 1, 1);
+		/*
+		 * Accommodate depth change in new subquery, Q''.
+		 */
+		IncrementVarSublevelsUpInTransformGroupedWindows((Node *) subq, 1, 1);
 
-	/* Might have changed. */
-	subq->hasSubLinks = checkExprHasSubLink((Node *) subq);
+		/* Might have changed. */
+		subq->hasSubLinks = checkExprHasSubLink((Node *) subq);
 
-	Assert(PointerIsValid(qry->targetList));
-	Assert(IsA(qry->targetList, List));
+		Assert(PointerIsValid(qry->targetList));
+		Assert(IsA(qry->targetList, List));
 
-	/*
-	 * Use error instead of assertion to "use" hadSubLinks and keep compiler
-	 * happy.
-	 */
-	if (hadSubLinks != (qry->hasSubLinks || subq->hasSubLinks))
-		elog(ERROR, "inconsistency detected in internal grouped windows transformation");
+		/*
+		 * Use error instead of assertion to "use" hadSubLinks and keep compiler
+		 * happy.
+		 */
+		if (hadSubLinks != (qry->hasSubLinks || subq->hasSubLinks))
+			elog(ERROR, "inconsistency detected in internal grouped windows transformation");
 
-	discard_grouped_window_context(&ctx);
+		discard_grouped_window_context(&ctx);
 
 		return (Node *) qry;
 	}
