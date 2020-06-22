@@ -166,12 +166,6 @@ namespace gpdxl
 
 				} CContextTLWalker;
 
-		private:
-
-			// check if the cte levels up needs to be corrected
-			static
-			BOOL NeedsLevelsUpCorrection(SContextIncLevelsupMutator *context, Index cte_levels_up);
-
 		public:
 
 			// fall back during since the target list refers to a attribute which algebrizer at this point cannot resolve

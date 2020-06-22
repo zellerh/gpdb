@@ -306,7 +306,7 @@ CQueryMutators::RunFixCTELevelsUpWalker
 	if (IsA(node, RangeTblEntry))
 	{
 		RangeTblEntry *rte = (RangeTblEntry *) node;
-		if (RTE_CTE == rte->rtekind  && NeedsLevelsUpCorrection(context, rte->ctelevelsup))
+		if (RTE_CTE == rte->rtekind  && rte->ctelevelsup >= context->m_current_query_level)
 		{
 			// fix the levels up for CTE range table entry when needed
 			// the walker in GPDB does not walk range table entries of type CTE
@@ -326,7 +326,7 @@ CQueryMutators::RunFixCTELevelsUpWalker
 								(Query *) node,
 								(ExprWalkerFn) CQueryMutators::RunFixCTELevelsUpWalker,
 								context,
-								QTW_EXAMINE_RTES // flags - visite RTEs
+								QTW_EXAMINE_RTES // flags - visit RTEs
 								);
 		context->m_current_query_level--;
 
@@ -342,25 +342,6 @@ CQueryMutators::RunFixCTELevelsUpWalker
 	}
 
 	return expression_tree_walker(node, (ExprWalkerFn) CQueryMutators::RunFixCTELevelsUpWalker, context);
-}
-
-//---------------------------------------------------------------------------
-//	@function:
-//		CQueryMutators::FCorrectCTELevelsup
-//
-//	@doc:
-//		Check if the cte levels up is the expected query level
-//---------------------------------------------------------------------------
-BOOL
-CQueryMutators::NeedsLevelsUpCorrection
-	(
-	SContextIncLevelsupMutator *context,
-	Index cte_levels_up
-	)
-{
-	// when converting the query to derived table, all references to cte defined at the current level
-	// or above needs to be incremented
-	return cte_levels_up >= context->m_current_query_level;
 }
 
 //---------------------------------------------------------------------------
@@ -1465,8 +1446,8 @@ CQueryMutators::NormalizeWindowProjList
 		return query_copy;
 	}
 
-	// Postgres doesn't seem to mix grouping and window functions in the same Query node,
-	// if it would, we would need some additional checks here
+	// we assume here that we have already performed the transformGroupedWindows()
+	// transformation, which separates GROUP BY from window functions
 	GPOS_ASSERT(NULL == original_query->distinctClause);
 	GPOS_ASSERT(NULL == original_query->groupClause);
 
@@ -1496,12 +1477,11 @@ CQueryMutators::NormalizeWindowProjList
 
 		if (CTranslatorUtils::IsReferencedInWindowSpec(target_entry, original_query->windowClause))
 		{
-			// This entry is used in the group by or order by of a window spec.
-			// Since these clauses refer to their argument by ressortgroupref, it must
-			// be preserved in the lower target list, so insert the entire Expr of
-			// the TargetEntry into the lower target list, using the same ressortgroupref
-			// and also preserving the resjunk attribute.
-			SContextIncLevelsupMutator level_context(0, true);
+			// This entry is used in a window spec. Since this clause refers to its argument by
+			// ressortgroupref, the target entry must be preserved in the lower target list,
+			// so insert the entire Expr of the TargetEntry into the lower target list, using the
+			// same ressortgroupref and also preserving the resjunk attribute.
+			SContextIncLevelsupMutator level_context(0, true /* should_fix_top_level_target_list */);
 			TargetEntry *lower_target_entry = (TargetEntry *) gpdb::MutateExpressionTree
 														(
 														 (Node *) target_entry,
@@ -1517,7 +1497,7 @@ CQueryMutators::NormalizeWindowProjList
 			if (!target_entry->resjunk || is_sorting_col)
 			{
 				// the target list entry is present in the query output or it is used in the ORDER BY,
-				// so add it to the target list of the new upper Query
+				// so also add it to the target list of the new upper Query
 				Var *new_var = gpdb::MakeVar
 										(
 										1,
@@ -1530,6 +1510,8 @@ CQueryMutators::NormalizeWindowProjList
 
 				if (is_sorting_col)
 				{
+					// This target list entry is referenced in the ORDER BY as well, evaluated in the upper
+					// query. Set the ressortgroupref, keeping the same number as in the original query.
 					upper_target_entry->ressortgroupref = lower_target_entry->ressortgroupref;
 				}
 				// Set target list entry of the derived table to be non-resjunked, since we need it in the upper
@@ -1595,7 +1577,7 @@ CQueryMutators::RunWindowProjListMutator
 		// that, to be used instead of the window function in the upper TargetEntry.
 
 		// make a copy of the tree and increment varlevelsup, using a different mutator
-		SContextIncLevelsupMutator levelsUpContext(context->m_current_query_level, true);
+		SContextIncLevelsupMutator levelsUpContext(context->m_current_query_level, true /* should_fix_top_level_target_list */);
 		WindowFunc *window_func = (WindowFunc *) expression_tree_mutator(node, (MutatorWalkerFn) RunIncrLevelsUpMutator, &levelsUpContext);
 		GPOS_ASSERT(IsA(window_func, WindowFunc));
 
@@ -1617,7 +1599,7 @@ CQueryMutators::RunWindowProjListMutator
 		// to be used somewhere in the upper query's target list
 		Var *new_var = gpdb::MakeVar
 								(
-								1,
+								1, // derived query which is now the only table in FROM expression
 								(AttrNumber) resno,
 								gpdb::ExprType(node),
 								gpdb::ExprTypeMod(node),
