@@ -80,9 +80,6 @@ namespace gpdxl
 				// indicate whether we are mutating the argument of an aggregate
 				BOOL m_is_mutating_agg_arg;
 
-				// indicate whether we are mutating the argument of a window function
-				BOOL m_is_mutating_window_arg;
-
 				// ctor
 				SContextGrpbyPlMutator
 					(
@@ -98,8 +95,7 @@ namespace gpdxl
 					m_lower_table_tlist(derived_table_tlist),
 					m_current_query_level(0),
 					m_agg_levels_up(gpos::ulong_max),
-					m_is_mutating_agg_arg(false),
-					m_is_mutating_window_arg(false)
+					m_is_mutating_agg_arg(false)
 				{
 				}
 
@@ -199,10 +195,6 @@ namespace gpdxl
 			// make a copy of the aggref (minus the arguments)
 			static
 			Aggref *FlatCopyAggref(Aggref *aggref);
-
-			// make a copy of the window function (minus the arguments)
-			static
-			WindowFunc *FlatCopyWindowFunc (WindowFunc *old_windowfunc);
 
 			// create a new entry in the derived table and return its corresponding var
 			static

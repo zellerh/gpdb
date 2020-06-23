@@ -921,28 +921,6 @@ CQueryMutators::FlatCopyAggref
 	return new_aggref;
 }
 
-//---------------------------------------------------------------------------
-//	@function:
-//		CQueryMutators::FlatCopyAggref
-//
-//	@doc:
-//		Make a copy of the aggref (minus the arguments)
-//---------------------------------------------------------------------------
-WindowFunc *
-CQueryMutators::FlatCopyWindowFunc
-(
- WindowFunc *old_windowfunc
- )
-{
-	WindowFunc *new_windowfunc = MakeNode(WindowFunc);
-
-	*new_windowfunc = *old_windowfunc;
-	new_windowfunc->args = NIL;
-
-	return new_windowfunc;
-}
-
-
 // Increment the levels up of outer references
 Var *
 CQueryMutators::IncrLevelsUpIfOuterRef
