@@ -475,7 +475,7 @@ typedef struct
 } grouped_window_ctx;
 
 static void init_grouped_window_context(grouped_window_ctx * ctx, Query *qry);
-static Var *var_for_gw_expr(grouped_window_ctx * ctx, Node *expr, bool force);
+static Var *var_for_grouped_window_expr(grouped_window_ctx * ctx, Node *expr, bool force);
 static void discard_grouped_window_context(grouped_window_ctx * ctx);
 static Node *map_sgr_mutator(Node *node, void *context);
 static Node *grouped_window_mutator(Node *node, void *context);
@@ -746,7 +746,7 @@ discard_grouped_window_context(grouped_window_ctx * ctx)
  * was found/added.
  */
 static Var *
-var_for_gw_expr(grouped_window_ctx * ctx, Node *expr, bool force)
+var_for_grouped_window_expr(grouped_window_ctx * ctx, Node *expr, bool force)
 {
 	Var		   *var = NULL;
 	TargetEntry *tle = tlist_member(expr, ctx->subtlist);
@@ -947,7 +947,7 @@ grouped_window_mutator(Node *node, void *context)
 	else if (IsA(node, Aggref))
 	{
 		/* Aggregation expression */
-		result = (Node *) var_for_gw_expr(ctx, node, true);
+		result = (Node *) var_for_grouped_window_expr(ctx, node, true);
 	}
 	else if (IsA(node, GroupingFunc))
 	{
@@ -958,7 +958,7 @@ grouped_window_mutator(Node *node, void *context)
 
 		newgfunc->refs = (List *) map_sgr_mutator((Node *) newgfunc->refs, ctx);
 
-		result = (Node *) var_for_gw_expr(ctx, (Node *) newgfunc, true);
+		result = (Node *) var_for_grouped_window_expr(ctx, (Node *) newgfunc, true);
 	}
 	else if (IsA(node, Var))
 	{
@@ -968,7 +968,7 @@ grouped_window_mutator(Node *node, void *context)
 		 * Since this is a Var (leaf node), we must be able to mutate it, else
 		 * we can't finish the transformation and must give up.
 		 */
-		result = (Node *) var_for_gw_expr(ctx, node, false);
+		result = (Node *) var_for_grouped_window_expr(ctx, node, false);
 
 		if (!result)
 		{
@@ -977,7 +977,7 @@ grouped_window_mutator(Node *node, void *context)
 
 			foreach(lc, altvars)
 			{
-				result = (Node *) var_for_gw_expr(ctx, lfirst(lc), false);
+				result = (Node *) var_for_grouped_window_expr(ctx, lfirst(lc), false);
 				if (result)
 					break;
 			}
@@ -994,12 +994,12 @@ grouped_window_mutator(Node *node, void *context)
 	else if (IsA(node, SubLink))
 	{
 		/* put the subquery into Q'' */
-		result = (Node *) var_for_gw_expr(ctx, node, true);
+		result = (Node *) var_for_grouped_window_expr(ctx, node, true /* force */);
 	}
 	else
 	{
 		/* Grouping expression; may not find one. */
-		result = (Node *) var_for_gw_expr(ctx, node, false);
+		result = (Node *) var_for_grouped_window_expr(ctx, node, false /* force */);
 	}
 
 
