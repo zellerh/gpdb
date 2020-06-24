@@ -467,7 +467,7 @@ typedef struct
 	int			sgr_map_size;
 
 	/*
-	 * Scratch area for grouped_window_mutator and var_for_gw_expr.
+	 * Scratch area for grouped_window_mutator and var_for_grouped_window_expr.
 	 */
 	List	   *subrtable;
 	int			call_depth;
@@ -662,7 +662,7 @@ transformGroupedWindows(Node *node, void *context)
  * be over-kill, but the grouping extension code seems to like it
  * this way.
  *
- * Note that we only transfer sortgrpref values associated with
+ * Note that we only transfer sortgroupref values associated with
  * grouping and windowing to the subquery context.  The subquery
  * shouldn't care about ordering, etc. XXX
  */
@@ -796,7 +796,7 @@ var_for_grouped_window_expr(grouped_window_ctx * ctx, Node *expr, bool force)
 
 /* Helper for transformGroupedWindows:
  *
- * Mutator for subquery groupingClause to adjust sortgrpref values
+ * Mutator for subquery groupingClause to adjust sortgroupref values
  * based on map developed while priming context target list.
  */
 static Node *
@@ -927,7 +927,7 @@ grouped_window_mutator(Node *node, void *context)
 		/*
 		 * This is pretty shady, but we know our call pattern.  The target
 		 * list is at level 1, so we're interested in target entries at level
-		 * 2.  We record them in context so var_for_gw_expr can maybe make a
+		 * 2.  We record them in context so var_for_grouped_window_expr can maybe make a
 		 * better than default choice of alias.
 		 */
 		if (ctx->call_depth == 2)
