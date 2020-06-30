@@ -138,7 +138,33 @@ namespace gpos
                 m_elems = new_elems;
                 m_capacity = new_size;
             }
-			
+
+			// The following allows us to have an OsPrint (and DbgPrint) method on
+			// arrays that contain objects of CRefCount and derived classes.
+			// Since specialization of the template for class hierarchies doesn't work,
+			// we use the the std::is_base_of::value mechanism to create a special
+			// version of OsPrint() that can print out the array members.
+			template <bool B> struct SBaseOf {};
+
+			IOstream &SpecializedOsPrint(SBaseOf<false>, IOstream &os) const
+			{
+				// if the elements stored in the array are not derived from CRefCount,
+				// do nothing
+				return os;
+			}
+
+			IOstream &SpecializedOsPrint(SBaseOf<true>, IOstream &os) const
+			{
+				// for CRefCount array elements, call the OsPrint method on each of them
+				os << "[" << std::endl;
+				for (ULONG i=0; i<m_size; i++)
+				{
+					(*this)[i]->OsPrint(os);
+				}
+				os << "]";
+				return os;
+			}
+
 		public:
 		
 			// ctor
@@ -369,6 +395,13 @@ namespace gpos
 					result->Append((*this)[*((*indexes_to_choose)[i])]);
 				}
 				return result;
+			}
+
+			// print function
+			virtual
+			IOstream &OsPrint(IOstream &os) const
+			{
+				return SpecializedOsPrint(SBaseOf<std::is_base_of<CRefCount, T>::value>(), os);
 			}
 
 	}; // class CDynamicPtrArray
