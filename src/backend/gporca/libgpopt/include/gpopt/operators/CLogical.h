@@ -281,6 +281,10 @@ namespace gpopt
 			virtual
 			CFunctionProp *DeriveFunctionProperties(CMemoryPool *mp, CExpressionHandle &exprhdl) const;
 
+			// derive interesting distribution specs
+			virtual
+			CInterestingDistSpecs *DeriveInterestingDistSpecs(CMemoryPool *mp, CExpressionHandle &exprhdl) const;
+
 			//-------------------------------------------------------------------------------------
 			// Derived Stats
 			//-------------------------------------------------------------------------------------

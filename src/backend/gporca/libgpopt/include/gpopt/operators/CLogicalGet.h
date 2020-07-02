@@ -189,6 +189,10 @@ namespace gpopt
 				return 1;
 			}
 
+			// derive interesting distribution specs
+			virtual
+			CInterestingDistSpecs *DeriveInterestingDistSpecs(CMemoryPool *mp, CExpressionHandle &exprhdl) const;
+
 			//-------------------------------------------------------------------------------------
 			// Required Relational Properties
 			//-------------------------------------------------------------------------------------

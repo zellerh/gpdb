@@ -18,6 +18,7 @@
 #include "gpopt/base/CColRefSet.h"
 #include "gpopt/base/CColRefSetIter.h"
 #include "gpopt/base/CColRefTable.h"
+#include "gpopt/base/CInterestingDistSpecs.h"
 #include "gpopt/base/COptCtxt.h"
 
 #include "gpopt/operators/CExpressionHandle.h"
@@ -322,6 +323,26 @@ CLogicalGet::DeriveKeyCollection
 	return CLogical::PkcKeysBaseTable(mp, pdrgpbs, m_pdrgpcrOutput);
 }
 
+
+CInterestingDistSpecs *
+CLogicalGet::DeriveInterestingDistSpecs(CMemoryPool *mp, CExpressionHandle &) const
+{
+	CInterestingDistSpecs *result = NULL;
+	CDistributionSpec *pds = CPhysical::PdsCompute(mp, m_ptabdesc, m_pdrgpcrOutput);
+	CDistributionSpecHashed *pdsh = CDistributionSpecHashed::PdsConvert(pds);
+
+	if (NULL != pdsh)
+	{
+		result = GPOS_NEW(mp) CInterestingDistSpecs(mp);
+		result->Add(mp, pdsh);
+	}
+	else if (NULL != pds)
+	{
+		pds->Release();
+	}
+
+	return result;
+}
 
 //---------------------------------------------------------------------------
 //	@function:

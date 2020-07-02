@@ -329,6 +329,8 @@ namespace gpopt
 			BOOL DeriveHasMultipleDistinctAggs(ULONG child_index);
 			BOOL DeriveHasScalarArrayCmp(ULONG child_index);
 
+			void AddSizeInformationForInterestingDistSpecs();
+
 	}; // class CExpressionHandle
 	
 }

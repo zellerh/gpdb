@@ -20,6 +20,7 @@
 #include "gpopt/base/CReqdPropPlan.h"
 #include "gpopt/operators/CExpressionHandle.h"
 #include "gpopt/base/CColRefSet.h"
+#include "gpopt/base/CInterestingDistSpecs.h"
 #include "gpopt/base/CKeyCollection.h"
 #include "gpopt/base/CPartInfo.h"
 
@@ -50,6 +51,7 @@ CDrvdPropRelational::CDrvdPropRelational
 	m_ppartinfo(NULL),
 	m_ppc(NULL),
 	m_pfp(NULL),
+	m_interesting_dist_specs(NULL),
 	m_is_complete(false)
 {
 	m_is_prop_derived = GPOS_NEW(mp) CBitSet(mp, EdptSentinel);
@@ -79,6 +81,7 @@ CDrvdPropRelational::~CDrvdPropRelational()
 		CRefCount::SafeRelease(m_ppartinfo);
 		CRefCount::SafeRelease(m_ppc);
 		CRefCount::SafeRelease(m_pfp);
+		CRefCount::SafeRelease(m_interesting_dist_specs);
 	}
 }
 
@@ -127,6 +130,9 @@ CDrvdPropRelational::Derive
 
 	// derive function properties
 	DeriveFunctionProperties(exprhdl);
+
+	// derive interesting distribution specs
+	DeriveInterestingDistSpecs(exprhdl);
 
 	// derive functional dependencies
 	DeriveFunctionalDependencies(exprhdl);
@@ -342,6 +348,8 @@ CDrvdPropRelational::OsPrint
 	os << "]";
 	
 	os << ", Function Properties: [" << *GetFunctionProperties() << "]";
+
+	os << ", Interesting Distribution Specs: [" << *GetInterestingDistSpecs() << "]";
 
 	os << ", Part Info: [" << *GetPartitionInfo() << "]";
 
@@ -602,6 +610,26 @@ CDrvdPropRelational::DeriveFunctionProperties(CExpressionHandle &exprhdl)
 	}
 
 	return m_pfp;
+}
+
+// interesting distribution specs
+CInterestingDistSpecs *
+CDrvdPropRelational::GetInterestingDistSpecs() const
+{
+	GPOS_RTL_ASSERT(IsComplete());
+	return m_interesting_dist_specs;
+}
+
+CInterestingDistSpecs *
+CDrvdPropRelational::DeriveInterestingDistSpecs(CExpressionHandle &exprhdl)
+{
+	if (!m_is_prop_derived->ExchangeSet(EdptPinterestingDistSpecs))
+	{
+		CLogical *popLogical = CLogical::PopConvert(exprhdl.Pop());
+		m_interesting_dist_specs = popLogical->DeriveInterestingDistSpecs(m_mp, exprhdl);
+	}
+
+	return m_interesting_dist_specs;
 }
 
 // has partial indexes

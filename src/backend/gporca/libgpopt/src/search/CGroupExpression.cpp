@@ -794,6 +794,7 @@ CGroupExpression::PreprocessTransform
 		CExpressionHandle exprhdl(pmpGlobal);
 		exprhdl.Attach(this);
 		exprhdl.DeriveStats(pmpLocal, pmpGlobal, NULL /*prprel*/, NULL /*stats_ctxt*/);
+		exprhdl.AddSizeInformationForInterestingDistSpecs();
 	}
 }
 

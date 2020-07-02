@@ -21,6 +21,7 @@
 #include "gpopt/base/CCTEReq.h"
 #include "gpopt/base/CDrvdPropCtxtPlan.h"
 #include "gpopt/base/CDrvdPropScalar.h"
+#include "gpopt/base/CInterestingDistSpecs.h"
 #include "gpopt/base/CReqdPropPlan.h"
 #include "gpopt/base/CUtils.h"
 #include "gpopt/operators/CExpressionHandle.h"
@@ -2131,4 +2132,26 @@ CExpressionHandle::DeriveHasScalarArrayCmp(ULONG child_index){
 
 	return GetDrvdScalarProps(child_index)->HasScalarArrayCmp();
 }
+
+void
+CExpressionHandle::AddSizeInformationForInterestingDistSpecs()
+{
+	CInterestingDistSpecs *ids = GetRelationalProperties()->GetInterestingDistSpecs();
+
+	if (NULL != ids && !ids->HasSizeInformation())
+	{
+		IStatistics *stats = Pstats();
+		// for now, we approximate the row size with the number of rows,
+		// since we don't have very reliable width information
+		CDouble num_rows = -1.0;
+
+		if (NULL != stats)
+		{
+			num_rows = stats->Rows();
+		}
+
+		ids->AddSizeInformation(*this, num_rows);
+	}
+}
+
 // EOF

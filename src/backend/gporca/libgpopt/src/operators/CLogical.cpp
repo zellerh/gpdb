@@ -21,6 +21,7 @@
 #include "gpopt/base/CConstraintConjunction.h"
 #include "gpopt/base/CConstraintInterval.h"
 #include "gpopt/base/CDrvdPropRelational.h"
+#include "gpopt/base/CInterestingDistSpecs.h"
 #include "gpopt/base/CReqdPropRelational.h"
 #include "gpopt/base/CKeyCollection.h"
 #include "gpopt/base/CPartIndexMap.h"
@@ -998,6 +999,27 @@ CLogical::DeriveFunctionProperties
 	IMDFunction::EFuncStbl efs = EfsDeriveFromChildren(exprhdl, IMDFunction::EfsImmutable);
 
 	return GPOS_NEW(mp) CFunctionProp(efs, IMDFunction::EfdaNoSQL, exprhdl.FChildrenHaveVolatileFuncScan(), false /*fScan*/);
+}
+
+//---------------------------------------------------------------------------
+// DeriveInterestingDistSpecs
+//---------------------------------------------------------------------------
+CInterestingDistSpecs *
+CLogical::DeriveInterestingDistSpecs(CMemoryPool *mp, CExpressionHandle &exprhdl) const
+{
+	ULONG arity = exprhdl.Arity();
+	CInterestingDistSpecs *result = GPOS_NEW(mp) CInterestingDistSpecs(m_mp);
+
+	for (ULONG c=0; c<arity; c++)
+	{
+		if (!exprhdl.FScalarChild(c))
+		{
+			// Simply add the interesting distribution specs of all the children
+			result->Add(mp, exprhdl.GetRelationalProperties(c)->GetInterestingDistSpecs());
+		}
+	}
+
+	return result;
 }
 
 //---------------------------------------------------------------------------

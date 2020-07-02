@@ -33,6 +33,7 @@ namespace gpopt
 	class CPartIndexMap;
 	class CPropConstraint;
 	class CPartInfo;
+	class CInterestingDistSpecs;
 	
 	//---------------------------------------------------------------------------
 	//	@class:
@@ -65,6 +66,7 @@ namespace gpopt
 			EdptPpartinfo,
 			EdptPpc,
 			EdptPfp,
+			EdptPinterestingDistSpecs,
 			EdptJoinDepth,
 			EdptFHasPartialIndexes,
 			EdptSentinel
@@ -109,6 +111,9 @@ namespace gpopt
 
 			// function properties
 			CFunctionProp *m_pfp;
+
+			// interesting distribution specs
+			CInterestingDistSpecs *m_interesting_dist_specs;
 
 			// true if all logical operators in the group are of type CLogicalDynamicGet,
 			// and the dynamic get has partial indexes
@@ -172,6 +177,8 @@ namespace gpopt
 			// function properties
 			CFunctionProp *DeriveFunctionProperties(CExpressionHandle &);
 
+			CInterestingDistSpecs*DeriveInterestingDistSpecs(CExpressionHandle &);
+
 			// has partial indexes
 			BOOL DeriveHasPartialIndexes(CExpressionHandle &exprhdl);
 
@@ -229,6 +236,9 @@ namespace gpopt
 
 			// function properties
 			CFunctionProp *GetFunctionProperties() const;
+
+			// interesting distribution specs
+			CInterestingDistSpecs *GetInterestingDistSpecs() const;
 
 			// has partial indexes
 			BOOL HasPartialIndexes() const;

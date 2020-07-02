@@ -239,10 +239,12 @@ namespace gpopt
 				ULONG ulScalarIndex
 				);
 
+		public:
 			// compute distribution spec from the table descriptor
 			static
 			CDistributionSpec *PdsCompute(CMemoryPool *mp, const CTableDescriptor *ptabdesc, CColRefArray *pdrgpcrOutput);
 
+		protected:
 			// helper for a simple case of computing child's required sort order
 			static
 			COrderSpec *PosPassThru
