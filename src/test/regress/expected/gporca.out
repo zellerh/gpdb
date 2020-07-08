@@ -11671,3 +11671,93 @@ SELECT * from tp;
  99 |  99
 (1 row)
 
+drop table if exists tcorr1, tcorr2;
+NOTICE:  table "tcorr1" does not exist, skipping
+NOTICE:  table "tcorr2" does not exist, skipping
+create table tcorr1(a int, b int);
+NOTICE:  Table doesn't have 'DISTRIBUTED BY' clause -- Using column named 'a' as the Greenplum Database data distribution key for this table.
+HINT:  The 'DISTRIBUTED BY' clause determines the distribution of data. Make sure column(s) chosen are the optimal data distribution key to minimize skew.
+create table tcorr2(a int, b int);
+NOTICE:  Table doesn't have 'DISTRIBUTED BY' clause -- Using column named 'a' as the Greenplum Database data distribution key for this table.
+HINT:  The 'DISTRIBUTED BY' clause determines the distribution of data. Make sure column(s) chosen are the optimal data distribution key to minimize skew.
+insert into tcorr1 values (1,99);
+insert into tcorr2 values (1,1);
+set optimizer_trace_fallback to on;
+select *
+from tcorr1 out
+where out.b in (select coalesce(tcorr2.a, 99)
+                from tcorr1 left outer join tcorr2 on tcorr1.a=tcorr2.a+out.a);
+ a | b 
+---+---
+(0 rows)
+
+-- expect 1 row
+-- FIXME: Incorrect result with planner
+select *
+from tcorr1 out
+where out.b in (select max(tcorr2.b + out.b - 1)
+                from tcorr2
+                where tcorr2.a=out.a);
+ a | b  
+---+----
+ 1 | 99
+(1 row)
+
+-- expect 1 row
+select *
+from tcorr1 out
+where out.b in (select coalesce(tcorr2_d.c, 99)
+                from tcorr1 left outer join (select a, count(*) as c
+                                             from tcorr2
+                                             where tcorr2.b = out.b
+                                             group by a) tcorr2_d on tcorr1.a=tcorr2_d.a);
+ERROR:  correlated subquery with skip-level correlations is not supported
+-- expect 1 row
+select *
+from tcorr1 out
+where out.b in (select coalesce(tcorr2.a, 99)
+                from tcorr1 full outer join tcorr2 on tcorr1.a=tcorr2.a+out.a);
+ERROR:  Query requires a feature that has been disabled by a configuration setting.
+DETAIL:  Could not devise a query plan for the given query.
+HINT:  Current settings:  optimizer=off; optimizer_cte_inlining_bound=1000; optimizer_metadata_caching=on
+-- currently no plan produced for this query
+set optimizer_join_order to exhaustive2;
+select *
+from tcorr1 out
+where out.b in (select coalesce(tcorr2.a, 99)
+                from tcorr1 left outer join tcorr2 on tcorr1.a=tcorr2.a+out.a);
+ a | b 
+---+---
+(0 rows)
+
+-- expect 1 row
+-- FIXME: Falls back and produces incorrect result
+select *
+from tcorr1 out
+where out.b in (select max(tcorr2.b + out.b - 1)
+                from tcorr2
+                where tcorr2.a=out.a);
+ a | b  
+---+----
+ 1 | 99
+(1 row)
+
+-- expect 1 row
+select *
+from tcorr1 out
+where out.b in (select coalesce(tcorr2_d.c, 99)
+                from tcorr1 left outer join (select a, count(*) as c
+                                             from tcorr2
+                                             where tcorr2.b = out.b
+                                             group by a) tcorr2_d on tcorr1.a=tcorr2_d.a);
+ERROR:  correlated subquery with skip-level correlations is not supported
+-- expect 1 row
+select *
+from tcorr1 out
+where out.b in (select coalesce(tcorr2.a, 99)
+                from tcorr1 full outer join tcorr2 on tcorr1.a=tcorr2.a+out.a);
+ERROR:  Query requires a feature that has been disabled by a configuration setting.
+DETAIL:  Could not devise a query plan for the given query.
+HINT:  Current settings:  optimizer=off; optimizer_cte_inlining_bound=1000; optimizer_metadata_caching=on
+-- currently no plan produced for this query
+reset optimizer_join_order;
