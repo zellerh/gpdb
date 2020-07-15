@@ -154,13 +154,21 @@ CPredicateUtils::FComparison
 	CExpression *pexprRight = (*pexpr)[1];
 
 	if (CUtils::FScalarIdent(pexprLeft, colref) ||
-		CScalarIdent::FCastedScId(pexprLeft, colref))
+		CScalarIdent::FCastedScId(pexprLeft, colref) ||
+        (!FContainsVolatileFunction(pexprLeft) &&
+         (pexprLeft->Pop()->Eopid() == COperator::EopScalarFunc) &&
+        ((*pexprLeft)[0]->Pop()->Eopid() == COperator::EopScalarIdent) &&
+        (CScalarIdent::PopConvert((*pexprLeft)[0]->Pop())->Pcr() == colref)))
 	{
 		return FValidRefsOnly(pexprRight, pcrsAllowedRefs);
 	}
 
 	if (CUtils::FScalarIdent(pexprRight, colref) ||
-		CScalarIdent::FCastedScId(pexprRight, colref))
+		CScalarIdent::FCastedScId(pexprRight, colref) ||
+        (!FContainsVolatileFunction(pexprRight) &&
+         (pexprRight->Pop()->Eopid() == COperator::EopScalarFunc) &&
+        ((*pexprRight)[0]->Pop()->Eopid() == COperator::EopScalarIdent) &&
+        (CScalarIdent::PopConvert((*pexprRight)[0]->Pop())->Pcr() == colref)))
 	{
 		return FValidRefsOnly(pexprLeft, pcrsAllowedRefs);
 	}
@@ -682,14 +690,22 @@ CPredicateUtils::ExtractComponents
 			CScalarCmp::PopConvert(pexprScCmp->Pop())->ParseCmpType();
 
 	if (CUtils::FScalarIdent(pexprLeft, pcrKey) ||
-		CScalarIdent::FCastedScId(pexprLeft, pcrKey))
+		CScalarIdent::FCastedScId(pexprLeft, pcrKey) ||
+        (!FContainsVolatileFunction(pexprLeft) &&
+         (pexprLeft->Pop()->Eopid() == COperator::EopScalarFunc) &&
+        ((*pexprLeft)[0]->Pop()->Eopid() == COperator::EopScalarIdent) &&
+        (CScalarIdent::PopConvert((*pexprLeft)[0]->Pop())->Pcr() == pcrKey)))
 	{
 		*ppexprKey = pexprLeft;
 		*ppexprOther = pexprRight;
 		*pecmpt = cmp_type;
 	}
 	else if (CUtils::FScalarIdent(pexprRight, pcrKey) ||
-			 CScalarIdent::FCastedScId(pexprRight, pcrKey))
+			 CScalarIdent::FCastedScId(pexprRight, pcrKey) ||
+             (!FContainsVolatileFunction(pexprRight) &&
+              (pexprRight->Pop()->Eopid() == COperator::EopScalarFunc) &&
+             ((*pexprRight)[0]->Pop()->Eopid() == COperator::EopScalarIdent) &&
+             (CScalarIdent::PopConvert((*pexprRight)[0]->Pop())->Pcr() == pcrKey)))
 	{
 		*ppexprKey = pexprRight;
 		*ppexprOther = pexprLeft;

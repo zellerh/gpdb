@@ -2451,15 +2451,23 @@ CTranslatorExprToDXLUtils::ExtractCastMdids
 	GPOS_ASSERT(NULL != ppmdidType);
 	GPOS_ASSERT(NULL != ppmdidCastFunc);
 
-	if (COperator::EopScalarCast != pop->Eopid())
+	if ((COperator::EopScalarCast != pop->Eopid()) && (COperator::EopScalarFunc != pop->Eopid()))
 	{
 		// not a cast
 		return;
 	}
-
-	CScalarCast *popCast = CScalarCast::PopConvert(pop);
-	*ppmdidType = popCast->MdidType();
-	*ppmdidCastFunc = popCast->FuncMdId();
+    if (COperator::EopScalarCast == pop->Eopid())
+    {
+        CScalarCast *popCast = CScalarCast::PopConvert(pop);
+        *ppmdidType = popCast->MdidType();
+        *ppmdidCastFunc = popCast->FuncMdId();
+     }
+     if (COperator::EopScalarFunc == pop->Eopid())
+    {
+        CScalarFunc *popCast = CScalarFunc::PopConvert(pop);
+        *ppmdidType = popCast->MdidType();
+        *ppmdidCastFunc = popCast->FuncMdId();
+    }
 }
 
 BOOL
