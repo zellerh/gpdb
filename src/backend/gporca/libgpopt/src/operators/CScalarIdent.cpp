@@ -14,6 +14,7 @@
 #include "gpopt/base/CColRefSet.h"
 #include "gpopt/base/CColRefTable.h"
 #include "gpopt/operators/CScalarIdent.h"
+#include "gpopt/operators/CScalarFunc.h"
 
 
 using namespace gpopt;
@@ -187,6 +188,54 @@ CScalarIdent::FCastedScId
 	return colref == pScIdent->Pcr();
 }
 
+//---------------------------------------------------------------------------
+//    @function:
+//        CScalarIdent::FLossyCastedScId
+//
+//    @doc:
+//         Is the given expression a lossy/assignment cast of a scalar identifier
+//
+//---------------------------------------------------------------------------
+BOOL
+CScalarIdent::FLossyCastedScId
+    (
+    CExpression *pexpr
+    )
+{
+    GPOS_ASSERT(NULL != pexpr);
+
+    // cast(col1)
+    if (COperator::EopScalarFunc == pexpr->Pop()->Eopid())
+    {
+        if (COperator::EopScalarIdent == (*pexpr)[0]->Pop()->Eopid())
+        {
+            CScalarFunc *pFunc = CScalarFunc::PopConvert(pexpr->Pop());
+            CMDIdGPDB *gpdb_mdid = CMDIdGPDB::CastMdid(pFunc->FuncMdId());
+            return gpdb_mdid->Oid() == 317;
+        }
+    }
+
+    return false;
+}
+
+BOOL
+CScalarIdent::FLossyCastedScId
+    (
+    CExpression *pexpr,
+    CColRef *colref
+    )
+{
+    GPOS_ASSERT(NULL != pexpr);
+    GPOS_ASSERT(NULL != colref);
+
+    if (!FLossyCastedScId(pexpr))
+    {
+        return false;
+    }
+    CScalarIdent *pScIdent = CScalarIdent::PopConvert((*pexpr)[0]->Pop());
+    return colref == pScIdent->Pcr();
+    
+}
 //---------------------------------------------------------------------------
 //	@function:
 //		CScalarIdent::OsPrint

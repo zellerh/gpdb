@@ -1007,6 +1007,12 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterScCmp
 	
 	pdxlnScalar->AddRef();
 	CDXLNode *pdxlnInclusiveCmp = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, cmp_type, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
+    
+    if (CMDIdGPDB::CastMdid(mdid_cast_func)->Oid() == 317)
+    {
+        return pdxlnInclusiveCmp;
+    }
+    
 	CDXLNode *pdxlnInclusiveBoolPredicate = GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarPartBoundInclusion(mp, ulPartLevel, fLowerBound));
 
 	CDXLNode *pdxlnPredicateInclusive = GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxland), pdxlnInclusiveCmp, pdxlnInclusiveBoolPredicate);
@@ -1077,10 +1083,19 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterPartBound
 		ecmptInc = IMDType::EcmptGEq;
 	}
 
-	CDXLNode *pdxlnPredicateExclusive = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, cmp_type, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
 
-	pdxlnScalar->AddRef();
 	CDXLNode *pdxlnInclusiveCmp = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, ecmptInc, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
+    
+    if (CMDIdGPDB::CastMdid(mdid_cast_func)->Oid() == 317)
+    {
+        return pdxlnInclusiveCmp;
+    }
+    
+    pdxlnScalar->AddRef();
+    
+    CDXLNode *pdxlnPredicateExclusive = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, cmp_type, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
+
+    
 	
 	CDXLNode *pdxlnInclusiveBoolPredicate = GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarPartBoundInclusion(mp, ulPartLevel, fLowerBound));
 	

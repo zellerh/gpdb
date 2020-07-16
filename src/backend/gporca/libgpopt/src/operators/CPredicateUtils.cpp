@@ -155,20 +155,14 @@ CPredicateUtils::FComparison
 
 	if (CUtils::FScalarIdent(pexprLeft, colref) ||
 		CScalarIdent::FCastedScId(pexprLeft, colref) ||
-        (!FContainsVolatileFunction(pexprLeft) &&
-         (pexprLeft->Pop()->Eopid() == COperator::EopScalarFunc) &&
-        ((*pexprLeft)[0]->Pop()->Eopid() == COperator::EopScalarIdent) &&
-        (CScalarIdent::PopConvert((*pexprLeft)[0]->Pop())->Pcr() == colref)))
+        CScalarIdent::FLossyCastedScId(pexprLeft, colref))
 	{
 		return FValidRefsOnly(pexprRight, pcrsAllowedRefs);
 	}
 
 	if (CUtils::FScalarIdent(pexprRight, colref) ||
 		CScalarIdent::FCastedScId(pexprRight, colref) ||
-        (!FContainsVolatileFunction(pexprRight) &&
-         (pexprRight->Pop()->Eopid() == COperator::EopScalarFunc) &&
-        ((*pexprRight)[0]->Pop()->Eopid() == COperator::EopScalarIdent) &&
-        (CScalarIdent::PopConvert((*pexprRight)[0]->Pop())->Pcr() == colref)))
+        CScalarIdent::FLossyCastedScId(pexprRight, colref))
 	{
 		return FValidRefsOnly(pexprLeft, pcrsAllowedRefs);
 	}
@@ -691,10 +685,7 @@ CPredicateUtils::ExtractComponents
 
 	if (CUtils::FScalarIdent(pexprLeft, pcrKey) ||
 		CScalarIdent::FCastedScId(pexprLeft, pcrKey) ||
-        (!FContainsVolatileFunction(pexprLeft) &&
-         (pexprLeft->Pop()->Eopid() == COperator::EopScalarFunc) &&
-        ((*pexprLeft)[0]->Pop()->Eopid() == COperator::EopScalarIdent) &&
-        (CScalarIdent::PopConvert((*pexprLeft)[0]->Pop())->Pcr() == pcrKey)))
+        CScalarIdent::FLossyCastedScId(pexprLeft, pcrKey))
 	{
 		*ppexprKey = pexprLeft;
 		*ppexprOther = pexprRight;
@@ -702,10 +693,7 @@ CPredicateUtils::ExtractComponents
 	}
 	else if (CUtils::FScalarIdent(pexprRight, pcrKey) ||
 			 CScalarIdent::FCastedScId(pexprRight, pcrKey) ||
-             (!FContainsVolatileFunction(pexprRight) &&
-              (pexprRight->Pop()->Eopid() == COperator::EopScalarFunc) &&
-             ((*pexprRight)[0]->Pop()->Eopid() == COperator::EopScalarIdent) &&
-             (CScalarIdent::PopConvert((*pexprRight)[0]->Pop())->Pcr() == pcrKey)))
+             CScalarIdent::FLossyCastedScId(pexprRight, pcrKey))
 	{
 		*ppexprKey = pexprRight;
 		*ppexprOther = pexprLeft;
