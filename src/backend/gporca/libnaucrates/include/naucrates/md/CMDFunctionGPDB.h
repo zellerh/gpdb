@@ -63,6 +63,9 @@ namespace gpmd
 
 			// function strictness (i.e. whether func returns NULL on NULL input)
 			BOOL m_is_strict;
+        
+            		//is an increasing function(lossy cast) which can be used for partition selection
+            		BOOL m_is_allowed_for_PS;
 
 			// function result has very similar number of distinct values as the
 			// single function argument (used for cardinality estimation)
@@ -102,7 +105,8 @@ namespace gpmd
 				EFuncStbl func_stability,
 				EFuncDataAcc func_data_access,
 				BOOL is_strict,
-				BOOL is_ndv_preserving
+				BOOL is_ndv_preserving,
+                		BOOL is_allowed_for_PS
 				);
 			
 			virtual

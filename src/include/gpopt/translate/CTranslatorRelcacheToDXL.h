@@ -205,6 +205,10 @@ namespace gpdxl
 			// retrieve cast object from the relcache
 			static
 			IMDCacheObject *RetrieveCast(CMemoryPool *mp, IMDId *mdid);
+        
+            // check if a function is a lossy cast allowed for Partition selection
+            static
+            BOOL *IsLossyCastAllowedForPS(IMDId *mdid);
 			
 			// retrieve scalar comparison object from the relcache
 			static

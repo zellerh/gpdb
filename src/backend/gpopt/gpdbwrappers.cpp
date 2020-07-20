@@ -623,6 +623,26 @@ gpdb::FreeAttrStatsSlot
 }
 
 bool
+gpdb::IsAllowedForPartitionSelection
+    (
+    Oid funcid
+    )
+{
+    GP_WRAP_START;
+    switch (funcid)
+    {
+        // for now, these are the functions we consider for lossy casts PS
+        case PS_ALLOWED_TS_DATE:
+        case PS_ALLOWED_FLOAT8_INT4:
+        case PS_ALLOWED_FLOAT4_INT4:
+            return true;
+        default:
+            return false;
+    }
+    GP_WRAP_END;
+}
+
+bool
 gpdb::FuncStrict
 	(
 	Oid funcid
