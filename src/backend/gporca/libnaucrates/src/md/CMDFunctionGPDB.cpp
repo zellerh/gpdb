@@ -40,7 +40,7 @@ CMDFunctionGPDB::CMDFunctionGPDB
 	EFuncDataAcc func_data_access,
 	BOOL is_strict,
 	BOOL is_ndv_preserving,
-    	BOOL is_allowed_for_PS
+	BOOL is_allowed_for_PS
 	)
 	:
 	m_mp(mp),
@@ -233,6 +233,7 @@ CMDFunctionGPDB::Serialize
 	xml_serializer->AddAttribute(CDXLTokens::GetDXLTokenStr(EdxltokenGPDBFuncDataAccess), GetFuncDataAccessStr());
 	xml_serializer->AddAttribute(CDXLTokens::GetDXLTokenStr(EdxltokenGPDBFuncStrict), m_is_strict);
 	xml_serializer->AddAttribute(CDXLTokens::GetDXLTokenStr(EdxltokenGPDBFuncNDVPreserving), m_is_ndv_preserving);
+	xml_serializer->AddAttribute(CDXLTokens::GetDXLTokenStr(EdxltokenGPDBFuncIsAllowedForPS), m_is_allowed_for_PS);
 
 	SerializeMDIdAsElem(xml_serializer, CDXLTokens::GetDXLTokenStr(EdxltokenGPDBFuncResultTypeId), m_mdid_type_result);
 

@@ -63,13 +63,13 @@ namespace gpmd
 
 			// function strictness (i.e. whether func returns NULL on NULL input)
 			BOOL m_is_strict;
-        
-            		//is an increasing function(lossy cast) which can be used for partition selection
-            		BOOL m_is_allowed_for_PS;
 
 			// function result has very similar number of distinct values as the
 			// single function argument (used for cardinality estimation)
 			BOOL m_is_ndv_preserving;
+			
+			//is an increasing function(lossy cast) which can be used for partition selection
+			BOOL m_is_allowed_for_PS;
 
 			// dxl token array for stability
 			Edxltoken m_dxl_func_stability_array[EfsSentinel];
@@ -100,13 +100,13 @@ namespace gpmd
 				IMDId *mdid,
 				CMDName *mdname,
 				IMDId *result_type_mdid,
-						IMdIdArray *mdid_array,
+				IMdIdArray *mdid_array,
 				BOOL ReturnsSet,
 				EFuncStbl func_stability,
 				EFuncDataAcc func_data_access,
 				BOOL is_strict,
 				BOOL is_ndv_preserving,
-                		BOOL is_allowed_for_PS
+				BOOL is_allowed_for_PS
 				);
 			
 			virtual
@@ -147,7 +147,14 @@ namespace gpmd
 			{
 				return m_is_ndv_preserving;
 			}
-
+		
+			// getter method for is this function allowed for Partition selection
+			virtual
+			BOOL IsAllowedForPS() const
+			{
+				return m_is_allowed_for_PS;
+			}
+		
 			// function stability
 			virtual
 			EFuncStbl GetFuncStability() const

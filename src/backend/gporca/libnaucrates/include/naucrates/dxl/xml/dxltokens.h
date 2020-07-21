@@ -601,6 +601,7 @@ namespace gpdxl
 		EdxltokenGPDBFuncReturnsSet,
 		EdxltokenGPDBFuncStrict,
 		EdxltokenGPDBFuncNDVPreserving,
+		EdxltokenGPDBFuncIsAllowedForPS,
 		
 		EdxltokenGPDBCast,
 		EdxltokenGPDBCastBinaryCoercible,
