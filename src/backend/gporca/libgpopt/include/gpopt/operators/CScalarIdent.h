@@ -138,14 +138,7 @@ namespace gpopt
 			// is the given expression a scalar cast of given scalar identifier
 			static
 			BOOL FCastedScId(CExpression *pexpr, CColRef *colref);
-            
-            // is the given expression a lossy/assignment cast of a scalar identifier
-            static
-            BOOL FLossyCastedScId(CExpression *pexpr);
 
-            // is the given expression a lossy/assignment cast of given scalar identifier, which can be used for partition selection
-            static
-            BOOL FLossyCastedScId(CExpression *pexpr, CColRef *colref);
 	}; // class CScalarIdent
 
 }

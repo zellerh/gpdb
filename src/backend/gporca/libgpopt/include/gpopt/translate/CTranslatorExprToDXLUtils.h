@@ -323,6 +323,7 @@ namespace gpopt
 				IMDId *pmdidTypeOther,
 				IMDId *pmdidTypeCastExpr,
 				IMDId *mdid_cast_func,
+				BOOL is_allowed_lossy_cast,
 				IMDType::ECmpType cmp_type,
 				ULONG ulPartLevel
 				);
@@ -338,6 +339,7 @@ namespace gpopt
 				IMDId *pmdidTypeOther,
 				IMDId *pmdidTypeCastExpr,
 				IMDId *mdid_cast_func,
+				BOOL is_allowed_lossy_cast,
 				ULONG ulPartLevel
 				);
 			
@@ -352,6 +354,7 @@ namespace gpopt
 				IMDId *pmdidTypeOther,
 				IMDId *pmdidTypeCastExpr,
 				IMDId *mdid_cast_func,
+				BOOL is_allowed_lossy_cast,
 				ULONG ulPartLevel,
 				ULONG fLowerBound,
 				IMDType::ECmpType cmp_type
@@ -543,7 +546,7 @@ namespace gpopt
 			
 			// if operator is a scalar cast, extract cast type and function
 			static 
-			void ExtractCastMdids(COperator *pop, IMDId **ppmdidType, IMDId **ppmdidCastFunc);
+			void ExtractCastMdids(COperator *pop, IMDId **ppmdidType, IMDId **ppmdidCastFunc, BOOL *is_allowed_lossy_cast);
 
 			// produce DXL representation of a datum
 			static

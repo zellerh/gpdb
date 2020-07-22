@@ -831,20 +831,12 @@ CTranslatorExprToDXLUtils::PdxlnListFilterPartKey
 		// ScalarCast(ScalarIdent) - create an ArrayCoerceExpr over a ScalarPartListValues
 		CScalarCast *pexprScalarCast = CScalarCast::PopConvert(pexprPartKey->Pop());
 		IMDId *pmdidDestElem = pexprScalarCast->MdidType();
+		IMDId *pmdidArrayCastFunc = pexprScalarCast->FuncMdId();
 		IMDId *pmdidDestArray = md_accessor->RetrieveType(pmdidDestElem)->GetArrayTypeMdid();
 
 		CScalarIdent *pexprScalarIdent = CScalarIdent::PopConvert((*pexprPartKey)[0]->Pop());
 		IMDId *pmdidSrcElem = pexprScalarIdent->MdidType();
 		IMDId *pmdidSrcArray = md_accessor->RetrieveType(pmdidSrcElem)->GetArrayTypeMdid();
-
-		IMDId *pmdidArrayCastFunc = NULL;
-
-		if (CMDAccessorUtils::FCastExists(md_accessor, pmdidSrcElem, pmdidDestElem))
-		{
-			const IMDCast *pmdcast = md_accessor->Pmdcast(pmdidSrcElem, pmdidDestElem);
-			pmdidArrayCastFunc = pmdcast->GetCastFuncMdId();
-		}
-
 		pmdidSrcArray->AddRef();
 		pmdidSrcElem->AddRef();
 		CDXLNode *pdxlnPartKeyIdent = GPOS_NEW(mp) CDXLNode
@@ -961,6 +953,7 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterScCmp
 	IMDId *pmdidTypeOther,
 	IMDId *pmdidTypeCastExpr,
 	IMDId *mdid_cast_func,
+	BOOL is_allowed_lossy_cast,
 	IMDType::ECmpType cmp_type,
 	ULONG ulPartLevel
 	)
@@ -976,6 +969,7 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterScCmp
 				pmdidTypeOther,
 				pmdidTypeCastExpr,
 				mdid_cast_func,
+				is_allowed_lossy_cast,
 				ulPartLevel
 				);
 	}
@@ -1008,7 +1002,7 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterScCmp
 	pdxlnScalar->AddRef();
 	CDXLNode *pdxlnInclusiveCmp = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, cmp_type, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
     
-    if (CMDIdGPDB::CastMdid(mdid_cast_func)->Oid() == 317)
+    if (is_allowed_lossy_cast)
     {
         return pdxlnInclusiveCmp;
     }
@@ -1039,12 +1033,13 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterEqCmp
 	IMDId *pmdidTypeOther,
 	IMDId *pmdidTypeCastExpr,
 	IMDId *mdid_cast_func,
+	BOOL is_allowed_lossy_cast,
 	ULONG ulPartLevel
 	)
 {
-	CDXLNode *pdxlnPredicateMin = PdxlnRangeFilterPartBound(mp, md_accessor, pdxlnScalar, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func, ulPartLevel, true /*fLowerBound*/, IMDType::EcmptL);
+	CDXLNode *pdxlnPredicateMin = PdxlnRangeFilterPartBound(mp, md_accessor, pdxlnScalar, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func, is_allowed_lossy_cast, ulPartLevel, true /*fLowerBound*/, IMDType::EcmptL);
 	pdxlnScalar->AddRef();
-	CDXLNode *pdxlnPredicateMax = PdxlnRangeFilterPartBound(mp, md_accessor, pdxlnScalar, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func, ulPartLevel, false /*fLowerBound*/, IMDType::EcmptG);
+	CDXLNode *pdxlnPredicateMax = PdxlnRangeFilterPartBound(mp, md_accessor, pdxlnScalar, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func, is_allowed_lossy_cast, ulPartLevel, false /*fLowerBound*/, IMDType::EcmptG);
 		
 	// return the conjunction of the predicate for the lower and upper bounds
 	return GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxland), pdxlnPredicateMin, pdxlnPredicateMax);
@@ -1070,6 +1065,7 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterPartBound
 	IMDId *pmdidTypeOther,
 	IMDId *pmdidTypeCastExpr,
 	IMDId *mdid_cast_func,
+	BOOL is_allowed_lossy_cast,
 	ULONG ulPartLevel,
 	ULONG fLowerBound,
 	IMDType::ECmpType cmp_type
@@ -1086,7 +1082,7 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterPartBound
 
 	CDXLNode *pdxlnInclusiveCmp = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, ecmptInc, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
     
-    if (CMDIdGPDB::CastMdid(mdid_cast_func)->Oid() == 317)
+    if (is_allowed_lossy_cast)
     {
         return pdxlnInclusiveCmp;
     }
@@ -2459,14 +2455,15 @@ CTranslatorExprToDXLUtils::ExtractCastMdids
 	(
 	COperator *pop, 
 	IMDId **ppmdidType, 
-	IMDId **ppmdidCastFunc
+	IMDId **ppmdidCastFunc,
+	BOOL *is_allowed_lossy_cast
 	)
 {
 	GPOS_ASSERT(NULL != pop);
 	GPOS_ASSERT(NULL != ppmdidType);
 	GPOS_ASSERT(NULL != ppmdidCastFunc);
 
-	if ((COperator::EopScalarCast != pop->Eopid()) && (COperator::EopScalarFunc != pop->Eopid()))
+	if (COperator::EopScalarCast != pop->Eopid())
 	{
 		// not a cast
 		return;
@@ -2476,13 +2473,8 @@ CTranslatorExprToDXLUtils::ExtractCastMdids
         CScalarCast *popCast = CScalarCast::PopConvert(pop);
         *ppmdidType = popCast->MdidType();
         *ppmdidCastFunc = popCast->FuncMdId();
+		*is_allowed_lossy_cast = popCast->IsAllowedLossyCast();
      }
-     if (COperator::EopScalarFunc == pop->Eopid())
-    {
-        CScalarFunc *popCast = CScalarFunc::PopConvert(pop);
-        *ppmdidType = popCast->MdidType();
-        *ppmdidCastFunc = popCast->FuncMdId();
-    }
 }
 
 BOOL
