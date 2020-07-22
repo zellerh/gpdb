@@ -642,7 +642,7 @@ CDXLTokens::Init
 			{EdxltokenGPDBFuncStrict, GPOS_WSZ_LIT("IsStrict")},
 			{EdxltokenGPDBFuncNDVPreserving, GPOS_WSZ_LIT("IsNDVPreserving")},
 			{EdxltokenGPDBFuncIsAllowedForPS, GPOS_WSZ_LIT("IsAllowedForPS")},
-		
+
 			{EdxltokenGPDBAgg, GPOS_WSZ_LIT("GPDBAgg")},
 			{EdxltokenGPDBIsAggOrdered, GPOS_WSZ_LIT("IsOrdered")},
 			{EdxltokenGPDBAggResultTypeId, GPOS_WSZ_LIT("ResultType")},

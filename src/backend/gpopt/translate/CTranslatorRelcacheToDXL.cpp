@@ -1857,7 +1857,7 @@ CTranslatorRelcacheToDXL::LookupFuncProps
 	BOOL *is_strict, // output: is function strict?
 	BOOL *is_ndv_preserving, // output: preserves NDVs of inputs
 	BOOL *returns_set, // output: does function return set?
-	BOOL *is_allowed_for_PS // output: is this a lossy cast which is allowed for Partition selection
+	BOOL *is_allowed_for_PS // output: is this a lossy (non-implicit) cast which is allowed for Partition selection
 	)
 {
 	GPOS_ASSERT(NULL != stability);

@@ -1001,12 +1001,13 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterScCmp
 	
 	pdxlnScalar->AddRef();
 	CDXLNode *pdxlnInclusiveCmp = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, cmp_type, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
-    
+
     if (is_allowed_lossy_cast)
     {
+		//in case of lossy casts, we don't want to eliminate partitions with exclusive ends when the predicate is on that end
         return pdxlnInclusiveCmp;
     }
-    
+
 	CDXLNode *pdxlnInclusiveBoolPredicate = GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarPartBoundInclusion(mp, ulPartLevel, fLowerBound));
 
 	CDXLNode *pdxlnPredicateInclusive = GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxland), pdxlnInclusiveCmp, pdxlnInclusiveBoolPredicate);
@@ -1081,18 +1082,17 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterPartBound
 
 
 	CDXLNode *pdxlnInclusiveCmp = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, ecmptInc, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
-    
+
     if (is_allowed_lossy_cast)
     {
+		//in case of lossy casts, we don't want to eliminate partitions with exclusive ends when the predicate is on that end
         return pdxlnInclusiveCmp;
     }
-    
+
     pdxlnScalar->AddRef();
-    
+
     CDXLNode *pdxlnPredicateExclusive = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, cmp_type, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
 
-    
-	
 	CDXLNode *pdxlnInclusiveBoolPredicate = GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarPartBoundInclusion(mp, ulPartLevel, fLowerBound));
 	
 	CDXLNode *pdxlnPredicateInclusive = GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxland), pdxlnInclusiveCmp, pdxlnInclusiveBoolPredicate);
@@ -2447,7 +2447,7 @@ CTranslatorExprToDXLUtils::FLocalHashAggStreamSafe
 //		CTranslatorExprToDXLUtils::ExtractCastMdids
 //
 //	@doc:
-//		If operator is a scalar cast, extract cast type and function
+//		If operator is a scalar cast, extract cast type and function, and if it is a lossy cast thats allowed for Partition Selection
 //
 //---------------------------------------------------------------------------
 void
@@ -2456,7 +2456,7 @@ CTranslatorExprToDXLUtils::ExtractCastMdids
 	COperator *pop, 
 	IMDId **ppmdidType, 
 	IMDId **ppmdidCastFunc,
-	BOOL *is_allowed_lossy_cast
+	BOOL *is_lossy_cast
 	)
 {
 	GPOS_ASSERT(NULL != pop);
@@ -2473,7 +2473,7 @@ CTranslatorExprToDXLUtils::ExtractCastMdids
         CScalarCast *popCast = CScalarCast::PopConvert(pop);
         *ppmdidType = popCast->MdidType();
         *ppmdidCastFunc = popCast->FuncMdId();
-		*is_allowed_lossy_cast = popCast->IsAllowedLossyCast();
+		*is_lossy_cast = popCast->IsLossyCast();
      }
 }
 

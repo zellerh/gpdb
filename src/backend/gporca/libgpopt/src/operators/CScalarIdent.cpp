@@ -14,7 +14,6 @@
 #include "gpopt/base/CColRefSet.h"
 #include "gpopt/base/CColRefTable.h"
 #include "gpopt/operators/CScalarIdent.h"
-#include "gpopt/operators/CScalarFunc.h"
 
 
 using namespace gpopt;

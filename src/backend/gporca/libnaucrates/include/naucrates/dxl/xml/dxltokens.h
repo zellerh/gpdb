@@ -602,7 +602,7 @@ namespace gpdxl
 		EdxltokenGPDBFuncStrict,
 		EdxltokenGPDBFuncNDVPreserving,
 		EdxltokenGPDBFuncIsAllowedForPS,
-		
+
 		EdxltokenGPDBCast,
 		EdxltokenGPDBCastBinaryCoercible,
 		EdxltokenGPDBCastSrcType,

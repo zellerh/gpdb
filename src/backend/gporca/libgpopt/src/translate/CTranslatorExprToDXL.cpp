@@ -5311,6 +5311,7 @@ CTranslatorExprToDXL::PdxlnScCmpPartKey
 			pexprPartKey->Release();
 		}
 
+		//Extract cast function, and if it is a lossy cast
 		CTranslatorExprToDXLUtils::ExtractCastMdids(pexprNewPartKey->Pop(), &pmdidTypeCastExpr, &mdid_cast_func, &is_allowed_lossy_cast);
 
 		return CTranslatorExprToDXLUtils::PdxlnRangeFilterScCmp

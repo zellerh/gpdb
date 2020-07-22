@@ -115,7 +115,7 @@ CParseHandlerMDGPDBFunc::StartElement
 											true, // optional
 											false // default is false
 											);
-		
+
 		// parse whether func is a lossy cast allowed for partition selection
 		m_is_allowed_for_PS = CDXLOperatorFactory::ExtractConvertAttrValueToBool
 											(

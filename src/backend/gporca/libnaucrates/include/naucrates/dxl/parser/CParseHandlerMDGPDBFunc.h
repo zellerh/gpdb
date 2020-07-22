@@ -62,7 +62,7 @@ namespace gpdxl
 			BOOL m_is_strict;
 
 			BOOL m_is_ndv_preserving;
-		
+
 			BOOL m_is_allowed_for_PS;
 			
 			// private copy ctor

@@ -72,7 +72,7 @@ namespace gpmd
 			// does function return a set of values
 			virtual 
 			BOOL ReturnsSet() const = 0;
-		
+
 			// is this function allowed for Partition selection
 			virtual
 			BOOL IsAllowedForPS() const = 0;

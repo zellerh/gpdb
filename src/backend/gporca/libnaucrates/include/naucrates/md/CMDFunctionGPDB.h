@@ -67,8 +67,8 @@ namespace gpmd
 			// function result has very similar number of distinct values as the
 			// single function argument (used for cardinality estimation)
 			BOOL m_is_ndv_preserving;
-			
-			//is an increasing function(lossy cast) which can be used for partition selection
+
+			// is an increasing function (non-implicit/lossy cast) which can be used for partition selection
 			BOOL m_is_allowed_for_PS;
 
 			// dxl token array for stability
@@ -147,14 +147,14 @@ namespace gpmd
 			{
 				return m_is_ndv_preserving;
 			}
-		
-			// getter method for is this function allowed for Partition selection
+
+			// is this function a lossy cast allowed for Partition selection
 			virtual
 			BOOL IsAllowedForPS() const
 			{
 				return m_is_allowed_for_PS;
 			}
-		
+
 			// function stability
 			virtual
 			EFuncStbl GetFuncStability() const
