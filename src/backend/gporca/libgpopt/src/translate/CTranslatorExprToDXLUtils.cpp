@@ -990,16 +990,14 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterScCmp
 		// partkey >/>= other: construct condition max > other
 		ecmptScCmp = IMDType::EcmptG;
 	}
-	
-	CDXLNode *pdxlnPredicateExclusive = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, ecmptScCmp, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
-	
+
 	if (IMDType::EcmptLEq != cmp_type && IMDType::EcmptGEq != cmp_type)
 	{
 		// scalar comparison does not include equality: no need to consider part constraint boundaries
+		CDXLNode *pdxlnPredicateExclusive = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, ecmptScCmp, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
 		return pdxlnPredicateExclusive;
 	}
-	
-	pdxlnScalar->AddRef();
+
 	CDXLNode *pdxlnInclusiveCmp = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, cmp_type, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
 
     if (is_allowed_lossy_cast)
@@ -1007,6 +1005,9 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterScCmp
 		//in case of lossy casts, we don't want to eliminate partitions with exclusive ends when the predicate is on that end
         return pdxlnInclusiveCmp;
     }
+
+	pdxlnScalar->AddRef();
+	CDXLNode *pdxlnPredicateExclusive = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, ecmptScCmp, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
 
 	CDXLNode *pdxlnInclusiveBoolPredicate = GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarPartBoundInclusion(mp, ulPartLevel, fLowerBound));
 
