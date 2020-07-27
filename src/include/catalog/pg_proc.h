@@ -550,12 +550,12 @@ DESCR("convert int4 to int2");
 DATA(insert OID = 315 (  int2vectoreq	   PGNSP PGUID 12 1 0 0 0 f f f f t f i 2 0 16 "22 22" _null_ _null_ _null_ _null_ int2vectoreq _null_ _null_ _null_ ));
 DATA(insert OID = 316 (  float8			   PGNSP PGUID 12 1 0 0 0 f f f f t f i 1 0 701  "23" _null_ _null_ _null_ _null_	i4tod _null_ _null_ _null_ ));
 DESCR("convert int4 to float8");
-#define PS_ALLOWED_FLOAT8_INT4 317
+#define CONVERT_FLOAT8_INT4_OID 317
 DATA(insert OID = 317 (  int4			   PGNSP PGUID 12 1 0 0 0 f f f f t f i 1 0 23 "701" _null_ _null_ _null_ _null_	dtoi4 _null_ _null_ _null_ ));
 DESCR("convert float8 to int4");
 DATA(insert OID = 318 (  float4			   PGNSP PGUID 12 1 0 0 0 f f f f t f i 1 0 700  "23" _null_ _null_ _null_ _null_	i4tof _null_ _null_ _null_ ));
 DESCR("convert int4 to float4");
-#define PS_ALLOWED_FLOAT4_INT4 319
+#define CONVERT_FLOAT4_INT4_OID 319
 DATA(insert OID = 319 (  int4			   PGNSP PGUID 12 1 0 0 0 f f f f t f i 1  0 23 "700" _null_ _null_ _null_ _null_	ftoi4 _null_ _null_ _null_ ));
 DESCR("convert float4 to int4");
 
@@ -3023,7 +3023,7 @@ DESCR("convert timestamp with time zone to timestamp");
 DATA(insert OID = 2028 (  timestamptz		PGNSP PGUID 12 1 0 0 0 f f f f t f s 1 0 1184 "1114" _null_ _null_ _null_ _null_ timestamp_timestamptz _null_ _null_ _null_ ));
 DESCR("convert timestamp to timestamp with time zone");
 DATA(insert OID = 2029 (  date				PGNSP PGUID 12 1 0 0 0 f f f f t f i 1 0 1082 "1114" _null_ _null_ _null_ _null_ timestamp_date _null_ _null_ _null_ ));
-#define PS_ALLOWED_TS_DATE 2029
+#define CONVERT_TS_DATE_OID 2029
 DESCR("convert timestamp to date");
 DATA(insert OID = 2030 (  abstime			PGNSP PGUID 12 1 0 0 0 f f f f t f s 1 0 702 "1114" _null_ _null_ _null_ _null_ timestamp_abstime _null_ _null_ _null_ ));
 DESCR("convert timestamp to abstime");

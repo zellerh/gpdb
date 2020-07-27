@@ -996,15 +996,17 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterScCmp
 		// scalar comparison does not include equality: no need to consider part constraint boundaries
 		CDXLNode *pdxlnPredicateExclusive = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, ecmptScCmp, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
 		return pdxlnPredicateExclusive;
+		// This is also correct for lossy casts. when we have predicate such as float::int < 2, we dont want to select values such as 1.7 which cast to 2. So, in this case, we should check lower bound::int < 2
 	}
 
 	CDXLNode *pdxlnInclusiveCmp = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, cmp_type, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
 
-    if (is_allowed_lossy_cast)
-    {
+	if (is_allowed_lossy_cast)
+	{
 		//in case of lossy casts, we don't want to eliminate partitions with exclusive ends when the predicate is on that end
-        return pdxlnInclusiveCmp;
-    }
+		// a partition such as [1,2) should be selected for float::int = 2, but shouldn't be selected for float = 2.0
+		return pdxlnInclusiveCmp;
+	}
 
 	pdxlnScalar->AddRef();
 	CDXLNode *pdxlnPredicateExclusive = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, ecmptScCmp, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
@@ -1081,23 +1083,23 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterPartBound
 		ecmptInc = IMDType::EcmptGEq;
 	}
 
-
 	CDXLNode *pdxlnInclusiveCmp = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, ecmptInc, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
 
-    if (is_allowed_lossy_cast)
-    {
+	if (is_allowed_lossy_cast)
+	{
 		//in case of lossy casts, we don't want to eliminate partitions with exclusive ends when the predicate is on that end
-        return pdxlnInclusiveCmp;
-    }
+		// a partition such as [1,2) should be selected for float::int = 2, but shouldn't be selected for float = 2.0
+		return pdxlnInclusiveCmp;
+	}
 
     pdxlnScalar->AddRef();
 
     CDXLNode *pdxlnPredicateExclusive = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, cmp_type, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
 
 	CDXLNode *pdxlnInclusiveBoolPredicate = GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarPartBoundInclusion(mp, ulPartLevel, fLowerBound));
-	
+
 	CDXLNode *pdxlnPredicateInclusive = GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxland), pdxlnInclusiveCmp, pdxlnInclusiveBoolPredicate);
-	
+
 	// return the final predicate in the form "(point <= col and colIncluded) or point < col" / "(point >= col and colIncluded) or point > col"
 	return GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxlor), pdxlnPredicateInclusive, pdxlnPredicateExclusive);
 }
@@ -2448,7 +2450,8 @@ CTranslatorExprToDXLUtils::FLocalHashAggStreamSafe
 //		CTranslatorExprToDXLUtils::ExtractCastMdids
 //
 //	@doc:
-//		If operator is a scalar cast, extract cast type and function, and if it is a lossy cast thats allowed for Partition Selection
+//		If operator is a scalar cast, extract cast type and function,
+//		and whether it is a lossy cast
 //
 //---------------------------------------------------------------------------
 void
@@ -2469,13 +2472,10 @@ CTranslatorExprToDXLUtils::ExtractCastMdids
 		// not a cast
 		return;
 	}
-    if (COperator::EopScalarCast == pop->Eopid())
-    {
-        CScalarCast *popCast = CScalarCast::PopConvert(pop);
-        *ppmdidType = popCast->MdidType();
-        *ppmdidCastFunc = popCast->FuncMdId();
-		*is_lossy_cast = popCast->IsLossyCast();
-     }
+	CScalarCast *popCast = CScalarCast::PopConvert(pop);
+	*ppmdidType = popCast->MdidType();
+	*ppmdidCastFunc = popCast->FuncMdId();
+	*is_lossy_cast = popCast->IsLossyCast();
 }
 
 BOOL

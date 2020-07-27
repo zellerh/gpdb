@@ -1875,7 +1875,7 @@ CTranslatorRelcacheToDXL::LookupFuncProps
 	*returns_set = gpdb::GetFuncRetset(func_oid);
 	*is_strict = gpdb::FuncStrict(func_oid);
 	*is_ndv_preserving = gpdb::IsFuncNDVPreserving(func_oid);
-	*is_allowed_for_PS = gpdb::IsAllowedForPartitionSelection(func_oid);
+	*is_allowed_for_PS = gpdb::IsFuncAllowedForPartitionSelection(func_oid);
 }
 
 

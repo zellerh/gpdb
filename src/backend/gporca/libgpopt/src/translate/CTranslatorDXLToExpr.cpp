@@ -2991,7 +2991,7 @@ CTranslatorDXLToExpr::PexprScalarFunc
 		 m_mp,
 		 mdid_return_type,
 		 mdid_func,
-		 false,
+		 false, /* is binary coercible */
 		 true /* is lossy cast */
 		 );
 	}

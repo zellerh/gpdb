@@ -623,7 +623,7 @@ gpdb::FreeAttrStatsSlot
 }
 
 bool
-gpdb::IsAllowedForPartitionSelection
+gpdb::IsFuncAllowedForPartitionSelection
     (
     Oid funcid
     )
@@ -631,10 +631,10 @@ gpdb::IsAllowedForPartitionSelection
     GP_WRAP_START;
     switch (funcid)
     {
-        // for now, these are the functions we consider for lossy casts PS
-        case PS_ALLOWED_TS_DATE:
-        case PS_ALLOWED_FLOAT8_INT4:
-        case PS_ALLOWED_FLOAT4_INT4:
+        // These are the functions we have allowed as lossy casts for Partition selection. For range partition selection, we check on ends of the partition ranges. Hence we can only allow increasing functions.
+        case CONVERT_TS_DATE_OID:
+        case CONVERT_FLOAT8_INT4_OID:
+        case CONVERT_FLOAT4_INT4_OID:
             return true;
         default:
             return false;

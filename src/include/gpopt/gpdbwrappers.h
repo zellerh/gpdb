@@ -195,7 +195,7 @@ namespace gpdb {
 	bool FunctionExists(Oid oid);
 
 	// is the given function an allowed lossy cast for PS
-	bool IsAllowedForPartitionSelection(Oid funcid);
+	bool IsFuncAllowedForPartitionSelection(Oid funcid);
 
 	// is the given function strict
 	bool FuncStrict(Oid funcid);
