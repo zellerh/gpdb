@@ -1949,20 +1949,21 @@ insert into tcorr2 values (1,1);
 
 set optimizer_trace_fallback to on;
 
+-- expect 1 row
+-- FIXME: Incorrect result with planner
 select *
 from tcorr1 out
 where out.b in (select coalesce(tcorr2.a, 99)
                 from tcorr1 left outer join tcorr2 on tcorr1.a=tcorr2.a+out.a);
--- expect 1 row
--- FIXME: Incorrect result with planner
 
+-- expect 1 row
 select *
 from tcorr1 out
 where out.b in (select max(tcorr2.b + out.b - 1)
                 from tcorr2
                 where tcorr2.a=out.a);
--- expect 1 row
 
+-- expect 1 row
 select *
 from tcorr1 out
 where out.b in (select coalesce(tcorr2_d.c, 99)
@@ -1970,30 +1971,30 @@ where out.b in (select coalesce(tcorr2_d.c, 99)
                                              from tcorr2
                                              where tcorr2.b = out.b
                                              group by a) tcorr2_d on tcorr1.a=tcorr2_d.a);
--- expect 1 row
 
+-- FIXME: currently no plan produced for this query
 select *
 from tcorr1 out
 where out.b in (select coalesce(tcorr2.a, 99)
                 from tcorr1 full outer join tcorr2 on tcorr1.a=tcorr2.a+out.a);
--- currently no plan produced for this query
 
 set optimizer_join_order to exhaustive2;
 
+-- expect 1 row
+-- FIXME: Falls back and produces incorrect result
 select *
 from tcorr1 out
 where out.b in (select coalesce(tcorr2.a, 99)
                 from tcorr1 left outer join tcorr2 on tcorr1.a=tcorr2.a+out.a);
--- expect 1 row
--- FIXME: Falls back and produces incorrect result
 
+-- expect 1 row
 select *
 from tcorr1 out
 where out.b in (select max(tcorr2.b + out.b - 1)
                 from tcorr2
                 where tcorr2.a=out.a);
--- expect 1 row
 
+-- expect 1 row
 select *
 from tcorr1 out
 where out.b in (select coalesce(tcorr2_d.c, 99)
@@ -2001,13 +2002,12 @@ where out.b in (select coalesce(tcorr2_d.c, 99)
                                              from tcorr2
                                              where tcorr2.b = out.b
                                              group by a) tcorr2_d on tcorr1.a=tcorr2_d.a);
--- expect 1 row
 
+-- FIXME: currently no plan produced for this query
 select *
 from tcorr1 out
 where out.b in (select coalesce(tcorr2.a, 99)
                 from tcorr1 full outer join tcorr2 on tcorr1.a=tcorr2.a+out.a);
--- currently no plan produced for this query
 
 reset optimizer_join_order;
 
