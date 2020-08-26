@@ -1106,6 +1106,15 @@ namespace gpopt
 					 CExpression **ppexprRecheck
 					 );
 
+			static
+			CExpression *AddALinearStackOfExpressions
+					(
+					 CMemoryPool *mp,
+					 CExpression *lowerPartOfExpr,
+					 CExpression *topOfStack,
+					 CExpression *exclusiveBottomOfStack
+					);
+
 	}; // class CXformUtils
 
 
