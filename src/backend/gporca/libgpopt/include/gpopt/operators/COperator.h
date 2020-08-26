@@ -273,6 +273,8 @@ namespace gpopt
 				EopPatternLeaf,
 				EopPatternMultiLeaf,
 				EopPatternMultiTree,
+
+				EopPatternNode,
 				
 				EopLogicalDynamicBitmapTableGet,
 				EopPhysicalDynamicBitmapTableScan,
