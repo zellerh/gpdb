@@ -2492,6 +2492,52 @@ partition by range(sales_ts) (start (timestamp '2010-01-01 00:00:00') end(timest
 every (interval '1 day'));
 insert into sales select i, i%100, i%1000, timestamp '2010-01-01 00:00:00' + i * interval '1 day' from generate_series(1,20) i;
 select * from sales where sales_ts::date != '2010-01-05' order by sales_ts;
+-- test join to index get apply xform
+drop table if exists foo, tbtree, tbitmap;
+create table foo(a int, b int, c int) distributed by(a);
+create table tbtree(a int, b int, c int) distributed by(a);
+create table tbitmap(a int, b int, c int) distributed by(a);
+
+insert into foo select i,i,i from generate_series(1,10) i;
+insert into tbtree select i,i,i from generate_series(1,100000) i;
+insert into tbitmap select i,i,i from generate_series(1,100000) i;
+
+create index tbtreexa  on tbtree  using btree(a);
+create index tbitmapxa on tbitmap using bitmap(a);
+
+set optimizer_join_order = query;
+set optimizer_enable_hashjoin = off;
+set optimizer_trace_fallback = on;
+
+-- 1 simple btree
+select * from foo join tbtree on foo.a=tbtree.a;
+-- 2 simple bitmap
+select * from foo join tbitmap on foo.a=tbitmap.a;
+-- 3 btree with select pred
+select * from foo join tbtree on foo.a=tbtree.a where tbtree.a < 5;
+-- 4 bitmap with select pred
+select * from foo join tbitmap on foo.a=tbitmap.a where tbitmap.a < 5;
+-- 5 btree with project
+select * from foo join (select a, b+c as bc from tbtree) proj on foo.a=proj.a;
+-- 6 bitmap with project
+select * from foo join (select a, b+c as bc from tbitmap) proj on foo.a=proj.a;
+-- 7 btree with grby
+select * from foo join (select a, count(*) as cnt from tbtree group by a) grby on foo.a=grby.a;
+-- 8 bitmap with grby
+select * from foo join (select a, count(*) as cnt from tbitmap group by a) grby on foo.a=grby.a;
+-- 9 btree with proj select grby select
+select * from foo join (select a, count(*) + 5 as cnt from tbtree where tbtree.a < 5 group by a having count(*) < 2) proj_sel_grby_sel on foo.a=proj_sel_grby_sel.a;
+-- 10 bitmap with proj select grby select
+select * from foo join (select a, count(*) + 5 as cnt from tbitmap where tbitmap.a < 5 group by a having count(*) < 2) proj_sel_grby_sel on foo.a=proj_sel_grby_sel.a;
+-- 11 join pred accesses a projected column - no index scan
+-- FIXME: errors out at execution time (not an index plan), see https://github.com/greenplum-db/gpdb/issues/10639
+-- select * from foo join (select a, a*a as aa from tbtree) proj on foo.a=proj.a and foo.b=proj.aa;
+-- 12 join pred accesses a projected column - no index scan
+select * from foo join (select a, count(*) as cnt from tbitmap group by a) grby on foo.a=grby.a and foo.b=grby.cnt;
+
+reset optimizer_join_order;
+reset optimizer_enable_hashjoin;
+reset optimizer_trace_fallback;
 
 -- test n-ary inner and left joins with outer references
 drop table if exists tcorr1, tcorr2;
