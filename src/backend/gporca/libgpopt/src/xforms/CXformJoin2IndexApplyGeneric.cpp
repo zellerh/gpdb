@@ -137,27 +137,27 @@ CXformJoin2IndexApplyGeneric::Transform(CXformContext *pxfctxt, CXformResult *px
 	// Example:
 	//
 	//      Join (with join preds)
-	//      //  \\
+	//      /   \                        .
 	//   Leaf   Select (not used as an index pred)  <== nodesToInsertAboveIndexGet
-	//            \\
+	//            \                      .
 	//            GbAgg
-	//              \\
+	//              \                    .
 	//              Project
-	//                \\
+	//                \                  .
 	//               Select (index/residual preds)  <== selectThatIsParentOfGet,
-	//                  \\                                endOfNodesToInsertAboveIndexGet
+	//                  \                               endOfNodesToInsertAboveIndexGet
 	//                  Get                         <== pexprGet
 	//
 	// Generated alternative:
 	//
 	//      Apply                                   <== new apply node (inner/outer)
-	//      //  \\
+	//      /   \                        .
 	//   Leaf   select (not used as an index pred)  \\
-	//            \\                                || this stack of unary nodes is
+	//            \                                 || this stack of unary nodes is
 	//            GbAgg                             || transferred from the pattern
-	//              \\                              || above (unchanged)
+	//              \                               || above (unchanged)
 	//              Project                         //
-	//                \\
+	//                \                  .
 	//               IndexGet                       <== new IndexGet node with
 	//                                                  index/residual preds
 
