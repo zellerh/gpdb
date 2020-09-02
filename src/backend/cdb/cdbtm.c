@@ -1676,7 +1676,7 @@ tmShmemInit(void)
 			elog(PANIC, "cannot generate global transaction id");
 		}
 
-		MemSet(shared, 0, tmShmemSize());
+		//MemSet(shared, 0, tmShmemSize());
 		*shmDistribTimeStamp = (DistributedTransactionTimeStamp)t;
   		elog(DEBUG1, "DTM start timestamp %u", *shmDistribTimeStamp);
 
@@ -1831,7 +1831,7 @@ getTmLock(void)
 	if (ControlLockCount++ == 0)
 		LWLockAcquire(shmControlLock, LW_EXCLUSIVE);
 
-	Assert(LWLockHeldByMe(shmControlLock));
+	//Assert(LWLockHeldByMe(shmControlLock));
 }
 
 /* release tm lw lock */
