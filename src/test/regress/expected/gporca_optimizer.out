@@ -11808,8 +11808,8 @@ select *
 from tcorr1 out
 where out.b in (select coalesce(tcorr2.a, 99)
                 from tcorr1 left outer join tcorr2 on tcorr1.a=tcorr2.a+out.a);
-                                                  QUERY PLAN                                                   
----------------------------------------------------------------------------------------------------------------
+                                                         QUERY PLAN                                                          
+-----------------------------------------------------------------------------------------------------------------------------
  Result  (cost=0.00..1356692026.74 rows=1 width=8)
    Filter: (subplan)
    ->  Gather Motion 3:1  (slice1; segments: 3)  (cost=0.00..431.00 rows=1 width=8)
@@ -11845,8 +11845,8 @@ from tcorr1 out
 where out.b in (select max(tcorr2.b + out.b - 1)
                 from tcorr2
                 where tcorr2.a=out.a);
-                                                  QUERY PLAN                                                   
----------------------------------------------------------------------------------------------------------------
+                                                         QUERY PLAN                                                          
+-----------------------------------------------------------------------------------------------------------------------------
  Result  (cost=0.00..1324032.62 rows=1 width=8)
    Filter: (subplan)
    ->  Gather Motion 3:1  (slice1; segments: 3)  (cost=0.00..431.00 rows=1 width=8)
@@ -11881,8 +11881,8 @@ where out.b in (select coalesce(tcorr2_d.c, 99)
                                              from tcorr2
                                              where tcorr2.b = out.b
                                              group by a) tcorr2_d on tcorr1.a=tcorr2_d.a);
-                                                        QUERY PLAN                                                        
---------------------------------------------------------------------------------------------------------------------------
+                                                         QUERY PLAN                                                          
+-----------------------------------------------------------------------------------------------------------------------------
  Result  (cost=0.00..1356692176.26 rows=1 width=8)
    Filter: (subplan)
    ->  Gather Motion 3:1  (slice1; segments: 3)  (cost=0.00..431.00 rows=1 width=8)
