@@ -175,7 +175,7 @@ CalcCumulativeScaleFactorSqrtAlg
 	for (ULONG ul = 0; ul < independent_join_preds->Size(); ul++)
 	{
 		CDouble local_scale_factor =  *(*independent_join_preds)[ul];
-		cumulative_scale_factor = cumulative_scale_factor * local_scale_factor;
+		cumulative_scale_factor = cumulative_scale_factor * std::max(CStatistics::MinRows.Get(), local_scale_factor.Get());
 	}
 
 	return cumulative_scale_factor;
