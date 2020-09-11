@@ -35,8 +35,6 @@ namespace gpopt
 			EmtSentinel
 		};
 
-	private:
-
 		// private copy ctor
 		CPatternNode(COperator &) = delete;
 
@@ -61,7 +59,8 @@ namespace gpopt
 		~CPatternNode() {}
 
 		// match function
-		BOOL Matches(COperator *pop) const {
+		BOOL Matches(COperator *pop) const
+		{
 			return Eopid() == pop->Eopid() &&
 					m_match == static_cast<CPatternNode *>(pop)->m_match;
 		}
@@ -109,9 +108,7 @@ namespace gpopt
 			}
 		}
 
-
 	}; // class CPatternNode
-
 }
 
 

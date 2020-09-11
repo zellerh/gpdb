@@ -5024,7 +5024,7 @@ CXformUtils::PexprGbAggOnCTEConsumer2Join
 }
 
 //---------------------------------------------------------------------------
-// CXformUtils::AddALinearStackOfExpressions
+// CXformUtils::AddALinearStackOfUnaryExpressions
 //
 // Given two CExpressions, a "lower part" and a "stack", consisting of
 // zero or more CExpressions with a single logical child and optional scalar
@@ -5055,7 +5055,7 @@ CXformUtils::PexprGbAggOnCTEConsumer2Join
 //
 //---------------------------------------------------------------------------
 CExpression *
-CXformUtils::AddALinearStackOfExpressions
+CXformUtils::AddALinearStackOfUnaryExpressions
 		(
 		 CMemoryPool *mp,
 		 CExpression *lowerPartOfExpr,
@@ -5073,10 +5073,11 @@ CXformUtils::AddALinearStackOfExpressions
 
 	// a stack must consist of logical nodes
 	GPOS_ASSERT(topOfStack->Pop()->FLogical());
+	GPOS_CHECK_STACK_SIZE;
 
 	// Recursively process the node just below topOfStack first, to build the new stack bottom-up.
 	// Note that if the stack ends here, the recursive call will return lowerPartOfExpr.
-	CExpression *processedRestOfStack = AddALinearStackOfExpressions(mp, lowerPartOfExpr, (*topOfStack)[0], exclusiveBottomOfStack);
+	CExpression *processedRestOfStack = AddALinearStackOfUnaryExpressions(mp, lowerPartOfExpr, (*topOfStack)[0], exclusiveBottomOfStack);
 
 	// now add a copy of node topOfStack
 	CExpressionArray *childrenArray = GPOS_NEW(mp) CExpressionArray(mp);

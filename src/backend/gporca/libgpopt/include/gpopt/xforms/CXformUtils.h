@@ -1107,7 +1107,7 @@ namespace gpopt
 					 );
 
 			static
-			CExpression *AddALinearStackOfExpressions
+			CExpression *AddALinearStackOfUnaryExpressions
 					(
 					 CMemoryPool *mp,
 					 CExpression *lowerPartOfExpr,

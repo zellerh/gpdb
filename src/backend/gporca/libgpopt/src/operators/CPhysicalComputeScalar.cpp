@@ -183,11 +183,12 @@ CPhysicalComputeScalar::PdsRequired
 	GPOS_ASSERT(0 == child_index);
 	GPOS_ASSERT(2 > ulOptReq);
 	CDistributionSpec::EDistributionType edtRequired = pdsRequired->Edt();
-	// we skip the test for singleton/replicated execution if the parent explicitly requested an
-	// ANY distribution with allowed outer refs and if there aren't other reasons for singleton execution
+	// check whether we need singleton execution - but if the parent explicitly
+	// allowed outer refs in an "ANY" request, then that alone doesn't qualify
+	// as a reason to request singleton
 	if (exprhdl.NeedsSingletonExecution() ||
-		CDistributionSpec::EdtAny != edtRequired ||
-		!(CDistributionSpecAny::PdsConvert(pdsRequired))->FAllowOuterRefs())
+		!(CDistributionSpec::EdtAny == edtRequired &&
+		  (CDistributionSpecAny::PdsConvert(pdsRequired))->FAllowOuterRefs()))
 	{
 		// check if singleton/replicated distribution needs to be requested
 		CDistributionSpec *pds = PdsRequireSingletonOrReplicated(mp, exprhdl, pdsRequired, child_index, ulOptReq);

@@ -311,7 +311,7 @@ CXformJoin2IndexApply::CreateAlternativesForBtreeIndex
 		// second child has residual predicates, create an apply of outer and inner
 		// and add it to xform results
 		CColRefArray *colref_array = outer_refs->Pdrgpcr(mp);
-		CExpression *rightChildOfApply = CXformUtils::AddALinearStackOfExpressions(mp, pexprLogicalIndexGet, nodesToInsertAboveIndexGet, endOfNodesToInsertAboveIndexGet);
+		CExpression *rightChildOfApply = CXformUtils::AddALinearStackOfUnaryExpressions(mp, pexprLogicalIndexGet, nodesToInsertAboveIndexGet, endOfNodesToInsertAboveIndexGet);
 		BOOL isOuterJoin = false;
 
 		switch (joinOp->Eopid())
@@ -383,7 +383,7 @@ void CXformJoin2IndexApply::CreateHomogeneousBitmapIndexApplyAlternatives
 		// second child has residual predicates, create an apply of outer and inner
 		// and add it to xform results
 		CColRefArray *colref_array = outer_refs->Pdrgpcr(mp);
-		CExpression *rightChildOfApply = CXformUtils::AddALinearStackOfExpressions(mp, pexprLogicalIndexGet, nodesToInsertAboveIndexGet, endOfNodesToInsertAboveIndexGet);
+		CExpression *rightChildOfApply = CXformUtils::AddALinearStackOfUnaryExpressions(mp, pexprLogicalIndexGet, nodesToInsertAboveIndexGet, endOfNodesToInsertAboveIndexGet);
 		BOOL isOuterJoin = false;
 
 		switch (joinOp->Eopid())

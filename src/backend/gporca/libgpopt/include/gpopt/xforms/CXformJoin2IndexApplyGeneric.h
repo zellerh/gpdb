@@ -89,7 +89,7 @@ namespace gpopt
 		virtual
 		CLogicalApply *PopLogicalApply(CMemoryPool *, CColRefArray *) const { return NULL; }
 
-	}; // class CXformJoin2IndexApplyBase
+	}; // class CXformJoin2IndexApplyGeneric
 
 }
 

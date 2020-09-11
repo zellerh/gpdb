@@ -91,7 +91,7 @@ CXformJoin2IndexApplyGeneric::Exfp
 	if (0 == exprhdl.DeriveUsedColumns(2)->Size() ||
 		exprhdl.DeriveHasSubquery(2) ||
 		exprhdl.HasOuterRefs() ||
-		1 != exprhdl.DeriveJoinDepth(1))
+		1 != exprhdl.DeriveJoinDepth(1)) // inner is definitely not a single get (with optional select/project/grby)
 	{
 		return CXform::ExfpNone;
 	}
