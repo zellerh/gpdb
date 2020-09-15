@@ -366,6 +366,9 @@ CSubqueryHandler::Psd
 	psd->m_fReturnedPcrIsOuterRef = (!subqueryOutputCols->FMember(pcrSubquery));
 	psd->m_fHasOuterRefs = pexprInner->HasOuterRefs() || psd->m_fReturnedPcrIsOuterRef;
 	psd->m_fHasVolatileFunctions = (IMDFunction::EfsVolatile == pexprSubquery->DeriveScalarFunctionProperties()->Efs());
+	// We have skip-level outer refs if there are outer refs at all, and at least one of the following is true:
+	// - the outer refs below the subquery node don't all come from the outer table (the level right above us)
+	// - the ColRef returned by the subquery is an outer ref that does not come from the outer table
 	psd->m_fHasSkipLevelCorrelations = psd->m_fHasOuterRefs &&
 										(!pcrsOuterOutput->ContainsAll(outer_refs) ||
 										 (psd->m_fReturnedPcrIsOuterRef && !pcrsOuterOutput->FMember(pcrSubquery)));
