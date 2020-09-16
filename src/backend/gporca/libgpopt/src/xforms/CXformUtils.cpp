@@ -5054,7 +5054,7 @@ CXformUtils::PexprGbAggOnCTEConsumer2Join
 //             lastIncludedNode
 //                    |
 //              lowerPartOfExpr
-//                  / | | \
+//                  / | | \ .
 //            (optional children)
 //
 //---------------------------------------------------------------------------
