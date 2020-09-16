@@ -12942,24 +12942,22 @@ select * from foo join (select a, count(*) as cnt from tbitmap group by a) grby 
 -- 9 btree with proj select grby select
 explain (costs off)
 select * from foo join (select a, count(*) + 5 as cnt from tbtree where tbtree.a < 5 group by a having count(*) < 2) proj_sel_grby_sel on foo.a=proj_sel_grby_sel.a;
-                            QUERY PLAN                             
--------------------------------------------------------------------
+                         QUERY PLAN                          
+-------------------------------------------------------------
  Gather Motion 3:1  (slice1; segments: 3)
    ->  Hash Join
          Hash Cond: (foo.a = tbtree.a)
          ->  Seq Scan on foo
          ->  Hash
-               ->  GroupAggregate
+               ->  HashAggregate
                      Group Key: tbtree.a
                      Filter: (count(*) < 2)
-                     ->  Sort
-                           Sort Key: tbtree.a
-                           ->  Bitmap Heap Scan on tbtree
-                                 Recheck Cond: (a < 5)
-                                 ->  Bitmap Index Scan on tbtreexa
-                                       Index Cond: (a < 5)
+                     ->  Bitmap Heap Scan on tbtree
+                           Recheck Cond: (a < 5)
+                           ->  Bitmap Index Scan on tbtreexa
+                                 Index Cond: (a < 5)
  Optimizer: Postgres query optimizer
-(15 rows)
+(13 rows)
 
 select * from foo join (select a, count(*) + 5 as cnt from tbtree where tbtree.a < 5 group by a having count(*) < 2) proj_sel_grby_sel on foo.a=proj_sel_grby_sel.a;
  a | b | c | a | cnt 
@@ -12973,24 +12971,22 @@ select * from foo join (select a, count(*) + 5 as cnt from tbtree where tbtree.a
 -- 10 bitmap with proj select grby select
 explain (costs off)
 select * from foo join (select a, count(*) + 5 as cnt from tbitmap where tbitmap.a < 5 group by a having count(*) < 2) proj_sel_grby_sel on foo.a=proj_sel_grby_sel.a;
-                             QUERY PLAN                             
---------------------------------------------------------------------
+                          QUERY PLAN                          
+--------------------------------------------------------------
  Gather Motion 3:1  (slice1; segments: 3)
    ->  Hash Join
          Hash Cond: (foo.a = tbitmap.a)
          ->  Seq Scan on foo
          ->  Hash
-               ->  GroupAggregate
+               ->  HashAggregate
                      Group Key: tbitmap.a
                      Filter: (count(*) < 2)
-                     ->  Sort
-                           Sort Key: tbitmap.a
-                           ->  Bitmap Heap Scan on tbitmap
-                                 Recheck Cond: (a < 5)
-                                 ->  Bitmap Index Scan on tbitmapxa
-                                       Index Cond: (a < 5)
+                     ->  Bitmap Heap Scan on tbitmap
+                           Recheck Cond: (a < 5)
+                           ->  Bitmap Index Scan on tbitmapxa
+                                 Index Cond: (a < 5)
  Optimizer: Postgres query optimizer
-(15 rows)
+(13 rows)
 
 select * from foo join (select a, count(*) + 5 as cnt from tbitmap where tbitmap.a < 5 group by a having count(*) < 2) proj_sel_grby_sel on foo.a=proj_sel_grby_sel.a;
  a | b | c | a | cnt 

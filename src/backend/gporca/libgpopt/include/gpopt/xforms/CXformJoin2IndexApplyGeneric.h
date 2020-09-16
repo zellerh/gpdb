@@ -27,7 +27,7 @@ namespace gpopt
 		BOOL m_generateBitmapPlans;
 
 		// no copy ctor
-		CXformJoin2IndexApplyGeneric(const CXformJoin2IndexApplyGeneric &) = delete;
+		CXformJoin2IndexApplyGeneric(const CXformJoin2IndexApplyGeneric &);
 
 		// Can we transform left outer join to left outer index apply?
 		BOOL

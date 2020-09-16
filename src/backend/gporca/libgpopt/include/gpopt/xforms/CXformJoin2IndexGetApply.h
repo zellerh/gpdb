@@ -24,7 +24,7 @@ namespace gpopt
 	private:
 
 		// no copy ctor
-		CXformJoin2IndexGetApply(const CXformJoin2IndexGetApply &) = delete;
+		CXformJoin2IndexGetApply(const CXformJoin2IndexGetApply &);
 
 	public:
 

@@ -13035,16 +13035,17 @@ select * from foo join tbitmap on foo.a=tbitmap.a where tbitmap.a < 5;
 -- 5 btree with project
 explain (costs off)
 select * from foo join (select a, b+c as bc from tbtree) proj on foo.a=proj.a;
-                   QUERY PLAN                    
--------------------------------------------------
+                      QUERY PLAN                       
+-------------------------------------------------------
  Gather Motion 3:1  (slice1; segments: 3)
    ->  Nested Loop
          Join Filter: true
          ->  Seq Scan on foo
-         ->  Index Scan using tbtreexa on tbtree
-               Index Cond: (a = foo.a)
+         ->  Result
+               ->  Index Scan using tbtreexa on tbtree
+                     Index Cond: (a = foo.a)
  Optimizer: Pivotal Optimizer (GPORCA)
-(7 rows)
+(8 rows)
 
 select * from foo join (select a, b+c as bc from tbtree) proj on foo.a=proj.a;
  a  | b  | c  | a  | bc 
@@ -13064,18 +13065,19 @@ select * from foo join (select a, b+c as bc from tbtree) proj on foo.a=proj.a;
 -- 6 bitmap with project
 explain (costs off)
 select * from foo join (select a, b+c as bc from tbitmap) proj on foo.a=proj.a;
-                    QUERY PLAN                    
---------------------------------------------------
+                       QUERY PLAN                       
+--------------------------------------------------------
  Gather Motion 3:1  (slice1; segments: 3)
    ->  Nested Loop
          Join Filter: true
          ->  Seq Scan on foo
-         ->  Bitmap Heap Scan on tbitmap
-               Recheck Cond: (a = foo.a)
-               ->  Bitmap Index Scan on tbitmapxa
-                     Index Cond: (a = foo.a)
+         ->  Result
+               ->  Bitmap Heap Scan on tbitmap
+                     Recheck Cond: (a = foo.a)
+                     ->  Bitmap Index Scan on tbitmapxa
+                           Index Cond: (a = foo.a)
  Optimizer: Pivotal Optimizer (GPORCA)
-(9 rows)
+(10 rows)
 
 select * from foo join (select a, b+c as bc from tbitmap) proj on foo.a=proj.a;
  a  | b  | c  | a  | bc 
@@ -13161,21 +13163,22 @@ select * from foo join (select a, count(*) as cnt from tbitmap group by a) grby 
 -- 9 btree with proj select grby select
 explain (costs off)
 select * from foo join (select a, count(*) + 5 as cnt from tbtree where tbtree.a < 5 group by a having count(*) < 2) proj_sel_grby_sel on foo.a=proj_sel_grby_sel.a;
-                           QUERY PLAN                            
------------------------------------------------------------------
+                              QUERY PLAN                               
+-----------------------------------------------------------------------
  Gather Motion 3:1  (slice1; segments: 3)
    ->  Nested Loop
          Join Filter: true
          ->  Seq Scan on foo
                Filter: (a < 5)
          ->  Result
-               Filter: ((count()) < 2)
-               ->  GroupAggregate
-                     Group Key: tbtree.a
-                     ->  Index Scan using tbtreexa on tbtree
-                           Index Cond: ((a = foo.a) AND (a < 5))
+               ->  Result
+                     Filter: ((count()) < 2)
+                     ->  GroupAggregate
+                           Group Key: tbtree.a
+                           ->  Index Scan using tbtreexa on tbtree
+                                 Index Cond: ((a = foo.a) AND (a < 5))
  Optimizer: Pivotal Optimizer (GPORCA)
-(12 rows)
+(13 rows)
 
 select * from foo join (select a, count(*) + 5 as cnt from tbtree where tbtree.a < 5 group by a having count(*) < 2) proj_sel_grby_sel on foo.a=proj_sel_grby_sel.a;
  a | b | c | a | cnt 
@@ -13189,25 +13192,26 @@ select * from foo join (select a, count(*) + 5 as cnt from tbtree where tbtree.a
 -- 10 bitmap with proj select grby select
 explain (costs off)
 select * from foo join (select a, count(*) + 5 as cnt from tbitmap where tbitmap.a < 5 group by a having count(*) < 2) proj_sel_grby_sel on foo.a=proj_sel_grby_sel.a;
-                                 QUERY PLAN                                  
------------------------------------------------------------------------------
+                                    QUERY PLAN                                     
+-----------------------------------------------------------------------------------
  Gather Motion 3:1  (slice1; segments: 3)
    ->  Nested Loop
          Join Filter: true
          ->  Seq Scan on foo
                Filter: (a < 5)
          ->  Result
-               Filter: ((count()) < 2)
-               ->  GroupAggregate
-                     Group Key: tbitmap.a
-                     ->  Sort
-                           Sort Key: tbitmap.a
-                           ->  Bitmap Heap Scan on tbitmap
-                                 Recheck Cond: ((a = foo.a) AND (a < 5))
-                                 ->  Bitmap Index Scan on tbitmapxa
-                                       Index Cond: ((a = foo.a) AND (a < 5))
+               ->  Result
+                     Filter: ((count()) < 2)
+                     ->  GroupAggregate
+                           Group Key: tbitmap.a
+                           ->  Sort
+                                 Sort Key: tbitmap.a
+                                 ->  Bitmap Heap Scan on tbitmap
+                                       Recheck Cond: ((a = foo.a) AND (a < 5))
+                                       ->  Bitmap Index Scan on tbitmapxa
+                                             Index Cond: ((a = foo.a) AND (a < 5))
  Optimizer: Pivotal Optimizer (GPORCA)
-(16 rows)
+(17 rows)
 
 select * from foo join (select a, count(*) + 5 as cnt from tbitmap where tbitmap.a < 5 group by a having count(*) < 2) proj_sel_grby_sel on foo.a=proj_sel_grby_sel.a;
  a | b | c | a | cnt 
@@ -13227,9 +13231,10 @@ select * from foo join (select a, a::bigint*a::bigint as aa from tbtree) proj on
    ->  Nested Loop
          Join Filter: ((foo.a = tbtree.a) AND (foo.b = (((tbtree.a)::bigint * (tbtree.a)::bigint))))
          ->  Seq Scan on foo
-         ->  Seq Scan on tbtree
+         ->  Result
+               ->  Seq Scan on tbtree
  Optimizer: Pivotal Optimizer (GPORCA)
-(6 rows)
+(7 rows)
 
 select * from foo join (select a, a::bigint*a::bigint as aa from tbtree) proj on foo.a=proj.a and foo.b=proj.aa;
  a | b | c | a | aa 
@@ -13272,7 +13277,7 @@ from foo l1 where b in (select ab
    Filter: (SubPlan 1)
    ->  Gather Motion 3:1  (slice1; segments: 3)
          ->  Seq Scan on foo
-   SubPlan 1
+   SubPlan 1  (slice0)
      ->  Nested Loop
            Join Filter: ((foo_1.a = tbtree.a) AND (foo_1.b = tbtree.b))
            ->  Materialize

@@ -35,8 +35,9 @@ namespace gpopt
 			EmtSentinel
 		};
 
+	private:
 		// private copy ctor
-		CPatternNode(COperator &) = delete;
+		CPatternNode(COperator &);
 
 		enum EMatchType m_match;
 
