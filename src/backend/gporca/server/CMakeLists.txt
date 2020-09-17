@@ -324,6 +324,7 @@ JoinAbsEqWithoutOpfamilies 3WayJoinUsingOperatorsOfNonDefaultOpfamily;
 
 CSubquery2Test:
 Subq2PartialDecorrelate Subq2CorrSQInLOJOn Subq2NotInWhereLOJ Subq2OuterRef2InJoin Subq2OuterRefMultiLevelInOn
+Subq2ProjectsWithOuterRef
 ")
 
 set(mdp_dir "../data/dxl/minidump/")
