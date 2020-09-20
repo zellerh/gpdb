@@ -4466,7 +4466,7 @@ explain (costs off)
 select d.* from d left join (select * from b group by b.id, b.c_id) s
   on d.a = s.id and d.b = s.c_id;
                       QUERY PLAN                      
-------------------------------------------------------
+------------------------------------------
  Gather Motion 3:1  (slice1; segments: 3)
    ->  Nested Loop Left Join
          Join Filter: true
@@ -4474,7 +4474,7 @@ select d.* from d left join (select * from b group by b.id, b.c_id) s
          ->  Index Scan using b_pkey on b
                Index Cond: (id = d.a)
                Filter: (d.b = c_id)
- Optimizer: Pivotal Optimizer (GPORCA) version 3.44.0
+ Optimizer: Pivotal Optimizer (GPORCA)
 (8 rows)
 
 -- similarly, but keying off a DISTINCT clause
@@ -4482,7 +4482,7 @@ explain (costs off)
 select d.* from d left join (select distinct * from b) s
   on d.a = s.id and d.b = s.c_id;
                       QUERY PLAN                      
-------------------------------------------------------
+------------------------------------------
  Gather Motion 3:1  (slice1; segments: 3)
    ->  Nested Loop Left Join
          Join Filter: true
@@ -4490,7 +4490,7 @@ select d.* from d left join (select distinct * from b) s
          ->  Index Scan using b_pkey on b
                Index Cond: (id = d.a)
                Filter: (d.b = c_id)
- Optimizer: Pivotal Optimizer (GPORCA) version 3.44.0
+ Optimizer: Pivotal Optimizer (GPORCA)
 (8 rows)
 
 -- join removal is not possible when the GROUP BY contains a column that is
@@ -4500,30 +4500,30 @@ select d.* from d left join (select distinct * from b) s
 explain (costs off)
 select d.* from d left join (select * from b group by b.id, b.c_id) s
   on d.a = s.id;
-                      QUERY PLAN                      
-------------------------------------------------------
+                QUERY PLAN                
+------------------------------------------
  Gather Motion 3:1  (slice1; segments: 3)
    ->  Nested Loop Left Join
          Join Filter: true
          ->  Seq Scan on d
          ->  Index Scan using b_pkey on b
                Index Cond: (id = d.a)
- Optimizer: Pivotal Optimizer (GPORCA) version 3.44.0
+ Optimizer: Pivotal Optimizer (GPORCA)
 (7 rows)
 
 -- similarly, but keying off a DISTINCT clause
 explain (costs off)
 select d.* from d left join (select distinct * from b) s
   on d.a = s.id;
-                      QUERY PLAN                      
-------------------------------------------------------
+                QUERY PLAN                
+------------------------------------------
  Gather Motion 3:1  (slice1; segments: 3)
    ->  Nested Loop Left Join
          Join Filter: true
          ->  Seq Scan on d
          ->  Index Scan using b_pkey on b
                Index Cond: (id = d.a)
- Optimizer: Pivotal Optimizer (GPORCA) version 3.44.0
+ Optimizer: Pivotal Optimizer (GPORCA)
 (7 rows)
 
 -- check join removal works when uniqueness of the join condition is enforced

@@ -5,9 +5,11 @@
 // CXformJoin2IndexApplyGeneric.cpp
 //---------------------------------------------------------------------------
 
+#include "gpos/common/CAutoRef.h"
 #include "gpopt/operators/CLogicalApply.h"
 #include "gpopt/operators/CLogicalDynamicGet.h"
 #include "gpopt/operators/CLogicalGet.h"
+#include "gpopt/operators/CLogicalGbAgg.h"
 #include "gpopt/xforms/CXformJoin2IndexApplyGeneric.h"
 
 using namespace gpmd;
@@ -165,6 +167,7 @@ CXformJoin2IndexApplyGeneric::Transform(CXformContext *pxfctxt, CXformResult *px
 	CTableDescriptor *ptabdescInner = NULL;
 	const CColRefSet *distributionCols = NULL;
 	CLogicalDynamicGet *popDynamicGet = NULL;
+	CAutoRef<CColRefSet> groupingColsToCheck;
 
 	// walk down the right child tree, accepting some unary operators
 	// like project and GbAgg and select, until we find a logical get
@@ -179,8 +182,8 @@ CXformJoin2IndexApplyGeneric::Transform(CXformContext *pxfctxt, CXformResult *px
 				selectThatIsParentOfGet = pexprCurrInnerChild;
 				break;
 
-			case COperator::EopLogicalProject:
 			case COperator::EopLogicalGbAgg:
+			case COperator::EopLogicalProject:
 				// We tolerate these operators in the tree (with some conditions, see below) and will
 				// just copy them into the result of the transform, any selects above this node won't
 				// be used for index predicates.
@@ -201,8 +204,41 @@ CXformJoin2IndexApplyGeneric::Transform(CXformContext *pxfctxt, CXformResult *px
 						// that can be applied to the get.
 						return;
 					}
+
+					if (COperator::EopLogicalGbAgg == pexprCurrInnerChild->Pop()->Eopid())
+					{
+						CLogicalGbAgg *grbyAggOp = CLogicalGbAgg::PopConvert(pexprCurrInnerChild->Pop());
+
+						GPOS_ASSERT(NULL != grbyAggOp);
+						if (NULL != grbyAggOp->Pdrgpcr() && 0 < grbyAggOp->Pdrgpcr()->Size())
+						{
+							// This has grouping cols. We can only do an index join with a groupby
+							// on the inner side if the grouping columns are a superset of the
+							// distribution columns. This way, we can put a groupby locally on top
+							// of each of the gets on every segment.
+							CColRefSet *groupingCols = GPOS_NEW(mp) CColRefSet(mp, grbyAggOp->Pdrgpcr());
+
+							// if there are multiple groupbys, then check the intersection of their grouping cols
+							groupingCols->Intersection(groupingColsToCheck.Value());
+							CRefCount::SafeRelease(groupingColsToCheck.Value());
+							groupingColsToCheck = groupingCols;
+
+							if (0 == groupingCols->Size())
+							{
+								// grouping columns don't intersect, give up
+								return;
+							}
+						}
+						else
+						{
+							// This is an aggregate. We won't be able to split it into tasks
+							// that are co-located to the gets on the individual segments, so
+							// don't allow the index join transformation.
+							return;
+						}
+					}
+					selectThatIsParentOfGet = NULL;
 				}
-				selectThatIsParentOfGet = NULL;
 				break;
 
 			case COperator::EopLogicalGet:
@@ -212,6 +248,13 @@ CXformJoin2IndexApplyGeneric::Transform(CXformContext *pxfctxt, CXformResult *px
 					ptabdescInner = popGet->Ptabdesc();
 					distributionCols = popGet->PcrsDist();
 					pexprGet = pexprCurrInnerChild;
+
+					if (NULL != groupingColsToCheck.Value() &&
+						!groupingColsToCheck->ContainsAll(distributionCols))
+					{
+						// the grouping columns are not a superset of the distribution columns
+						return;
+					}
 				}
 				break;
 
