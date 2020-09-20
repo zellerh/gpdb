@@ -2703,6 +2703,9 @@ create table tbitmap(a int, b int, c int) distributed by(a);
 insert into foo select i,i,i from generate_series(1,10) i;
 insert into tbtree select i,i,i from generate_series(1,100000) i;
 insert into tbitmap select i,i,i from generate_series(1,100000) i;
+-- insert a duplicate value for a=2
+insert into tbtree values (2,-1,-1);
+insert into tbitmap values (2,-1,-1);
 
 create index tbtreexa  on tbtree  using btree(a);
 create index tbitmapxa on tbitmap using bitmap(a);
@@ -2743,8 +2746,8 @@ select * from foo join (select a, b+c as bc from tbitmap) proj on foo.a=proj.a;
 
 -- 7 btree with grby
 explain (costs off)
-select * from foo join (select a, count(*) as cnt from tbtree group by a) grby on foo.a=grby.a;
-select * from foo join (select a, count(*) as cnt from tbtree group by a) grby on foo.a=grby.a;
+select * from foo join (select a, count(*) as cnt from tbtree group by a,b) grby on foo.a=grby.a;
+select * from foo join (select a, count(*) as cnt from tbtree group by a,b) grby on foo.a=grby.a;
 
 -- 8 bitmap with grby
 explain (costs off)
@@ -2761,17 +2764,29 @@ explain (costs off)
 select * from foo join (select a, count(*) + 5 as cnt from tbitmap where tbitmap.a < 5 group by a having count(*) < 2) proj_sel_grby_sel on foo.a=proj_sel_grby_sel.a;
 select * from foo join (select a, count(*) + 5 as cnt from tbitmap where tbitmap.a < 5 group by a having count(*) < 2) proj_sel_grby_sel on foo.a=proj_sel_grby_sel.a;
 
--- 11 join pred accesses a projected column - no index scan
+-- 11 bitmap with two groupbys
+explain (costs off)
+select * from foo join (select a, count(*) as cnt from (select distinct a, b from tbitmap) grby1 group by a) grby2 on foo.a=grby2.a;
+select * from foo join (select a, count(*) as cnt from (select distinct a, b from tbitmap) grby1 group by a) grby2 on foo.a=grby2.a;
+
+-- 12 btree with proj select 2*grby select
+explain (costs off)
+select * from foo join (select a, count(*) + cnt1 as cnt2 from (select a, count(*) as cnt1 from tbtree group by a) grby1
+                                                                where grby1.a < 5 group by a, cnt1 having count(*) < 2) proj_sel_grby_sel
+                    on foo.a=proj_sel_grby_sel.a;
+select * from foo join (select a, count(*) + cnt1 as cnt2 from (select a, count(*) as cnt1 from tbtree group by a) grby1
+                                                                where grby1.a < 5 group by a, cnt1 having count(*) < 2) proj_sel_grby_sel
+                    on foo.a=proj_sel_grby_sel.a;
+
+-- 13 join pred accesses a projected column - no index scan
 explain (costs off)
 select * from foo join (select a, a::bigint*a::bigint as aa from tbtree) proj on foo.a=proj.a and foo.b=proj.aa;
-select * from foo join (select a, a::bigint*a::bigint as aa from tbtree) proj on foo.a=proj.a and foo.b=proj.aa;
 
--- 12 join pred accesses a projected column - no index scan
+-- 14 join pred accesses a projected column - no index scan
 explain (costs off)
 select * from foo join (select a, count(*) as cnt from tbitmap group by a) grby on foo.a=grby.a and foo.b=grby.cnt;
-select * from foo join (select a, count(*) as cnt from tbitmap group by a) grby on foo.a=grby.a and foo.b=grby.cnt;
 
--- 13 the potential index join itself contains outer refs - no index scan
+-- 15 the potential index join itself contains outer refs - no index scan
 explain (costs off)
 select *
 from foo l1 where b in (select ab
@@ -2779,12 +2794,14 @@ from foo l1 where b in (select ab
                                     on l2.a=tbtree_derived.a and l2.b=tbtree_derived.b
                         where l2.c = 1
                        );
-select *
-from foo l1 where b in (select ab
-                        from foo l2 join (select *, l1.a+tbtree.b as ab from tbtree) tbtree_derived
-                                    on l2.a=tbtree_derived.a and l2.b=tbtree_derived.b
-                        where l2.c = 1
-                       );
+
+-- 16 group by columns are not a superset of the distribution columns - no index scan
+explain (costs off)
+select * from foo join (select b, count(*) as cnt from tbtree group by b) grby on foo.a=grby.cnt;
+
+-- 17 group by columns don't intersect - no index scan
+explain (costs off)
+select * from foo join (select min_a, count(*) as cnt from (select min(a) as min_a, b from tbitmap group by b) grby1 group by min_a) grby2 on foo.a=grby2.min_a;
 
 reset optimizer_join_order;
 reset optimizer_enable_hashjoin;
