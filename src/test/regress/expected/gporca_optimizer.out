@@ -13342,16 +13342,14 @@ select * from foo join (select a, count(*) + 5 as cnt from tbitmap where tbitmap
                Filter: (a < 5)
          ->  Result
                Filter: ((count()) < 2)
-               ->  GroupAggregate
+               ->  HashAggregate
                      Group Key: tbitmap.a
-                     ->  Sort
-                           Sort Key: tbitmap.a
-                           ->  Bitmap Heap Scan on tbitmap
-                                 Recheck Cond: ((a = foo.a) AND (a < 5))
-                                 ->  Bitmap Index Scan on tbitmapxa
-                                       Index Cond: ((a = foo.a) AND (a < 5))
+                     ->  Bitmap Heap Scan on tbitmap
+                           Recheck Cond: ((a = foo.a) AND (a < 5))
+                           ->  Bitmap Index Scan on tbitmapxa
+                                 Index Cond: ((a = foo.a) AND (a < 5))
  Optimizer: Pivotal Optimizer (GPORCA)
-(16 rows)
+(14 rows)
 
 select * from foo join (select a, count(*) + 5 as cnt from tbitmap where tbitmap.a < 5 group by a having count(*) < 2) proj_sel_grby_sel on foo.a=proj_sel_grby_sel.a;
  a | b | c | a | cnt 
