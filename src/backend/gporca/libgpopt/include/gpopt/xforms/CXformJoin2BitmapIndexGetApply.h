@@ -23,8 +23,7 @@ class CXformJoin2BitmapIndexGetApply : public CXformJoin2IndexApplyGeneric
 {
 private:
 	// no copy ctor
-	CXformJoin2BitmapIndexGetApply(const CXformJoin2BitmapIndexGetApply &) =
-		delete;
+	CXformJoin2BitmapIndexGetApply(const CXformJoin2BitmapIndexGetApply &);
 
 public:
 	// ctor

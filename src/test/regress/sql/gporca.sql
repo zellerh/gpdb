@@ -2697,7 +2697,9 @@ analyze tbitmap;
 
 set optimizer_join_order = query;
 set optimizer_enable_hashjoin = off;
+set optimizer_enable_groupagg = off;
 set optimizer_trace_fallback = on;
+set enable_sort = off;
 
 -- 1 simple btree
 explain (costs off)
@@ -2790,7 +2792,9 @@ select * from foo join (select min_a, count(*) as cnt from (select min(a) as min
 
 reset optimizer_join_order;
 reset optimizer_enable_hashjoin;
+reset optimizer_enable_groupagg;
 reset optimizer_trace_fallback;
+reset enable_sort;
 
 -- start_ignore
 DROP SCHEMA orca CASCADE;

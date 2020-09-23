@@ -23,7 +23,7 @@ class CXformJoin2IndexGetApply : public CXformJoin2IndexApplyGeneric
 {
 private:
 	// no copy ctor
-	CXformJoin2IndexGetApply(const CXformJoin2IndexGetApply &) = delete;
+	CXformJoin2IndexGetApply(const CXformJoin2IndexGetApply &);
 
 public:
 	// ctor
