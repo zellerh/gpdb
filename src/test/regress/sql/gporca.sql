@@ -2710,6 +2710,10 @@ insert into tbitmap values (2,-1,-1);
 create index tbtreexa  on tbtree  using btree(a);
 create index tbitmapxa on tbitmap using bitmap(a);
 
+analyze foo;
+analyze tbtree;
+analyze tbitmap;
+
 set optimizer_join_order = query;
 set optimizer_enable_hashjoin = off;
 set optimizer_trace_fallback = on;

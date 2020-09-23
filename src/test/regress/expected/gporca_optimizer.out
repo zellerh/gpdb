@@ -13055,6 +13055,9 @@ insert into tbtree values (2,-1,-1);
 insert into tbitmap values (2,-1,-1);
 create index tbtreexa  on tbtree  using btree(a);
 create index tbitmapxa on tbitmap using bitmap(a);
+analyze foo;
+analyze tbtree;
+analyze tbitmap;
 set optimizer_join_order = query;
 set optimizer_enable_hashjoin = off;
 set optimizer_trace_fallback = on;
@@ -13342,14 +13345,16 @@ select * from foo join (select a, count(*) + 5 as cnt from tbitmap where tbitmap
                Filter: (a < 5)
          ->  Result
                Filter: ((count()) < 2)
-               ->  HashAggregate
+               ->  GroupAggregate
                      Group Key: tbitmap.a
-                     ->  Bitmap Heap Scan on tbitmap
-                           Recheck Cond: ((a = foo.a) AND (a < 5))
-                           ->  Bitmap Index Scan on tbitmapxa
-                                 Index Cond: ((a = foo.a) AND (a < 5))
+                     ->  Sort
+                           Sort Key: tbitmap.a
+                           ->  Bitmap Heap Scan on tbitmap
+                                 Recheck Cond: ((a = foo.a) AND (a < 5))
+                                 ->  Bitmap Index Scan on tbitmapxa
+                                       Index Cond: ((a = foo.a) AND (a < 5))
  Optimizer: Pivotal Optimizer (GPORCA)
-(14 rows)
+(16 rows)
 
 select * from foo join (select a, count(*) + 5 as cnt from tbitmap where tbitmap.a < 5 group by a having count(*) < 2) proj_sel_grby_sel on foo.a=proj_sel_grby_sel.a;
  a | b | c | a | cnt 
