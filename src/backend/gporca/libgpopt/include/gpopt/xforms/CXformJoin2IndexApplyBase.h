@@ -105,9 +105,11 @@ protected:
 	// xform rule, caller takes the ownership and
 	// responsibility to release the instance.
 	virtual CLogicalApply *
-	PopLogicalApply(CMemoryPool *mp, CColRefArray *colref_array) const
+	PopLogicalApply(CMemoryPool *mp, CColRefArray *colref_array,
+					CExpression *origJoinPred) const
 	{
-		return GPOS_NEW(mp) TApply(mp, colref_array, m_fOuterJoin);
+		return GPOS_NEW(mp)
+			TApply(mp, colref_array, m_fOuterJoin, origJoinPred);
 	}
 
 public:
@@ -202,6 +204,7 @@ public:
 		{
 			CreateHomogeneousIndexApplyAlternatives(
 				mp, pexpr->Pop(), pexprOuter, pexprGet, pexprAllPredicates,
+				pexprScalar,
 				NULL,  // extra nodes to copy
 				NULL,  // end of extra nodes to copy
 				ptabdescInner, popDynamicGet, pxfres, eidxtype);
