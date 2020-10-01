@@ -220,9 +220,19 @@ CXformJoin2IndexApply::CreateAlternativesForBtreeIndex(
 		// second child has residual predicates, create an apply of outer and inner
 		// and add it to xform results
 		CColRefArray *colref_array = outer_refs->Pdrgpcr(mp);
+		CExpression *indexGetWithOptionalSelect = pexprLogicalIndexGet;
+
+		if (COperator::EopLogicalDynamicGet == pexprInner->Pop()->Eopid())
+		{
+			indexGetWithOptionalSelect =
+				CXformUtils::PexprRedundantSelectForDynamicIndex(
+					mp, pexprLogicalIndexGet);
+			pexprLogicalIndexGet->Release();
+		}
+
 		CExpression *rightChildOfApply =
 			CXformUtils::AddALinearStackOfUnaryExpressions(
-				mp, pexprLogicalIndexGet, nodesToInsertAboveIndexGet,
+				mp, indexGetWithOptionalSelect, nodesToInsertAboveIndexGet,
 				endOfNodesToInsertAboveIndexGet);
 		BOOL isOuterJoin = false;
 
@@ -279,9 +289,19 @@ CXformJoin2IndexApply::CreateHomogeneousBitmapIndexApplyAlternatives(
 		// second child has residual predicates, create an apply of outer and inner
 		// and add it to xform results
 		CColRefArray *colref_array = outer_refs->Pdrgpcr(mp);
+		CExpression *indexGetWithOptionalSelect = pexprLogicalIndexGet;
+
+		if (COperator::EopLogicalDynamicGet == popGet->Eopid())
+		{
+			indexGetWithOptionalSelect =
+				CXformUtils::PexprRedundantSelectForDynamicIndex(
+					mp, pexprLogicalIndexGet);
+			pexprLogicalIndexGet->Release();
+		}
+
 		CExpression *rightChildOfApply =
 			CXformUtils::AddALinearStackOfUnaryExpressions(
-				mp, pexprLogicalIndexGet, nodesToInsertAboveIndexGet,
+				mp, indexGetWithOptionalSelect, nodesToInsertAboveIndexGet,
 				endOfNodesToInsertAboveIndexGet);
 		BOOL isOuterJoin = false;
 
