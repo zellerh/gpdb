@@ -29,7 +29,7 @@ protected:
 	// is this an outer join?
 	BOOL m_fOuterJoin;
 
-	// a copy of the original join predicate that is now pushed down to the inner side
+	// a copy of the original join predicate that has been pushed down to the inner side
 	CExpression *m_origJoinPred;
 
 public:

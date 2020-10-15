@@ -975,6 +975,8 @@ CDistributionSpecHashed::TryToCompleteEquivSpec(
 		if (NULL != pexprMatching &&
 			outerRefs->FIntersects(pexprMatching->DeriveUsedColumns()))
 		{
+			// we are able to replace an original expression with one that refers to outer
+			// references (values from the equivalent table), making it more complete
 			pexprMatching->AddRef();
 			pdrgpexprResult->Append(pexprMatching);
 		}
