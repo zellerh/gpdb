@@ -18,7 +18,7 @@ private:
 	// columns from outer child used for index lookup in inner child
 	CColRefArray *m_pdrgpcrOuterRefs;
 
-	// a copy of the original join predicate that is now pushed down to the inner side
+	// a copy of the original join predicate that has been pushed down to the inner side
 	CExpression *m_origJoinPred;
 
 	// private copy ctor

@@ -13,6 +13,10 @@
     set optimizer_enable_hashjoin to off;
     set optimizer_enumerate_plans = on;
 
+    select *
+    from foo join bar on foo.a=bar.a and foo.b=bar.b
+    where bar.c > 10 and bar.d = 11;
+
     Look for an index join plan with a broadcast on the outer, since we can't
     generate a matching distribution spec for the outer table, foo.
   ]]>
