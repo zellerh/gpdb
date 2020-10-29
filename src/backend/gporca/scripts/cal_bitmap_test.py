@@ -1413,7 +1413,7 @@ def smoothStatisticsForOneCol(conn, table_name, attnum, row_count, ndv):
     # correlation to physical row ordering is 0 for all columns
     corr = 0.0
 
-    # stakind: 1 is a list of MCVs and frequencies, 2 is a histogram with range buckets
+    # stakind: 1 is a list of most common values and frequencies, 2 is a histogram with range buckets
     stakind = 1
     # arrays for stanumbers and stavalues
     stanumbers = []

@@ -1765,6 +1765,11 @@ CCostModelGPDB::CostBitmapTableScan(CMemoryPool *mp, CExpressionHandle &exprhdl,
 				dBitmapPageCost = dBitmapPageCost / 5.0;
 			}
 
+			// Give the index scan a small initial advantage over the table scan, so we use indexes
+			// for small tables - this should avoid having table scan and index scan costs being
+			// very close together for many small queries.
+			dInitScan = dInitScan * 0.9;
+
 			// The numbers below were experimentally determined using regression analysis in the cal_bitmap_test.py script
 			// The following dSizeCost is in the form C1 * rows + C2 * rows * width. This is because the width should have
 			// significantly less weight than rows as the execution time does not grow as fast in regards to width
@@ -1782,7 +1787,8 @@ CCostModelGPDB::CostBitmapTableScan(CMemoryPool *mp, CExpressionHandle &exprhdl,
 				// for bitmap index scans on heap tables, we found that there is an additional cost
 				// associated with unioning them that is proportional to the number of bitmaps involved
 				// (dNDV-1) times the width of the bitmap (proportional to the number of rows in the table)
-				bitmapUnionCost = (dNDV - 1.0) * baseTableRows * 0.000027;
+				bitmapUnionCost =
+					std::max(0.0, dNDV.Get() - 1.0) * baseTableRows * 0.000027;
 			}
 
 			result =
