@@ -55,12 +55,6 @@ private:
 	// derived rewindability
 	CRewindabilitySpec *m_prs;
 
-	// derived partition index map
-	CPartIndexMap *m_ppim;
-
-	// derived filter expressions indexed by the part index id
-	CPartFilterMap *m_ppfm;
-
 	// derived cte map
 	CCTEMap *m_pcm;
 
@@ -110,20 +104,6 @@ public:
 	Prs() const
 	{
 		return m_prs;
-	}
-
-	// partition index map
-	CPartIndexMap *
-	Ppim() const
-	{
-		return m_ppim;
-	}
-
-	// partition filter map
-	CPartFilterMap *
-	Ppfm() const
-	{
-		return m_ppfm;
 	}
 
 	// cte map

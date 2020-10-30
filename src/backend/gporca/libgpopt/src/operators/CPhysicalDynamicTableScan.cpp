@@ -71,14 +71,13 @@ CPhysicalDynamicTableScan::Matches(COperator *pop) const
 IStatistics *
 CPhysicalDynamicTableScan::PstatsDerive(CMemoryPool *mp,
 										CExpressionHandle &exprhdl,
-										CReqdPropPlan *prpplan,
+										CReqdPropPlan *prpplan GPOS_UNUSED,
 										IStatisticsArray *	// stats_ctxt
 ) const
 {
 	GPOS_ASSERT(NULL != prpplan);
 
-	return CStatisticsUtils::DeriveStatsForDynamicScan(
-		mp, exprhdl, ScanId(), prpplan->Pepp()->PpfmDerived());
+	return CStatisticsUtils::DeriveStatsForDynamicScan(mp, exprhdl, ScanId());
 }
 
 // EOF

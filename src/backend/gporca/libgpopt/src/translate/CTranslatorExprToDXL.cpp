@@ -4776,11 +4776,7 @@ CTranslatorExprToDXL::PdxlnPartitionSelectorExpand(
 	// construct propagation expression
 	CPartIndexMap *ppimDrvd = m_pdpplan->Ppim();
 	ULONG scan_id = popSelector->ScanId();
-	CDXLNode *pdxlnPropagation =
-		CTranslatorExprToDXLUtils::PdxlnPropExprPartitionSelector(
-			m_mp, m_pmda, m_pcf, ppimDrvd->FPartialScans(scan_id),
-			ppimDrvd->Ppartcnstrmap(scan_id), popSelector->Pdrgpdrgpcr(),
-			scan_id, pmdrel->GetPartitionTypes());
+	CDXLNode *pdxlnPropagation = PdxlnInt4Const(mp, md_accessor, (INT) scan_id);
 
 	// translate printable filter
 	CExpression *pexprPrintable = popSelector->PexprCombinedPred();

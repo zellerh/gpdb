@@ -170,13 +170,13 @@ CPhysicalDynamicIndexScan::OsPrint(IOstream &os) const
 IStatistics *
 CPhysicalDynamicIndexScan::PstatsDerive(CMemoryPool *mp,
 										CExpressionHandle &exprhdl,
-										CReqdPropPlan *prpplan,
+										CReqdPropPlan *prpplan GPOS_UNUSED,
 										IStatisticsArray *stats_ctxt) const
 {
 	GPOS_ASSERT(NULL != prpplan);
 
-	IStatistics *pstatsBaseTable = CStatisticsUtils::DeriveStatsForDynamicScan(
-		mp, exprhdl, ScanId(), prpplan->Pepp()->PpfmDerived());
+	IStatistics *pstatsBaseTable =
+		CStatisticsUtils::DeriveStatsForDynamicScan(mp, exprhdl, ScanId());
 
 	// create a conjunction of index condition and additional filters
 	CExpression *pexprScalar = exprhdl.PexprScalarRepChild(0 /*ulChidIndex*/);

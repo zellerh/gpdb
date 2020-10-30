@@ -296,9 +296,6 @@ public:
 		return NULL != m_pim->Find(&scan_id);
 	}
 
-	// check if the given expression derives unneccessary partition selectors
-	BOOL FContainsRedundantPartitionSelectors(CPartIndexMap *ppimReqd) const;
-
 	// part keys of the entry with the given scan id
 	CPartKeysArray *Pdrgppartkeys(ULONG scan_id) const;
 

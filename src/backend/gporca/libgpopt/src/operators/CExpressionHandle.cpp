@@ -520,6 +520,7 @@ CExpressionHandle::DeriveCostContextStats()
 		return;
 	}
 
+#if 0
 	CEnfdPartitionPropagation *pepp = m_pcc->Poc()->Prpp()->Pepp();
 	COperator *pop = Pop();
 	if (CUtils::FPhysicalScan(pop) &&
@@ -547,6 +548,7 @@ CExpressionHandle::DeriveCostContextStats()
 
 		return;
 	}
+#endif
 
 	// release current stats since we will derive new stats
 	CRefCount::SafeRelease(m_pstats);

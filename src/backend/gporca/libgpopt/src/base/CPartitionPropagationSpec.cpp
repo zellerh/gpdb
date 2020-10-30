@@ -121,11 +121,6 @@ CPartitionPropagationSpec::AppendEnforcers(CMemoryPool *mp,
 			continue;
 		}
 
-		if (!FRequiresPartitionPropagation(mp, pexpr, exprhdl, scan_id))
-		{
-			continue;
-		}
-
 		CExpression *pexprResolver = NULL;
 
 		IMDId *mdid = m_ppim->GetRelMdId(scan_id);
@@ -238,55 +233,6 @@ CPartitionPropagationSpec::PexprFilter(CMemoryPool *mp, ULONG scan_id)
 	}
 
 	return pexprScalar;
-}
-
-//---------------------------------------------------------------------------
-//	@function:
-//		CPartitionPropagationSpec::FRequiresPartitionPropagation
-//
-//	@doc:
-//		Check if given part index id needs to be enforced on top of the given
-//		expression
-//
-//---------------------------------------------------------------------------
-BOOL
-CPartitionPropagationSpec::FRequiresPartitionPropagation(
-	CMemoryPool *mp, CExpression *pexpr, CExpressionHandle &exprhdl,
-	ULONG part_idx_id) const
-{
-	GPOS_ASSERT(m_ppim->Contains(part_idx_id));
-
-	// construct partition propagation spec with the given id only, and check if it needs to be
-	// enforced on top
-	CPartIndexMap *ppim = GPOS_NEW(mp) CPartIndexMap(mp);
-
-	IMDId *mdid = m_ppim->GetRelMdId(part_idx_id);
-	CPartKeysArray *pdrgppartkeys = m_ppim->Pdrgppartkeys(part_idx_id);
-	CPartConstraint *ppartcnstr = m_ppim->PpartcnstrRel(part_idx_id);
-	UlongToPartConstraintMap *ppartcnstrmap =
-		m_ppim->Ppartcnstrmap(part_idx_id);
-	mdid->AddRef();
-	pdrgppartkeys->AddRef();
-	ppartcnstr->AddRef();
-	ppartcnstrmap->AddRef();
-
-	ppim->Insert(part_idx_id, ppartcnstrmap, m_ppim->Epim(part_idx_id),
-				 m_ppim->UlExpectedPropagators(part_idx_id), mdid,
-				 pdrgppartkeys, ppartcnstr);
-
-	CPartitionPropagationSpec *ppps = GPOS_NEW(mp)
-		CPartitionPropagationSpec(ppim, GPOS_NEW(mp) CPartFilterMap(mp));
-
-	CEnfdPartitionPropagation *pepp = GPOS_NEW(mp)
-		CEnfdPartitionPropagation(ppps, CEnfdPartitionPropagation::EppmSatisfy,
-								  GPOS_NEW(mp) CPartFilterMap(mp));
-	CEnfdProp::EPropEnforcingType epetPartitionPropagation =
-		pepp->Epet(exprhdl, CPhysical::PopConvert(pexpr->Pop()),
-				   true /*fPartitionPropagationRequired*/);
-
-	pepp->Release();
-
-	return CEnfdProp::FEnforce(epetPartitionPropagation);
 }
 
 //---------------------------------------------------------------------------

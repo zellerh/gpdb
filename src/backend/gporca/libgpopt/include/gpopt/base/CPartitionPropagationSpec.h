@@ -41,11 +41,6 @@ private:
 	// filter expressions indexed by the part index id
 	CPartFilterMap *m_ppfm;
 
-	// check if given part index id needs to be enforced on top of the given expression
-	BOOL FRequiresPartitionPropagation(CMemoryPool *mp, CExpression *pexpr,
-									   CExpressionHandle &exprhdl,
-									   ULONG part_idx_id) const;
-
 	// split the partition elimination predicates over the various levels
 	// as well as the residual predicate
 	void SplitPartPredicates(CMemoryPool *mp, CExpression *pexprScalar,
@@ -117,7 +112,7 @@ public:
 	EPropSpecType
 	Epst() const override
 	{
-		return EpstPartPropagation;
+		return EpstDistribution;
 	}
 
 	// equality function

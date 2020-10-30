@@ -126,7 +126,6 @@ CEnfdDistribution::HashValue() const
 //---------------------------------------------------------------------------
 CEnfdProp::EPropEnforcingType
 CEnfdDistribution::Epet(CExpressionHandle &exprhdl, CPhysical *popPhysical,
-						CPartitionPropagationSpec *pppsReqd,
 						BOOL fDistribReqd) const
 {
 	if (fDistribReqd)
@@ -140,18 +139,6 @@ CEnfdDistribution::Epet(CExpressionHandle &exprhdl, CPhysical *popPhysical,
 			// child delivers a replicated distribution, no need to enforce hashed distribution
 			// if only satisfiability is needed
 			return EpetUnnecessary;
-		}
-
-		// if operator is a propagator/consumer of any partition index id, prohibit
-		// enforcing any distribution not compatible with what operator delivers
-		// if the derived partition consumers are a subset of the ones in the given
-		// required partition propagation spec, those will be enforced in the same group
-		CPartIndexMap *ppimDrvd = CDrvdPropPlan::Pdpplan(exprhdl.Pdp())->Ppim();
-		GPOS_ASSERT(NULL != ppimDrvd);
-		if (ppimDrvd->FContainsUnresolved() && !this->FCompatible(pds) &&
-			!ppimDrvd->FSubset(pppsReqd->Ppim()))
-		{
-			return CEnfdProp::EpetProhibited;
 		}
 
 		// N.B.: subtlety ahead:

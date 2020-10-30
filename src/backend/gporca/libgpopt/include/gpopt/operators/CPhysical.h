@@ -19,7 +19,6 @@
 #include "gpopt/base/CEnfdOrder.h"
 #include "gpopt/base/CEnfdDistribution.h"
 #include "gpopt/base/CEnfdRewindability.h"
-#include "gpopt/base/CEnfdPartitionPropagation.h"
 #include "gpopt/base/COrderSpec.h"
 #include "gpopt/base/CRewindabilitySpec.h"
 #include "gpopt/base/CDistributionSpecSingleton.h"
@@ -277,20 +276,6 @@ protected:
 	static BOOL FUnaryProvidesReqdCols(CExpressionHandle &exprhdl,
 									   CColRefSet *pcrsRequired);
 
-	// helper for common case of passing through partition index map
-	static CPartIndexMap *PpimPassThruOuter(CExpressionHandle &exprhdl);
-
-	// helper for common case of passing through partition filter map
-	static CPartFilterMap *PpfmPassThruOuter(CExpressionHandle &exprhdl);
-
-	// combine derived part filter maps of relational children
-	static CPartFilterMap *PpfmDeriveCombineRelational(
-		CMemoryPool *mp, CExpressionHandle &exprhdl);
-
-	// helper for common case of combining partition index maps of all relational children
-	static CPartIndexMap *PpimDeriveCombineRelational(
-		CMemoryPool *mp, CExpressionHandle &exprhdl);
-
 	// Generate a singleton distribution spec request
 	static CDistributionSpec *PdsRequireSingleton(CMemoryPool *mp,
 												  CExpressionHandle &exprhdl,
@@ -380,12 +365,6 @@ public:
 											CDrvdPropArray *pdrgpdpCtxt,
 											ULONG ulOptReq) const = 0;
 
-	// compute required partition propagation of the n-th child
-	virtual CPartitionPropagationSpec *PppsRequired(
-		CMemoryPool *mp, CExpressionHandle &exprhdl,
-		CPartitionPropagationSpec *pppsRequired, ULONG child_index,
-		CDrvdPropArray *pdrgpdpCtxt, ULONG ulOptReq) = 0;
-
 	// required properties: check if required columns are included in output columns
 	virtual BOOL FProvidesReqdCols(CExpressionHandle &exprhdl,
 								   CColRefSet *pcrsRequired,
@@ -411,15 +390,6 @@ public:
 	virtual CRewindabilitySpec *PrsDerive(CMemoryPool *mp,
 										  CExpressionHandle &exprhdl) const = 0;
 
-	// derive partition index map
-	virtual CPartIndexMap *PpimDerive(CMemoryPool *mp,
-									  CExpressionHandle &exprhdl,
-									  CDrvdPropCtxt *pdpctxt) const = 0;
-
-	// derive partition filter map
-	virtual CPartFilterMap *PpfmDerive(CMemoryPool *mp,
-									   CExpressionHandle &exprhdl) const = 0;
-
 	// derive cte map
 	virtual CCTEMap *PcmDerive(CMemoryPool *mp,
 							   CExpressionHandle &exprhdl) const;
@@ -440,11 +410,6 @@ public:
 	// return rewindability property enforcing type for this operator
 	virtual CEnfdProp::EPropEnforcingType EpetRewindability(
 		CExpressionHandle &exprhdl, const CEnfdRewindability *per) const = 0;
-
-	// return partition propagation property enforcing type for this operator
-	virtual CEnfdProp::EPropEnforcingType EpetPartitionPropagation(
-		CExpressionHandle &exprhdl,
-		const CEnfdPartitionPropagation *pepp) const;
 
 	// order matching type
 	virtual CEnfdOrder::EOrderMatching Eom(CReqdPropPlan *prppInput,

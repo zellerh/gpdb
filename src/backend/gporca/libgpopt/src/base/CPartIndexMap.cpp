@@ -706,34 +706,6 @@ CPartIndexMap::HashValue() const
 
 //---------------------------------------------------------------------------
 //	@function:
-//		CPartIndexMap::FContainsRedundantPartitionSelectors
-//
-//	@doc:
-//		Check if the given expression derives unneccessary partition selectors
-//
-//---------------------------------------------------------------------------
-BOOL
-CPartIndexMap::FContainsRedundantPartitionSelectors(
-	CPartIndexMap *ppimReqd) const
-{
-	// check that there are no unneeded propagators
-	ScanIdToPartTableInfoMapIter pimiDrvd(m_pim);
-	while (pimiDrvd.Advance())
-	{
-		// check if there is a derived propagator that does not appear in the requirements
-		if (EpimPropagator == (pimiDrvd.Value())->Epim() &&
-			(NULL == ppimReqd ||
-			 !ppimReqd->Contains(pimiDrvd.Value()->ScanId())))
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-//---------------------------------------------------------------------------
-//	@function:
 //		CPartIndexMap::FSatisfies
 //
 //	@doc:

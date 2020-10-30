@@ -890,12 +890,6 @@ public:
 	static CColRef *PcrMap(CColRef *pcrSource, CColRefArray *pdrgpcrSource,
 						   CColRefArray *pdrgpcrTarget);
 
-	// check if group expression is a motion and there is an unresolved consumer
-	// not specified in the required properties
-	static BOOL FMotionOverUnresolvedPartConsumers(CMemoryPool *mp,
-												   CExpressionHandle &exprhdl,
-												   CPartIndexMap *ppimReqd);
-
 	//	return index of the set containing given column
 	static ULONG UlPcrIndexContainingSet(CColRefSetArray *pdrgpcrs,
 										 const CColRef *colref);

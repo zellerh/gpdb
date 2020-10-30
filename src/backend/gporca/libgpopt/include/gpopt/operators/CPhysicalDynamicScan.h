@@ -135,10 +135,6 @@ public:
 	// operator specific hash function
 	ULONG HashValue() const override;
 
-	// derive partition index map
-	CPartIndexMap *PpimDerive(CMemoryPool *mp, CExpressionHandle &exprhdl,
-							  CDrvdPropCtxt *pdpctxt) const override;
-
 	// return true if operator is dynamic scan
 	BOOL
 	FDynamicScan() const override

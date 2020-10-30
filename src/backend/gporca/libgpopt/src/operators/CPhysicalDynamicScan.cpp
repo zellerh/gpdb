@@ -94,34 +94,6 @@ CPhysicalDynamicScan::HashValue() const
 
 //---------------------------------------------------------------------------
 //	@function:
-//		CPhysicalDynamicScan::PpimDerive
-//
-//	@doc:
-//		Derive partition index map
-//
-//---------------------------------------------------------------------------
-CPartIndexMap *
-CPhysicalDynamicScan::PpimDerive(CMemoryPool *mp,
-								 CExpressionHandle &,  //exprhdl
-								 CDrvdPropCtxt *pdpctxt) const
-{
-	GPOS_ASSERT(NULL != pdpctxt);
-	IMDId *mdid = m_ptabdesc->MDId();
-	mdid->AddRef();
-	m_pdrgpdrgpcrPart->AddRef();
-	m_part_constraint->AddRef();
-	m_ppartcnstrRel->AddRef();
-	ULONG ulExpectedPartitionSelectors =
-		CDrvdPropCtxtPlan::PdpctxtplanConvert(pdpctxt)
-			->UlExpectedPartitionSelectors();
-
-	return PpimDeriveFromDynamicScan(
-		mp, m_scan_id, mdid, m_pdrgpdrgpcrPart, m_ulSecondaryScanId,
-		m_part_constraint, m_ppartcnstrRel, ulExpectedPartitionSelectors);
-}
-
-//---------------------------------------------------------------------------
-//	@function:
 //		CPhysicalDynamicScan::OsPrint
 //
 //	@doc:
