@@ -1655,7 +1655,7 @@ CCostModelGPDB::CostBitmapTableScan(CMemoryPool *mp, CExpressionHandle &exprhdl,
 		// earlier versions of the code that treated IN predicates like ORs and therefore
 		// also handled them in this code path. This is especially noticeable for btree
 		// indexes that often have a high NDV, because the small/large NDV cost model
-		// produces very high estimates for cases with a higher NDV.
+		// produces very high cost for cases with a higher NDV.
 		const CDouble dIndexFilterCostUnit =
 			pcmgpdb->GetCostModelParams()
 				->PcpLookup(CCostModelParamsGPDB::EcpIndexFilterCostUnit)
@@ -1741,11 +1741,11 @@ CCostModelGPDB::CostBitmapTableScan(CMemoryPool *mp, CExpressionHandle &exprhdl,
 				pcmgpdb->GetCostModelParams()
 					->PcpLookup(CCostModelParamsGPDB::EcpBitmapIOCostSmallNDV)
 					->Get();
-			CDouble dInitScan =
+			CDouble c5_dInitScan =
 				pcmgpdb->GetCostModelParams()
 					->PcpLookup(CCostModelParamsGPDB::EcpInitScanFactor)
 					->Get();
-			CDouble dBitmapPageCost =
+			CDouble c3_dBitmapPageCost =
 				pcmgpdb->GetCostModelParams()
 					->PcpLookup(CCostModelParamsGPDB::EcpBitmapPageCost)
 					->Get();
@@ -1753,28 +1753,28 @@ CCostModelGPDB::CostBitmapTableScan(CMemoryPool *mp, CExpressionHandle &exprhdl,
 								 ->Ptabdesc()
 								 ->IsAORowOrColTable();
 
+			// some cost constants determined with the cal_bitmap_test.py script
+			CDouble c1_cost_per_row(0.03);
+			CDouble c2_cost_per_byte(0.0001);
+			CDouble bitmap_union_cost_per_distinct_value(0.000027);
+			CDouble init_cost_advantage_for_bitmap_scan(0.9);
+
 			if (IMDIndex::EmdindBtree == indexType)
 			{
 				// btree indexes are not sensitive to the NDV, since they don't have any bitmaps
-				dBitmapPageCost = 0.0;
-			}
-			else
-			{
-				// we found that the bitmap IO cost default is too high for bitmap indexes,
-				// reduce it for the experimental cost model
-				dBitmapPageCost = dBitmapPageCost / 5.0;
+				c3_dBitmapPageCost = 0.0;
 			}
 
 			// Give the index scan a small initial advantage over the table scan, so we use indexes
 			// for small tables - this should avoid having table scan and index scan costs being
 			// very close together for many small queries.
-			dInitScan = dInitScan * 0.9;
+			c5_dInitScan = c5_dInitScan * init_cost_advantage_for_bitmap_scan;
 
 			// The numbers below were experimentally determined using regression analysis in the cal_bitmap_test.py script
 			// The following dSizeCost is in the form C1 * rows + C2 * rows * width. This is because the width should have
 			// significantly less weight than rows as the execution time does not grow as fast in regards to width
-			CDouble dSizeCost =
-				dBitmapIO * (rows * 0.03 + rows * width * 0.0001);
+			CDouble dSizeCost = dBitmapIO * (rows * c1_cost_per_row +
+											 rows * width * c2_cost_per_byte);
 
 			CDouble bitmapUnionCost = 0;
 
@@ -1787,14 +1787,15 @@ CCostModelGPDB::CostBitmapTableScan(CMemoryPool *mp, CExpressionHandle &exprhdl,
 				// for bitmap index scans on heap tables, we found that there is an additional cost
 				// associated with unioning them that is proportional to the number of bitmaps involved
 				// (dNDV-1) times the width of the bitmap (proportional to the number of rows in the table)
-				bitmapUnionCost =
-					std::max(0.0, dNDV.Get() - 1.0) * baseTableRows * 0.000027;
+				bitmapUnionCost = std::max(0.0, dNDV.Get() - 1.0) *
+								  baseTableRows *
+								  bitmap_union_cost_per_distinct_value;
 			}
 
-			result =
-				CCost(pci->NumRebinds() * (dSizeCost + dNDV * dBitmapPageCost +
-										   dInitRebind + bitmapUnionCost) +
-					  dInitScan);
+			result = CCost(pci->NumRebinds() *
+							   (dSizeCost + dNDV * c3_dBitmapPageCost +
+								dInitRebind + bitmapUnionCost) +
+						   c5_dInitScan);
 		}
 	}
 
