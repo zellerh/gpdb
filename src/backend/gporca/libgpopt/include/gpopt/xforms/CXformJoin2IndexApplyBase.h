@@ -178,6 +178,13 @@ public:
 			pexprScalar->AddRef();
 		}
 
+		if (pexprAllPredicates->DeriveHasSubquery())
+		{
+			// don't transform an expression that still has subqueries in its predicates
+			CRefCount::SafeRelease(pexprAllPredicates);
+			return;
+		}
+
 		if (m_fOuterJoin && !FCanLeftOuterIndexApply(mp, pexprGet, pexprScalar))
 		{
 			// It is a left outer join, but we can't do outer index apply,

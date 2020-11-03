@@ -32,6 +32,10 @@ CLogicalIndexApply::CLogicalIndexApply(CMemoryPool *mp,
 	GPOS_ASSERT(NULL != pdrgpcrOuterRefs);
 	if (NULL != origJoinPred)
 	{
+		// We don't allow subqueries in the expression that we
+		// store in the logical operator, since such expressions
+		// would be unsuitable for generating a plan.
+		GPOS_RTL_ASSERT(!origJoinPred->DeriveHasSubquery());
 		origJoinPred->AddRef();
 	}
 }
