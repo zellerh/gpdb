@@ -2785,9 +2785,9 @@ CXformUtils::PexprBuildIndexPlan(
 	ULONG ulOriginOpId, CExpressionArray *pdrgpexprConds, CColRefSet *pcrsReqd,
 	CColRefSet *pcrsScalarExpr, CColRefSet *outer_refs,
 	const IMDIndex *pmdindex, const IMDRelation *pmdrel,
-	BOOL fAllowPartialIndex, CPartConstraint *ppartcnstrIndex,
-	IMDIndex::EmdindexType emdindtype, PDynamicIndexOpConstructor pdiopc,
-	PStaticIndexOpConstructor psiopc, PRewrittenIndexPath prip)
+	CPartConstraint *ppartcnstrIndex, IMDIndex::EmdindexType emdindtype,
+	PDynamicIndexOpConstructor pdiopc, PStaticIndexOpConstructor psiopc,
+	PRewrittenIndexPath prip)
 {
 	GPOS_ASSERT(NULL != pexprGet);
 	GPOS_ASSERT(NULL != pdrgpexprConds);
@@ -2813,7 +2813,7 @@ CXformUtils::PexprBuildIndexPlan(
 	ULONG ulSecondaryPartIndex = gpos::ulong_max;
 	CPartConstraint *ppartcnstrRel = NULL;
 
-	if (!fAllowPartialIndex && fPartialIndex)
+	if (fPartialIndex)
 	{
 		CRefCount::SafeRelease(ppartcnstrIndex);
 
@@ -3852,92 +3852,6 @@ CXformUtils::PexprBitmapTableGet(CMemoryPool *mp, CLogical *popGet,
 
 //---------------------------------------------------------------------------
 //	@function:
-//		CXformUtils::PdrgpdrgppartdigCandidates
-//
-//	@doc:
-//		Find a set of partial index combinations
-//
-//---------------------------------------------------------------------------
-SPartDynamicIndexGetInfoArrays *
-CXformUtils::PdrgpdrgppartdigCandidates(
-	CMemoryPool *mp, CMDAccessor *md_accessor,
-	CExpressionArray *pdrgpexprScalar, CColRef2dArray *pdrgpdrgpcrPartKey,
-	const IMDRelation *pmdrel, CPartConstraint *ppartcnstrRel,
-	CColRefArray *pdrgpcrOutput, CColRefSet *pcrsReqd,
-	CColRefSet *pcrsScalarExpr, CColRefSet *pcrsAcceptedOuterRefs)
-{
-	SPartDynamicIndexGetInfoArrays *pdrgpdrgppartdig =
-		GPOS_NEW(mp) SPartDynamicIndexGetInfoArrays(mp);
-	const ULONG ulIndexes = pmdrel->IndexCount();
-
-	// currently covered parts
-	CPartConstraint *ppartcnstrCovered = NULL;
-	SPartDynamicIndexGetInfoArray *pdrgppartdig =
-		GPOS_NEW(mp) SPartDynamicIndexGetInfoArray(mp);
-
-	for (ULONG ul = 0; ul < ulIndexes; ul++)
-	{
-		const IMDIndex *pmdindex =
-			md_accessor->RetrieveIndex(pmdrel->IndexMDidAt(ul));
-
-		if (!CXformUtils::FIndexApplicable(
-				mp, pmdindex, pmdrel, pdrgpcrOutput, pcrsReqd, pcrsScalarExpr,
-				IMDIndex::EmdindBtree /*emdindtype*/) ||
-			!pmdrel->IsPartialIndex(pmdindex->MDId()))
-		{
-			// not a partial index (handled in another function), or index does not apply to predicate
-			continue;
-		}
-
-		CPartConstraint *ppartcnstr = CUtils::PpartcnstrFromMDPartCnstr(
-			mp, md_accessor, pdrgpdrgpcrPartKey, pmdindex->MDPartConstraint(),
-			pdrgpcrOutput);
-		CExpressionArray *pdrgpexprIndex = GPOS_NEW(mp) CExpressionArray(mp);
-		CExpressionArray *pdrgpexprResidual = GPOS_NEW(mp) CExpressionArray(mp);
-		CPartConstraint *ppartcnstrNewlyCovered = PpartcnstrUpdateCovered(
-			mp, md_accessor, pdrgpexprScalar, ppartcnstrCovered, ppartcnstr,
-			pdrgpcrOutput, pdrgpexprIndex, pdrgpexprResidual, pmdrel, pmdindex,
-			pcrsAcceptedOuterRefs);
-
-		if (NULL == ppartcnstrNewlyCovered)
-		{
-			ppartcnstr->Release();
-			pdrgpexprResidual->Release();
-			pdrgpexprIndex->Release();
-			continue;
-		}
-
-		CRefCount::SafeRelease(ppartcnstrCovered);
-		ppartcnstrCovered = ppartcnstrNewlyCovered;
-
-		pdrgppartdig->Append(GPOS_NEW(mp) SPartDynamicIndexGetInfo(
-			pmdindex, ppartcnstr, pdrgpexprIndex, pdrgpexprResidual));
-	}
-
-	if (NULL != ppartcnstrCovered &&
-		!ppartcnstrRel->FEquivalent(ppartcnstrCovered))
-	{
-		pdrgpexprScalar->AddRef();
-		SPartDynamicIndexGetInfo *ppartdig = PpartdigDynamicGet(
-			mp, pdrgpexprScalar, ppartcnstrCovered, ppartcnstrRel);
-		if (NULL == ppartdig)
-		{
-			CRefCount::SafeRelease(ppartcnstrCovered);
-			pdrgppartdig->Release();
-			return pdrgpdrgppartdig;
-		}
-
-		pdrgppartdig->Append(ppartdig);
-	}
-
-	CRefCount::SafeRelease(ppartcnstrCovered);
-
-	pdrgpdrgppartdig->Append(pdrgppartdig);
-	return pdrgpdrgppartdig;
-}
-
-//---------------------------------------------------------------------------
-//	@function:
 //		CXformUtils::PpartcnstrUpdateCovered
 //
 //	@doc:
@@ -4022,34 +3936,6 @@ CXformUtils::PpartcnstrDisjunction(CMemoryPool *mp,
 
 //---------------------------------------------------------------------------
 //	@function:
-//		CXformUtils::PpartdigDynamicGet
-//
-//	@doc:
-//		Create a dynamic table get candidate to cover the partitions not covered
-//		by the partial index scans
-//
-//---------------------------------------------------------------------------
-SPartDynamicIndexGetInfo *
-CXformUtils::PpartdigDynamicGet(CMemoryPool *mp,
-								CExpressionArray *pdrgpexprScalar,
-								CPartConstraint *ppartcnstrCovered,
-								CPartConstraint *ppartcnstrRel)
-{
-	GPOS_ASSERT(!ppartcnstrCovered->IsConstraintUnbounded());
-	CPartConstraint *ppartcnstrRest =
-		ppartcnstrRel->PpartcnstrRemaining(mp, ppartcnstrCovered);
-	if (NULL == ppartcnstrRest)
-	{
-		return NULL;
-	}
-
-	return GPOS_NEW(mp)
-		SPartDynamicIndexGetInfo(NULL /*pmdindex*/, ppartcnstrRest,
-								 NULL /* pdrgpexprIndex */, pdrgpexprScalar);
-}
-
-//---------------------------------------------------------------------------
-//	@function:
 //		CXformUtils::PexprRemapColumns
 //
 //	@doc:
@@ -4076,122 +3962,6 @@ CXformUtils::PexprRemapColumns(CMemoryPool *mp, CExpression *pexpr,
 	colref_mapping->Release();
 
 	return pexprRemapped;
-}
-
-//---------------------------------------------------------------------------
-//	@function:
-//		CXformUtils::PexprPartialDynamicIndexGet
-//
-//	@doc:
-//		Create a dynamic index get plan for the given partial index
-//
-//---------------------------------------------------------------------------
-CExpression *
-CXformUtils::PexprPartialDynamicIndexGet(
-	CMemoryPool *mp, CLogicalDynamicGet *popGet, ULONG ulOriginOpId,
-	CExpressionArray *pdrgpexprIndex, CExpressionArray *pdrgpexprResidual,
-	CColRefArray *pdrgpcrDIG, const IMDIndex *pmdindex,
-	const IMDRelation *pmdrel, CPartConstraint *ppartcnstr,
-	CColRefSet *pcrsAcceptedOuterRefs, CColRefArray *pdrgpcrOuter,
-	CColRefArray *pdrgpcrNewOuter)
-{
-	GPOS_ASSERT_IMP(NULL == pdrgpcrOuter, NULL == pcrsAcceptedOuterRefs);
-	GPOS_ASSERT_IMP(NULL != pdrgpcrOuter, NULL != pdrgpcrNewOuter);
-	GPOS_ASSERT(NULL != pmdindex);
-	GPOS_ASSERT(pmdrel->IsPartialIndex(pmdindex->MDId()));
-
-	CColRefArray *pdrgpcrIndexCols =
-		PdrgpcrIndexKeys(mp, popGet->PdrgpcrOutput(), pmdindex, pmdrel);
-
-	UlongToColRefMap *colref_mapping = NULL;
-
-	if (popGet->PdrgpcrOutput() != pdrgpcrDIG)
-	{
-		// columns need to be remapped
-		colref_mapping =
-			CUtils::PhmulcrMapping(mp, popGet->PdrgpcrOutput(), pdrgpcrDIG);
-	}
-
-	CTableDescriptor *ptabdesc = popGet->Ptabdesc();
-	ptabdesc->AddRef();
-
-	CWStringConst strTableAliasName(mp, popGet->Name().Pstr()->GetBuffer());
-
-	CColRef2dArray *pdrgpdrgpcrPart = NULL;
-	CPartConstraint *ppartcnstrDIG = NULL;
-	CExpressionArray *pdrgpexprIndexRemapped = NULL;
-	CExpressionArray *pdrgpexprResidualRemapped = NULL;
-	CPartConstraint *ppartcnstrRel = NULL;
-
-	if (NULL != colref_mapping)
-	{
-		// if there are any outer references, add them to the mapping
-		if (NULL != pcrsAcceptedOuterRefs)
-		{
-			ULONG ulOuterPcrs = pdrgpcrOuter->Size();
-			GPOS_ASSERT(ulOuterPcrs == pdrgpcrNewOuter->Size());
-
-			for (ULONG ul = 0; ul < ulOuterPcrs; ul++)
-			{
-				CColRef *pcrOld = (*pdrgpcrOuter)[ul];
-				CColRef *new_colref = (*pdrgpcrNewOuter)[ul];
-				BOOL fInserted GPOS_ASSERTS_ONLY = colref_mapping->Insert(
-					GPOS_NEW(mp) ULONG(pcrOld->Id()), new_colref);
-				GPOS_ASSERT(fInserted);
-			}
-		}
-
-		pdrgpdrgpcrPart = CUtils::PdrgpdrgpcrRemap(
-			mp, popGet->PdrgpdrgpcrPart(), colref_mapping, true /*must_exist*/);
-		ppartcnstrDIG = ppartcnstr->PpartcnstrCopyWithRemappedColumns(
-			mp, colref_mapping, true /*must_exist*/);
-		ppartcnstrRel =
-			popGet->PpartcnstrRel()->PpartcnstrCopyWithRemappedColumns(
-				mp, colref_mapping, true /*must_exist*/);
-
-		pdrgpexprIndexRemapped =
-			CUtils::PdrgpexprRemap(mp, pdrgpexprIndex, colref_mapping);
-		pdrgpexprResidualRemapped =
-			CUtils::PdrgpexprRemap(mp, pdrgpexprResidual, colref_mapping);
-	}
-	else
-	{
-		popGet->PdrgpdrgpcrPart()->AddRef();
-		ppartcnstr->AddRef();
-		pdrgpexprIndex->AddRef();
-		pdrgpexprResidual->AddRef();
-		popGet->PpartcnstrRel()->AddRef();
-
-		pdrgpdrgpcrPart = popGet->PdrgpdrgpcrPart();
-		ppartcnstrDIG = ppartcnstr;
-		pdrgpexprIndexRemapped = pdrgpexprIndex;
-		pdrgpexprResidualRemapped = pdrgpexprResidual;
-		ppartcnstrRel = popGet->PpartcnstrRel();
-	}
-	pdrgpcrDIG->AddRef();
-
-	// create the logical index get operator
-	CLogicalDynamicIndexGet *popIndexGet = GPOS_NEW(mp) CLogicalDynamicIndexGet(
-		mp, pmdindex, ptabdesc, ulOriginOpId,
-		GPOS_NEW(mp) CName(mp, CName(&strTableAliasName)), popGet->ScanId(),
-		pdrgpcrDIG, pdrgpdrgpcrPart,
-		COptCtxt::PoctxtFromTLS()->UlPartIndexNextVal(), ppartcnstrDIG,
-		ppartcnstrRel);
-
-
-	CExpression *pexprIndexCond =
-		CPredicateUtils::PexprConjunction(mp, pdrgpexprIndexRemapped);
-	CExpression *pexprResidualCond =
-		CPredicateUtils::PexprConjunction(mp, pdrgpexprResidualRemapped);
-
-	// cleanup
-	CRefCount::SafeRelease(colref_mapping);
-	pdrgpcrIndexCols->Release();
-
-	// create the expression containing the logical index get operator
-	return CUtils::PexprSafeSelect(
-		mp, GPOS_NEW(mp) CExpression(mp, popIndexGet, pexprIndexCond),
-		pexprResidualCond);
 }
 
 //---------------------------------------------------------------------------
