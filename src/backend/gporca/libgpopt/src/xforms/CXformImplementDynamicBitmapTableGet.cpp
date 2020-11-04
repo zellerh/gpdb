@@ -17,6 +17,7 @@
 
 #include "gpopt/xforms/CXformImplementDynamicBitmapTableGet.h"
 
+#include "gpopt/metadata/CPartConstraint.h"
 #include "gpopt/metadata/CTableDescriptor.h"
 #include "gpopt/operators/CLogicalDynamicBitmapTableGet.h"
 #include "gpopt/operators/CPatternLeaf.h"

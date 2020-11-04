@@ -15,7 +15,6 @@
 #include "gpos/common/CRefCount.h"
 
 #include "gpopt/base/CColRef.h"
-#include "gpopt/base/CPartFilterMap.h"
 #include "gpopt/base/CDrvdProp.h"
 
 namespace gpopt
@@ -28,7 +27,6 @@ class CExpressionHandle;
 class COrderSpec;
 class CRewindabilitySpec;
 class CReqdPropPlan;
-class CPartIndexMap;
 class CCTEMap;
 
 //---------------------------------------------------------------------------

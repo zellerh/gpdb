@@ -34,8 +34,6 @@ using namespace gpos;
 // arrays of unsigned integer arrays
 typedef CDynamicPtrArray<ULONG_PTR, CleanupDeleteArray> UlongPtrArray;
 
-// forward declaration
-class CPartIndexMap;
 class CTableDescriptor;
 class CCTEMap;
 
@@ -235,23 +233,6 @@ protected:
 										   CExpressionHandle &exprhdl,
 										   CRewindabilitySpec *prsRequired,
 										   ULONG child_index);
-
-	// pass partition propagation requirement to the child
-	static CPartitionPropagationSpec *PppsRequiredPushThru(
-		CMemoryPool *mp, CExpressionHandle &exprhdl,
-		CPartitionPropagationSpec *pppsRequired, ULONG child_index);
-
-	// pass partition propagation requirement to the children of an n-ary operator
-	static CPartitionPropagationSpec *PppsRequiredPushThruNAry(
-		CMemoryPool *mp, CExpressionHandle &exprhdl,
-		CPartitionPropagationSpec *pppsRequired, ULONG child_index);
-
-	// helper function for pushing unresolved partition propagation in unary
-	// operators
-	static CPartitionPropagationSpec *PppsRequiredPushThruUnresolvedUnary(
-		CMemoryPool *mp, CExpressionHandle &exprhdl,
-		CPartitionPropagationSpec *pppsRequired,
-		EPropogatePartConstraint eppcPropogate, CColRefSet *filter_cols);
 
 	// pass cte requirement to the child
 	static CCTEReq *PcterPushThru(CCTEReq *pcter);

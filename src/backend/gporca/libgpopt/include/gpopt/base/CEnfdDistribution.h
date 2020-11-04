@@ -22,8 +22,6 @@ namespace gpopt
 {
 using namespace gpos;
 
-class CPartitionPropagationSpec;
-
 //---------------------------------------------------------------------------
 //	@class:
 //		CEnfdDistribution

@@ -13,7 +13,6 @@
 
 #include "gpos/base.h"
 #include "gpopt/base/CColRef.h"
-#include "gpopt/base/CPartFilterMap.h"
 #include "gpopt/operators/CExpression.h"
 #include "gpopt/operators/CLogical.h"
 #include "gpopt/operators/CScalarBoolOp.h"

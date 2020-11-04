@@ -12,7 +12,6 @@
 #include "gpos/base.h"
 #include "gpopt/operators/CPhysical.h"
 #include "gpopt/operators/CScalar.h"
-#include "gpopt/base/CPartIndexMap.h"
 #include "gpopt/base/CCTEMap.h"
 #include "gpopt/base/CDrvdPropPlan.h"
 #include "gpopt/base/CDrvdPropCtxtPlan.h"
@@ -137,10 +136,6 @@ CDrvdPropPlan::CopyCTEProducerPlanProps(CMemoryPool *mp, CDrvdPropCtxt *pdpctxt,
 		// we add-ref producer's properties directly
 		pdpplan->Prs()->AddRef();
 		m_prs = pdpplan->Prs();
-
-		// no need to copy the part index map. return an empty one. This is to
-		// distinguish between a CTE consumer and the inlined expression
-		GPOS_NEW(mp) CPartIndexMap(mp);
 
 		GPOS_ASSERT(CDistributionSpec::EdtAny != m_pds->Edt() &&
 					"CDistributionAny is a require-only, cannot be derived");

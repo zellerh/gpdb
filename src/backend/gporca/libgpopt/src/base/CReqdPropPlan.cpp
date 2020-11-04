@@ -21,15 +21,11 @@
 #include "gpopt/base/CEnfdOrder.h"
 #include "gpopt/base/CEnfdDistribution.h"
 #include "gpopt/base/CEnfdRewindability.h"
-#include "gpopt/base/CEnfdPartitionPropagation.h"
-#include "gpopt/base/CPartFilterMap.h"
 #include "gpopt/base/CReqdPropPlan.h"
 #include "gpopt/operators/CExpressionHandle.h"
 #include "gpopt/operators/CLogical.h"
 #include "gpopt/operators/CPhysical.h"
 #include "gpopt/search/CGroupExpression.h"
-#include "gpopt/base/CPartIndexMap.h"
-#include "gpopt/base/CPartitionPropagationSpec.h"
 #include "gpopt/base/CCTEReq.h"
 #include "gpopt/base/CPartInfo.h"
 
@@ -255,18 +251,6 @@ CReqdPropPlan::Equals(const CReqdPropPlan *prpp) const
 				  Pcter()->Equals(prpp->Pcter()) &&
 				  Peo()->Matches(prpp->Peo()) && Ped()->Matches(prpp->Ped()) &&
 				  Per()->Matches(prpp->Per());
-
-	if (result)
-	{
-		if (NULL == Pepp() || NULL == prpp->Pepp())
-		{
-			result = (NULL == Pepp() && NULL == prpp->Pepp());
-		}
-		else
-		{
-			result = Pepp()->Matches(prpp->Pepp());
-		}
-	}
 
 	return result;
 }
@@ -538,13 +522,10 @@ CReqdPropPlan::PrppRemap(CMemoryPool *mp, CReqdPropPlan *prppInput,
 	prppInput->Per()->AddRef();
 	CEnfdRewindability *per = prppInput->Per();
 
-	prppInput->Pepp()->AddRef();
-	CEnfdPartitionPropagation *pepp = prppInput->Pepp();
-
 	prppInput->Pcter()->AddRef();
 	CCTEReq *pcter = prppInput->Pcter();
 
-	return GPOS_NEW(mp) CReqdPropPlan(pcrsRequired, peo, ped, per, pepp, pcter);
+	return GPOS_NEW(mp) CReqdPropPlan(pcrsRequired, peo, ped, per, pcter);
 }
 
 

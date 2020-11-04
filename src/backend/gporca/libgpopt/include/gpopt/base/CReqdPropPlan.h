@@ -31,7 +31,6 @@ class CEnfdPartitionPropagation;
 class CExpressionHandle;
 class CCTEReq;
 class CPartInfo;
-class CPartFilterMap;
 class CPhysical;
 class CPropSpec;
 

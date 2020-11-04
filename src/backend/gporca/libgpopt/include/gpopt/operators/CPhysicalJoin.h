@@ -78,21 +78,6 @@ protected:
 									   CColRefSet *pcrsRequired);
 
 
-	// helper to add filter on part key
-	static void AddFilterOnPartKey(
-		CMemoryPool *mp, BOOL fNLJoin, CExpression *pexprScalar,
-		CPartIndexMap *ppimSource, CPartFilterMap *ppfmSource,
-		ULONG child_index, ULONG part_idx_id, BOOL fOuterPartConsumer,
-		CPartIndexMap *ppimResult, CPartFilterMap *ppfmResult,
-		CColRefSet *pcrsAllowedRefs);
-
-	// helper to find join predicates on part keys. Returns NULL if not found
-	static CExpression *PexprJoinPredOnPartKeys(CMemoryPool *mp,
-												CExpression *pexprScalar,
-												CPartIndexMap *ppimSource,
-												ULONG part_idx_id,
-												CColRefSet *pcrsAllowedRefs);
-
 	// Do each of the given predicate children use columns from a different
 	// join child?
 	static BOOL FPredKeysSeparated(CExpression *pexprOuter,

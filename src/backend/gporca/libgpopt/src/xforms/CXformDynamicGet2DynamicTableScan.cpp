@@ -15,6 +15,7 @@
 #include "gpopt/operators/CLogicalDynamicGet.h"
 #include "gpopt/operators/CPhysicalDynamicTableScan.h"
 #include "gpopt/metadata/CTableDescriptor.h"
+#include "gpopt/metadata/CPartConstraint.h"
 
 using namespace gpopt;
 

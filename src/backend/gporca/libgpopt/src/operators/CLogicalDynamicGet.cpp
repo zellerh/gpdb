@@ -9,11 +9,11 @@
 //		Implementation of dynamic table access
 //---------------------------------------------------------------------------
 
+#include "gpopt/metadata/CPartConstraint.h"
 #include "gpos/base.h"
 #include "gpopt/base/CUtils.h"
 #include "gpopt/base/CConstraintInterval.h"
 #include "gpopt/base/CColRefSet.h"
-#include "gpopt/base/CPartIndexMap.h"
 #include "gpopt/base/CColRefSetIter.h"
 #include "gpopt/base/CColRefTable.h"
 #include "gpopt/base/COptCtxt.h"

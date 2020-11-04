@@ -50,13 +50,6 @@ protected:
 	// if operator is index scan, this is the stats of table on which index is created
 	IStatistics *m_pstatsBaseTable;
 
-	// derive part index map from a dynamic scan operator
-	static CPartIndexMap *PpimDeriveFromDynamicScan(
-		CMemoryPool *mp, ULONG part_idx_id, IMDId *rel_mdid,
-		CColRef2dArray *pdrgpdrgpcrPart, ULONG ulSecondaryPartIndexId,
-		CPartConstraint *ppartcnstr, CPartConstraint *ppartcnstrRel,
-		ULONG ulExpectedPropagators);
-
 private:
 	// compute stats of underlying table
 	void ComputeTableStats(CMemoryPool *mp);

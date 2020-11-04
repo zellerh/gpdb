@@ -39,7 +39,6 @@ using namespace gpopt;
 //---------------------------------------------------------------------------
 CPhysicalJoin::CPhysicalJoin(CMemoryPool *mp) : CPhysical(mp)
 {
-	m_phmpp = GPOS_NEW(mp) PartPropReqToPartPropSpecMap(mp);
 }
 
 
@@ -686,85 +685,6 @@ CPhysicalJoin::AlignJoinKeyOuterInner(CExpression *pexprPred,
 
 //---------------------------------------------------------------------------
 //	@function:
-//		CPhysicalJoin::AddFilterOnPartKey
-//
-//	@doc:
-//		 Helper to add filter on part key
-//
-//---------------------------------------------------------------------------
-void
-CPhysicalJoin::AddFilterOnPartKey(
-	CMemoryPool *mp, BOOL fNLJoin, CExpression *pexprScalar,
-	CPartIndexMap *ppimSource, CPartFilterMap *ppfmSource, ULONG child_index,
-	ULONG part_idx_id, BOOL fOuterPartConsumer, CPartIndexMap *ppimResult,
-	CPartFilterMap *ppfmResult, CColRefSet *pcrsAllowedRefs)
-{
-	GPOS_ASSERT(NULL != pcrsAllowedRefs);
-
-	ULONG ulChildIndexToTestFirst = 0;
-	ULONG ulChildIndexToTestSecond = 1;
-	BOOL fOuterPartConsumerTest = fOuterPartConsumer;
-
-	if (fNLJoin)
-	{
-		ulChildIndexToTestFirst = 1;
-		ulChildIndexToTestSecond = 0;
-		fOuterPartConsumerTest = !fOuterPartConsumer;
-	}
-
-	// look for a filter on the part key
-	CExpression *pexprCmp = PexprJoinPredOnPartKeys(
-		mp, pexprScalar, ppimSource, part_idx_id, pcrsAllowedRefs);
-
-	// TODO:  - Aug 14, 2013; create a conjunction of the two predicates when the partition resolver framework supports this
-	if (NULL == pexprCmp && ppfmSource->FContainsScanId(part_idx_id))
-	{
-		// look if a predicates was propagated from an above level
-		pexprCmp = ppfmSource->Pexpr(part_idx_id);
-		pexprCmp->AddRef();
-	}
-
-	if (NULL != pexprCmp)
-	{
-		if (fOuterPartConsumerTest)
-		{
-			if (ulChildIndexToTestFirst == child_index)
-			{
-				// we know that we will be requesting the selector from the second child
-				// so we need to increment the number of expected propagators here and pass through
-				ppimResult->AddRequiredPartPropagation(
-					ppimSource, part_idx_id,
-					CPartIndexMap::EppraIncrementPropagators);
-				pexprCmp->Release();
-			}
-			else
-			{
-				// an interesting condition found - request partition selection on the inner child
-				ppimResult->AddRequiredPartPropagation(
-					ppimSource, part_idx_id,
-					CPartIndexMap::EppraZeroPropagators);
-				ppfmResult->AddPartFilter(mp, part_idx_id, pexprCmp,
-										  NULL /*stats*/);
-			}
-		}
-		else
-		{
-			pexprCmp->Release();
-			GPOS_ASSERT(ulChildIndexToTestFirst == child_index);
-		}
-	}
-	else if (FProcessingChildWithPartConsumer(
-				 fOuterPartConsumerTest, ulChildIndexToTestFirst,
-				 ulChildIndexToTestSecond, child_index))
-	{
-		// no interesting condition found - push through partition propagation request
-		ppimResult->AddRequiredPartPropagation(
-			ppimSource, part_idx_id, CPartIndexMap::EppraPreservePropagators);
-	}
-}
-
-//---------------------------------------------------------------------------
-//	@function:
 //		CPhysicalJoin::FProcessingChildWithPartConsumer
 //
 //	@doc:
@@ -779,42 +699,6 @@ CPhysicalJoin::FProcessingChildWithPartConsumer(BOOL fOuterPartConsumerTest,
 {
 	return (fOuterPartConsumerTest && ulChildIndexToTestFirst == child_index) ||
 		   (!fOuterPartConsumerTest && ulChildIndexToTestSecond == child_index);
-}
-
-//---------------------------------------------------------------------------
-//	@function:
-//		CPhysicalJoin::PexprJoinPredOnPartKeys
-//
-//	@doc:
-//		Helper to find join predicates on part keys. Returns NULL if not found
-//
-//---------------------------------------------------------------------------
-CExpression *
-CPhysicalJoin::PexprJoinPredOnPartKeys(CMemoryPool *mp,
-									   CExpression *pexprScalar,
-									   CPartIndexMap *ppimSource,
-									   ULONG part_idx_id,
-									   CColRefSet *pcrsAllowedRefs)
-{
-	GPOS_ASSERT(NULL != pcrsAllowedRefs);
-
-	CExpression *pexprPred = NULL;
-	CPartKeysArray *pdrgppartkeys = ppimSource->Pdrgppartkeys(part_idx_id);
-	const ULONG ulKeysets = pdrgppartkeys->Size();
-	for (ULONG ulKey = 0; NULL == pexprPred && ulKey < ulKeysets; ulKey++)
-	{
-		// get partition key
-		CColRef2dArray *pdrgpdrgpcrPartKeys =
-			(*pdrgppartkeys)[ulKey]->Pdrgpdrgpcr();
-
-		// try to generate a request with dynamic partition selection
-		pexprPred = CPredicateUtils::PexprExtractPredicatesOnPartKeys(
-			mp, pexprScalar, pdrgpdrgpcrPartKeys, pcrsAllowedRefs,
-			true  // fUseConstraints
-		);
-	}
-
-	return pexprPred;
 }
 
 //---------------------------------------------------------------------------

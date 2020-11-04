@@ -4583,9 +4583,9 @@ CTranslatorExprToDXL::PdxlnPartitionSelector(
 			pexprScalarCond, dxl_properties);
 	}
 
-	return PdxlnPartitionSelectorFilter(pexpr, colref_array, pdrgpdsBaseTables,
-										pulNonGatherMotions, pfDML,
-										pexprScalarCond, dxl_properties);
+	// GPDB_12_MERGE_FIXME: Support generating Partition Selector
+	GPOS_RAISE(gpdxl::ExmaDXL, gpdxl::ExmiExpr2DXLUnsupportedFeature,
+			   GPOS_WSZ_LIT("Partition Selector with filter not supported"));
 }
 
 //---------------------------------------------------------------------------
@@ -4758,7 +4758,6 @@ CTranslatorExprToDXL::PdxlnPartitionSelectorExpand(
 
 	// project list
 	IMDId *mdid = popSelector->MDId();
-	const IMDRelation *pmdrel = (IMDRelation *) m_pmda->RetrieveRel(mdid);
 	CDXLNode *pdxlnPrL = CTranslatorExprToDXLUtils::PdxlnPrLPartitionSelector(
 		m_mp, m_pmda, m_pcf, m_phmcrdxln,
 		false,	//fUseChildProjList
@@ -4774,9 +4773,9 @@ CTranslatorExprToDXL::PdxlnPartitionSelectorExpand(
 							  &pdxlnFilters, &pdxlnResidual);
 
 	// construct propagation expression
-	CPartIndexMap *ppimDrvd = m_pdpplan->Ppim();
 	ULONG scan_id = popSelector->ScanId();
-	CDXLNode *pdxlnPropagation = PdxlnInt4Const(mp, md_accessor, (INT) scan_id);
+	CDXLNode *pdxlnPropagation =
+		CTranslatorExprToDXLUtils::PdxlnInt4Const(m_mp, m_pmda, (INT) scan_id);
 
 	// translate printable filter
 	CExpression *pexprPrintable = popSelector->PexprCombinedPred();
@@ -4817,135 +4816,6 @@ CTranslatorExprToDXL::PdxlnPartitionSelectorExpand(
 #endif
 
 	return pdxlnSequence;
-}
-
-//---------------------------------------------------------------------------
-//	@function:
-//		CTranslatorExprToDXL::PdxlnPartitionSelectorFilter
-//
-//	@doc:
-//		Translate a filter-based partition selector into DXL
-//
-//---------------------------------------------------------------------------
-CDXLNode *
-CTranslatorExprToDXL::PdxlnPartitionSelectorFilter(
-	CExpression *pexpr, CColRefArray *colref_array,
-	CDistributionSpecArray *pdrgpdsBaseTables, ULONG *pulNonGatherMotions,
-	BOOL *pfDML, CExpression *pexprScalarCond,
-	CDXLPhysicalProperties *dxl_properties)
-{
-	GPOS_ASSERT(NULL != pexpr);
-	GPOS_ASSERT(1 == pexpr->Arity());
-
-	CPhysicalPartitionSelector *popSelector =
-		CPhysicalPartitionSelector::PopConvert(pexpr->Pop());
-	CPartIndexMap *ppimDrvd = m_pdpplan->Ppim();
-	ULONG scan_id = popSelector->ScanId();
-	ULONG ulLevels = popSelector->UlPartLevels();
-	BOOL fPartialScans = ppimDrvd->FPartialScans(scan_id);
-	UlongToPartConstraintMap *ppartcnstrmap = ppimDrvd->Ppartcnstrmap(scan_id);
-
-	BOOL fPassThrough =
-		FEqPartFiltersAllLevels(pexpr, false /*fCheckGeneralFilters*/) &&
-		!fPartialScans;
-#ifdef GPOS_DEBUG
-	BOOL fPoint =
-		FEqPartFiltersAllLevels(pexpr, true /*fCheckGeneralFilters*/) &&
-		!fPartialScans;
-	GPOS_ASSERT_IMP(!fPoint && fPartialScans, NULL != ppartcnstrmap);
-#endif
-
-	CExpression *pexprChild = (*pexpr)[0];
-
-	GPOS_ASSERT_IMP(
-		NULL != pexprScalarCond,
-		(COperator::EopPhysicalDynamicTableScan == pexprChild->Pop()->Eopid() ||
-		 COperator::EopPhysicalDynamicIndexScan == pexprChild->Pop()->Eopid() ||
-		 COperator::EopPhysicalDynamicBitmapTableScan ==
-			 pexprChild->Pop()->Eopid()) &&
-			"Inlining predicates only allowed in DynamicTableScan, DynamicIndexScan and DynamicBitmapTableScan");
-
-	// translate child
-	CDXLNode *child_dxlnode = PdxlnPartitionSelectorChild(
-		pexprChild, pexprScalarCond, dxl_properties, colref_array,
-		pdrgpdsBaseTables, pulNonGatherMotions, pfDML);
-	CDXLNode *pdxlnPrLChild = (*child_dxlnode)[0];
-
-	// we add a sequence if the scan id is found below the resolver
-	BOOL fNeedSequence = pexprChild->DerivePartitionInfo()->FContainsScanId(
-		popSelector->ScanId());
-
-	// project list
-	IMDId *mdid = popSelector->MDId();
-	const IMDRelation *pmdrel = (IMDRelation *) m_pmda->RetrieveRel(mdid);
-	CDXLNode *pdxlnPrL = CTranslatorExprToDXLUtils::PdxlnPrLPartitionSelector(
-		m_mp, m_pmda, m_pcf, m_phmcrdxln, !fNeedSequence, pdxlnPrLChild,
-		NULL /*pcrOid*/, ulLevels, CUtils::FGeneratePartOid(mdid));
-
-	// translate filters
-	CDXLNode *pdxlnEqFilters = NULL;
-	CDXLNode *pdxlnFilters = NULL;
-	CDXLNode *pdxlnResidual = NULL;
-	TranslatePartitionFilters(pexpr, fPassThrough, &pdxlnEqFilters,
-							  &pdxlnFilters, &pdxlnResidual);
-
-	// construct propagation expression
-	CDXLNode *pdxlnPropagation =
-		CTranslatorExprToDXLUtils::PdxlnPropExprPartitionSelector(
-			m_mp, m_pmda, m_pcf,
-			!fPassThrough && fPartialScans,	 //fConditional
-			ppartcnstrmap, popSelector->Pdrgpdrgpcr(), popSelector->ScanId(),
-			pmdrel->GetPartitionTypes());
-
-	// translate printable filter
-	CExpression *pexprPrintable = popSelector->PexprCombinedPred();
-	GPOS_ASSERT(NULL != pexprPrintable);
-	CDXLNode *pdxlnPrintable = PdxlnScalar(pexprPrintable);
-
-	// construct PartitionSelector node
-	IMDId *rel_mdid = popSelector->MDId();
-	rel_mdid->AddRef();
-
-	CDXLNode *pdxlnSelectorChild = NULL;
-	if (!fNeedSequence)
-	{
-		pdxlnSelectorChild = child_dxlnode;
-	}
-
-	CDXLNode *pdxlnSelector = CTranslatorExprToDXLUtils::PdxlnPartitionSelector(
-		m_mp, rel_mdid, ulLevels, scan_id,
-		CTranslatorExprToDXLUtils::GetProperties(m_mp), pdxlnPrL,
-		pdxlnEqFilters, pdxlnFilters, pdxlnResidual, pdxlnPropagation,
-		pdxlnPrintable, pdxlnSelectorChild);
-
-	CDXLNode *pdxlnReturned = pdxlnSelector;
-	if (fNeedSequence)
-	{
-		CDXLPhysicalSequence *pdxlopSequence =
-			GPOS_NEW(m_mp) CDXLPhysicalSequence(m_mp);
-		CDXLNode *pdxlnSequence = GPOS_NEW(m_mp) CDXLNode(m_mp, pdxlopSequence);
-		CDXLPhysicalProperties *pdxlpropSeq =
-			CTranslatorExprToDXLUtils::PdxlpropCopy(m_mp, child_dxlnode);
-		pdxlnSequence->SetProperties(pdxlpropSeq);
-
-		// construct sequence's project list from the project list of the last child
-		CDXLNode *pdxlnPrLSequence =
-			CTranslatorExprToDXLUtils::PdxlnProjListFromChildProjList(
-				m_mp, m_pcf, m_phmcrdxln, pdxlnPrLChild);
-
-		pdxlnSequence->AddChild(pdxlnPrLSequence);
-		pdxlnSequence->AddChild(pdxlnSelector);
-		pdxlnSequence->AddChild(child_dxlnode);
-
-		pdxlnReturned = pdxlnSequence;
-	}
-
-#ifdef GPOS_DEBUG
-	pdxlnReturned->GetOperator()->AssertValid(pdxlnReturned,
-											  false /* validate_children */);
-#endif
-
-	return pdxlnReturned;
 }
 
 //---------------------------------------------------------------------------

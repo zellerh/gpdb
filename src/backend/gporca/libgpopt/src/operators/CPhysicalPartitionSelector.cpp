@@ -611,8 +611,6 @@ CPhysicalPartitionSelector::EpetDistribution(CExpressionHandle &exprhdl,
 	}
 #endif
 
-	GPOS_ASSERT(CPartIndexMap::EpimConsumer == ppimDrvd->Epim(m_scan_id));
-
 	// part consumer found below: enforce distribution on top of part resolver
 	return CEnfdProp::EpetRequired;
 }
