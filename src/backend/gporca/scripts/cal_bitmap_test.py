@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Optimizer calibration test for bitmap indexes
 #
@@ -30,7 +30,7 @@ import sys
 
 try:
     from gppylib.db import dbconn
-except ImportError, e:
+except ImportError as e:
     sys.exit('ERROR: Cannot import modules.  Please check that you have sourced greenplum_path.sh.  Detail: ' + str(e))
 
 # constants
@@ -278,7 +278,7 @@ _stats_cols_to_fix = [
 # -----------------------------------------------------------------------------
 
 def parseargs():
-    parser = argparse.ArgumentParser(description=_help, version='1.0')
+    parser = argparse.ArgumentParser(description=_help)
 
     parser.add_argument("tests", metavar="TEST", choices=[[], "all", "none", "bitmap_scan_tests", "btree_ao_scan_tests",
                                                           "bitmap_ndv_scan_tests", "index_join_tests", "bfv_join_tests"],
@@ -325,13 +325,10 @@ def log_output(str):
 def connect(host, port_num, db_name):
     try:
         dburl = dbconn.DbURL(hostname=host, port=port_num, dbname=db_name)
-        conn = dbconn.connect(dburl, encoding="UTF8")
-
-        sqlStr = "set search_path to \"$user\", public"
-        dbconn.execSQL(conn, sqlStr)
+        conn = dbconn.connect(dburl, encoding="UTF8", unsetSearchPath=False)
 
     except Exception as e:
-        print("Exception during connect: %s" % e)
+        print(("Exception during connect: %s" % e))
         quit()
 
     return conn
@@ -364,7 +361,7 @@ def execute_sql(conn, sqlStr):
         dbconn.execSQL(conn, sqlStr)
     except Exception as e:
         print("")
-        print("Error executing query: %s; Reason: %s" % (sqlStr, e))
+        print(("Error executing query: %s; Reason: %s" % (sqlStr, e)))
         dbconn.execSQL(conn, "abort")
 
 
@@ -372,14 +369,14 @@ def select_first_int(conn, sqlStr):
     try:
         log_output("")
         log_output("Executing query: %s" % sqlStr)
-        curs = dbconn.execSQL(conn, sqlStr)
+        curs = dbconn.query(conn, sqlStr)
         rows = curs.fetchall()
         for row in rows:
             return int(row[0])
 
     except Exception as e:
         print("")
-        print("Error executing query: %s; Reason: %s" % (sqlStr, e))
+        print(("Error executing query: %s; Reason: %s" % (sqlStr, e)))
         dbconn.execSQL(conn, "abort")
 
 
@@ -403,7 +400,7 @@ def timed_execute_sql(conn, sqlStr):
     num_rows = select_first_int(conn, sqlStr)
     end = time.time()
     elapsed_time_in_msec = round((end - start) * 1000)
-    log_output("Elapsed time (msec): %.0f, rows: %d" % (elapsed_time_in_msec, num_rows))
+    log_output("Elapsed time (msec): %d, rows: %d" % (elapsed_time_in_msec, num_rows))
     return elapsed_time_in_msec, num_rows
 
 
@@ -587,7 +584,7 @@ def find_crossover(conn, lowParamValue, highParamLimit, setup, parameterizeMetho
     reset_method(conn)
 
     # determine the increment
-    incParamValue = (highParamLimit - lowParamValue) / 10
+    incParamValue = (highParamLimit - lowParamValue) // 10
     if incParamValue == 0:
         incParamValue = 1
     elif highParamLimit <= lowParamValue:
@@ -728,7 +725,7 @@ def print_results(testTitle, explainDict, execDict, errMessages, plan_ids, execu
             for p_id in plan_ids:
                 headerList.append("Std dev %s" % p_id)
         headerList.append("Selectivity pct")
-    print(", ".join(headerList))
+    print((", ".join(headerList)))
 
     # sort the keys of the dictionary by parameter value
     sorted_params = sorted(explainDict.keys())
@@ -775,12 +772,12 @@ def print_results(testTitle, explainDict, execDict, errMessages, plan_ids, execu
             resultList.append(str((100.0 * num_rows) / glob_rowcount))
 
         # print a comma-separated list of result values (CSV)
-        print(", ".join(resultList))
+        print((", ".join(resultList)))
 
     # if there are any errors, print them at the end, leaving an empty line between the result and the errors
     if (len(errMessages) > 0):
         print("")
-        print("%d diagnostic message(s):" % len(errMessages))
+        print(("%d diagnostic message(s):" % len(errMessages)))
         for e in errMessages:
             print(e)
 
@@ -1237,7 +1234,7 @@ def run_btree_ao_index_scan_tests(conn, execute_n_times):
     run_one_bitmap_scan_test(conn,
                              "Btree Scan Test; unique; selectivity_pct=100*parameter_value/%d; count(*)" % glob_rowcount,
                              0,
-                             glob_rowcount/10, # 10% is the max allowed selectivity for a btree scan on an AO table
+                             glob_rowcount // 10, # 10% is the max allowed selectivity for a btree scan on an AO table
                              noSetupRequired,
                              parameterize_btree_index_unique_narrow,
                              execute_n_times)
@@ -1245,7 +1242,7 @@ def run_btree_ao_index_scan_tests(conn, execute_n_times):
     run_one_bitmap_scan_test(conn,
                              "Btree Scan Test; unique; selectivity_pct=100*parameter_value/%d; max(txt)" % glob_rowcount,
                              0,
-                             glob_rowcount/20,
+                             glob_rowcount // 20,
                              noSetupRequired,
                              parameterize_btree_index_unique_wide,
                              execute_n_times)
@@ -1432,7 +1429,7 @@ def smoothStatisticsForOneCol(conn, table_name, attnum, row_count, ndv):
         stakind = 2
         stavalues.append(str(1))
         for j in range(1,num_values+1):
-            stavalues.append(str((j*ndv)/num_values))
+            stavalues.append(str((j*ndv) // num_values))
 
     stavalues_txt = "'{ " + ", ".join(stavalues) + " }'::int[]"
     execute_sql(conn, _update_pg_stats % (stadistinct, stakind, stanumbers_txt, stavalues_txt, corr, table_name, attnum))
@@ -1460,7 +1457,7 @@ def inspectExistingTables(conn):
     global glob_appendonly
 
     sqlStr = "SELECT count(*) from cal_txtest"
-    curs = dbconn.execSQL(conn, sqlStr)
+    curs = dbconn.query(conn, sqlStr)
 
     rows = curs.fetchall()
     for row in rows:
@@ -1468,7 +1465,7 @@ def inspectExistingTables(conn):
         log_output("Row count of existing fact table is %d" % glob_rowcount)
 
     sqlStr = "SELECT lower(unnest(reloptions)) from pg_class where relname = 'cal_txtest'"
-    curs = dbconn.execSQL(conn, sqlStr)
+    curs = dbconn.query(conn, sqlStr)
 
     rows = curs.fetchall()
     for row in rows:
