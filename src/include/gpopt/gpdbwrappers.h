@@ -753,6 +753,8 @@ MemoryContext GPDBAllocSetContextCreate();
 
 void GPDBMemoryContextDelete(MemoryContext context);
 
+List *GetRelChildPartitions(Oid reloid);
+
 }  //namespace gpdb
 
 #define ForEach(cell, l) \

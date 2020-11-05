@@ -39,6 +39,7 @@ extern "C" {
 #include "parser/parse_agg.h"
 #include "utils/fmgroids.h"
 #include "utils/memutils.h"
+#include "partitioning/partdesc.h"
 }
 #define GP_WRAP_START                                            \
 	sigjmp_buf local_sigjmp_buf;                                 \
@@ -2819,6 +2820,34 @@ gpdb::RelIsPartitioned(Oid relid)
 		return relation_is_partitioned(relid);
 	}
 	GP_WRAP_END;
+}
+
+List *
+gpdb::GetRelChildPartitions(Oid reloid)
+{
+	List *partoids = NIL;
+	GP_WRAP_START;
+	{
+		if (InvalidOid == reloid)
+		{
+			return NIL;
+		}
+		RelationWrapper rel = gpdb::GetRelation(reloid);
+
+
+		if (NULL == rel->rd_partdesc)
+		{
+			return NIL;
+		}
+
+		for (ULONG ul = 0; ul < rel->rd_partdesc->nparts; ul++)
+		{
+			partoids = lappend_oid(partoids, rel->rd_partdesc->oids[ul]);
+		}
+	}
+	GP_WRAP_END;
+
+	return partoids;
 }
 
 // EOF

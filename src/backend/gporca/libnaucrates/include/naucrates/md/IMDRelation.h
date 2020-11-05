@@ -187,6 +187,13 @@ public:
 	// part constraint
 	virtual IMDPartConstraint *MDPartConstraint() const = 0;
 
+	// child partition oids
+	virtual IMdIdArray *
+	ChildPartitionMdids() const
+	{
+		return NULL;
+	}
+
 	// relation distribution policy as a string value
 	static const CWStringConst *GetDistrPolicyStr(
 		Ereldistrpolicy rel_distr_policy);

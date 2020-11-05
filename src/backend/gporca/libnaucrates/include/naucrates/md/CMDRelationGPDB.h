@@ -89,6 +89,9 @@ private:
 	// number of partition
 	ULONG m_num_of_partitions;
 
+	// Child partition oids
+	IMdIdArray *m_partition_oids;
+
 	// array of key sets
 	ULongPtr2dArray *m_keyset_array;
 
@@ -134,7 +137,8 @@ public:
 					IMdIdArray *distr_opfamilies,
 					ULongPtrArray *partition_cols_array,
 					CharPtrArray *str_part_types_array, ULONG num_of_partitions,
-					BOOL convert_hash_to_random, ULongPtr2dArray *keyset_array,
+					IMdIdArray *partition_oids, BOOL convert_hash_to_random,
+					ULongPtr2dArray *keyset_array,
 					CMDIndexInfoArray *md_index_info_array,
 					IMdIdArray *mdid_triggers_array,
 					IMdIdArray *mdid_check_constraint_array,
@@ -256,6 +260,9 @@ public:
 
 	// part constraint
 	IMDPartConstraint *MDPartConstraint() const override;
+
+	// child partition oids
+	IMdIdArray *ChildPartitionMdids() const override;
 
 #ifdef GPOS_DEBUG
 	// debug print of the metadata relation
