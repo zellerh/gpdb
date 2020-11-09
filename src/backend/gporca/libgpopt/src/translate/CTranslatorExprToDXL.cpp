@@ -1118,10 +1118,6 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 		CPhysicalDynamicTableScan::PopConvert(pexprDTS->Pop());
 	CColRefArray *pdrgpcrOutput = popDTS->PdrgpcrOutput();
 
-	// translate table descriptor
-	CDXLTableDescr *table_descr =
-		MakeDXLTableDescr(popDTS->Ptabdesc(), pdrgpcrOutput, pexprDTS->Prpp());
-
 	// construct plan costs
 	CDXLPhysicalProperties *pdxlpropDTS = GetProperties(pexprDTS);
 
@@ -1140,40 +1136,103 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 		dxl_properties->Release();
 	}
 
-	// construct dynamic table scan operator
-	CDXLPhysicalDynamicTableScan *pdxlopDTS =
-		GPOS_NEW(m_mp) CDXLPhysicalDynamicTableScan(
-			m_mp, table_descr, popDTS->UlSecondaryScanId(), popDTS->ScanId());
-
-	CDXLNode *pdxlnDTS = GPOS_NEW(m_mp) CDXLNode(m_mp, pdxlopDTS);
-	pdxlnDTS->SetProperties(pdxlpropDTS);
-
-	CDXLNode *pdxlnCond = NULL;
-
-	if (NULL != pexprScalarCond)
-	{
-		pdxlnCond = PdxlnScalar(pexprScalarCond);
-	}
-
-	CDXLNode *filter_dxlnode = PdxlnFilter(pdxlnCond);
-
 	// construct projection list
 	GPOS_ASSERT(NULL != pexprDTS->Prpp());
 
 	CColRefSet *pcrsOutput = pexprDTS->Prpp()->PcrsRequired();
-	pdxlnDTS->AddChild(PdxlnProjList(pcrsOutput, colref_array));
-	pdxlnDTS->AddChild(filter_dxlnode);
+	CDXLNode *pdxlnPrL = PdxlnProjList(pcrsOutput, colref_array);
 
-#ifdef GPOS_DEBUG
-	pdxlnDTS->GetOperator()->AssertValid(pdxlnDTS,
-										 false /* validate_children */);
-#endif
+	// construct the filter
+	CDXLNode *filter_dxlnode = NULL;
+	{
+		CDXLNode *pdxlnCond = NULL;
+		if (NULL != pexprScalarCond)
+		{
+			pdxlnCond = PdxlnScalar(pexprScalarCond);
+		}
+		filter_dxlnode = PdxlnFilter(pdxlnCond);
+	}
+
+	const IMDRelation *rel = m_pmda->RetrieveRel(popDTS->Ptabdesc()->MDId());
+	IMdIdArray *part_mdids = rel->ChildPartitionMdids();
+
+	CDXLNode *pdxlnResult = NULL;
+
+	if (part_mdids->Size() > 1)
+	{
+		pdxlnResult = GPOS_NEW(m_mp) CDXLNode(
+			m_mp, GPOS_NEW(m_mp) CDXLPhysicalAppend(m_mp, false, false));
+		pdxlnResult->SetProperties(pdxlpropDTS);
+		pdxlnResult->AddChild(pdxlnPrL);
+		pdxlnResult->AddChild(PdxlnFilter(NULL));
+	}
+
+	for (ULONG ul = 0; ul < part_mdids->Size(); ++ul)
+	{
+		IMDId *part_mdid = (*part_mdids)[ul];
+		const IMDRelation *part = m_pmda->RetrieveRel(part_mdid);
+
+		part_mdid->AddRef();
+
+		// Construct a new table descr for each child partition TableScan
+		CTableDescriptor *table_descr = GPOS_NEW(m_mp) CTableDescriptor(
+			m_mp, part_mdid, part->Mdname().GetMDName(),
+			part->ConvertHashToRandom(), part->GetRelDistribution(),
+			part->RetrieveRelStorageType(),
+			popDTS->Ptabdesc()->GetExecuteAsUserId());
+
+		CColumnDescriptorArray *dts_col_desc =
+			popDTS->Ptabdesc()->Pdrgpcoldesc();
+		for (ULONG ul = 0; ul < dts_col_desc->Size(); ul++)
+		{
+			CColumnDescriptor *col_desc = (*dts_col_desc)[ul];
+			col_desc->AddRef();
+			table_descr->AddColumn(col_desc);
+		}
+
+		CDXLTableDescr *dxl_table_descr =
+			MakeDXLTableDescr(table_descr, pdrgpcrOutput, pexprDTS->Prpp());
+		table_descr->Release();
+
+		// Finally create the TableScan DXL node
+		CDXLNode *dxlnode = GPOS_NEW(m_mp) CDXLNode(
+			m_mp, GPOS_NEW(m_mp) CDXLPhysicalTableScan(m_mp, dxl_table_descr));
+
+		// FIXME: Computer stats & properties per scan
+		pdxlpropDTS->AddRef();
+		dxlnode->SetProperties(pdxlpropDTS);
+
+		// construct projection list - same as the upper Append node
+		GPOS_ASSERT(NULL != pexprDTS->Prpp());
+
+		pdxlnPrL->AddRef();
+		dxlnode->AddChild(pdxlnPrL);  // project list
+
+		filter_dxlnode->AddRef();
+		dxlnode->AddChild(filter_dxlnode);	// filter
+
+		if (NULL == pdxlnResult)
+		{
+			// no Append node created - there must be only one node to scan!
+			pdxlnResult = dxlnode;
+			GPOS_ASSERT(1 == part_mdids->Size());
+			CRefCount::SafeRelease(pdxlpropDTS);
+			CRefCount::SafeRelease(pdxlnPrL);
+		}
+		else
+		{
+			// add to the other scans under the created Append node
+			pdxlnResult->AddChild(dxlnode);
+		}
+	}
+
+	CRefCount::SafeRelease(filter_dxlnode);
 
 	CDistributionSpec *pds = pexprDTS->GetDrvdPropPlan()->Pds();
 	pds->AddRef();
 	pdrgpdsBaseTables->Append(pds);
 
-	return pdxlnDTS;
+	return pdxlnResult;
 }
 
 //---------------------------------------------------------------------------
