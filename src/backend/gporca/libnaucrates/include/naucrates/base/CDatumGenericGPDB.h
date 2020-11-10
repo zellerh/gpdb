@@ -43,6 +43,10 @@ private:
 	// is null
 	BOOL m_is_null;
 
+	// datum is mappable to a LINT or double value
+	BOOL m_is_mappable_to_lint;
+	BOOL m_is_mappable_to_double;
+
 	// type information
 	IMDId *m_mdid;
 
@@ -61,7 +65,8 @@ public:
 	// ctor
 	CDatumGenericGPDB(CMemoryPool *mp, IMDId *mdid, INT type_modifier,
 					  const void *src, ULONG size, BOOL is_null,
-					  LINT stats_comp_val_int, CDouble stats_comp_val_double);
+					  LINT stats_comp_val_int, CDouble stats_comp_val_double,
+					  BOOL is_mappable_to_lint, BOOL is_mappable_to_double);
 
 	// dtor
 	virtual ~CDatumGenericGPDB();
@@ -98,7 +103,11 @@ public:
 	// statistics related APIs
 
 	// can datum be mapped to a double
-	virtual BOOL IsDatumMappableToDouble() const;
+	virtual BOOL
+	IsDatumMappableToDouble() const
+	{
+		return m_is_mappable_to_double;
+	}
 
 	// map to double for stats computation
 	virtual CDouble
@@ -110,7 +119,11 @@ public:
 	}
 
 	// can datum be mapped to LINT
-	virtual BOOL IsDatumMappableToLINT() const;
+	virtual BOOL
+	IsDatumMappableToLINT() const
+	{
+		return m_is_mappable_to_lint;
+	}
 
 	// map to LINT for statistics computation
 	virtual LINT

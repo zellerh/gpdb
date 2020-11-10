@@ -45,11 +45,15 @@ CDatumGenericGPDB::CDatumGenericGPDB(CMemoryPool *mp, IMDId *mdid,
 									 INT type_modifier, const void *src,
 									 ULONG size, BOOL is_null,
 									 LINT stats_comp_val_int,
-									 CDouble stats_comp_val_double)
+									 CDouble stats_comp_val_double,
+									 BOOL is_mappable_to_lint,
+									 BOOL is_mappable_to_double)
 	: m_mp(mp),
 	  m_size(size),
 	  m_bytearray_value(NULL),
 	  m_is_null(is_null),
+	  m_is_mappable_to_lint(is_mappable_to_lint),
+	  m_is_mappable_to_double(is_mappable_to_double),
 	  m_mdid(mdid),
 	  m_type_modifier(type_modifier),
 	  m_stats_comp_val_int(stats_comp_val_int),
@@ -257,7 +261,8 @@ CDatumGenericGPDB::MakeCopy(CMemoryPool *mp) const
 	// CDatumGenericGPDB makes a copy of the buffer
 	return GPOS_NEW(mp) CDatumGenericGPDB(
 		mp, m_mdid, m_type_modifier, m_bytearray_value, m_size, m_is_null,
-		m_stats_comp_val_int, m_stats_comp_val_double);
+		m_stats_comp_val_int, m_stats_comp_val_double, m_is_mappable_to_lint,
+		m_is_mappable_to_double);
 }
 
 
@@ -277,36 +282,6 @@ CDatumGenericGPDB::OsPrint(IOstream &os) const
 	GPOS_DELETE(str);
 
 	return os;
-}
-
-//---------------------------------------------------------------------------
-//	@function:
-//		CDatumGenericGPDB::IsDatumMappableToDouble
-//
-//	@doc:
-//		For statistics computation, can this datum be mapped to a CDouble
-//
-//---------------------------------------------------------------------------
-BOOL
-CDatumGenericGPDB::IsDatumMappableToDouble() const
-{
-	return CMDTypeGenericGPDB::HasByte2DoubleMapping(this->MDId());
-}
-
-//---------------------------------------------------------------------------
-//	@function:
-//		CDatumGenericGPDB::IsDatumMappableToLINT
-//
-//	@doc:
-//		For statistics computation, can this datum be mapped to a LINT
-//
-//---------------------------------------------------------------------------
-BOOL
-CDatumGenericGPDB::IsDatumMappableToLINT() const
-{
-	CMDAccessor *md_accessor = COptCtxt::PoctxtFromTLS()->Pmda();
-	const IMDType *type = md_accessor->RetrieveType(MDId());
-	return CMDTypeGenericGPDB::HasByte2IntMapping(type);
 }
 
 //---------------------------------------------------------------------------
@@ -438,7 +413,8 @@ CDatumGenericGPDB::MakePaddedDatum(CMemoryPool *mp, ULONG col_len) const
 		this->MDId()->AddRef();
 		CDatumGenericGPDB *datum_new = GPOS_NEW(m_mp) CDatumGenericGPDB(
 			mp, this->MDId(), this->TypeModifier(), dest, adjusted_col_width,
-			this->IsNull(), this->GetLINTMapping(), 0 /* dValue */
+			this->IsNull(), this->GetLINTMapping(), 0 /* dValue */,
+			m_is_mappable_to_lint, false /*mappable to double*/
 		);
 
 		// clean up the input byte array as the constructor creates a copy
