@@ -29,7 +29,6 @@ extern "C" {
 
 // fwd declarations
 typedef struct SysScanDescData *SysScanDesc;
-typedef int LOCKMODE;
 struct TypeCacheEntry;
 typedef struct NumericData *Numeric;
 typedef struct HeapTupleData *HeapTuple;
@@ -752,6 +751,8 @@ MemoryContext GPDBAllocSetContextCreate();
 void GPDBMemoryContextDelete(MemoryContext context);
 
 List *GetRelChildPartitions(Oid reloid);
+
+void GPDBLockRelationOid(Oid reloid, int lockmode);
 
 }  //namespace gpdb
 
