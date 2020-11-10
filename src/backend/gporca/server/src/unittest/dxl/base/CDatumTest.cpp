@@ -231,10 +231,11 @@ CDatumTest::CreateGenericDatum(CMemoryPool *mp, BOOL is_null)
 	CMDIdGPDB *pmdidChar = GPOS_NEW(mp) CMDIdGPDB(GPDB_CHAR);
 
 	const CHAR *val = "test";
-	return GPOS_NEW(mp)
-		CDatumGenericGPDB(mp, pmdidChar, default_type_modifier, val,
-						  5 /*length*/, is_null, 0 /*value*/, 0 /*value*/
-		);
+	return GPOS_NEW(mp) CDatumGenericGPDB(
+		mp, pmdidChar, default_type_modifier, val, 5 /*length*/, is_null,
+		0 /*value*/, 0 /*value*/, true /*mappable to lint*/,
+		false /*mappable to double*/
+	);
 }
 
 //---------------------------------------------------------------------------

@@ -1622,14 +1622,13 @@ CUtils::PexprScalarConstNull(CMemoryPool *mp, const IMDType *typ,
 	IDatum *datum = NULL;
 	IMDId *mdid = typ->MDId();
 	mdid->AddRef();
-	CMDAccessor *md_accessor = COptCtxt::PoctxtFromTLS()->Pmda();
 
 	switch (typ->GetDatumType())
 	{
 		case IMDType::EtiInt2:
 		{
 			const IMDTypeInt2 *pmdtypeint2 =
-				md_accessor->PtMDType<IMDTypeInt2>();
+				dynamic_cast<const IMDTypeInt2 *>(typ);
 			datum = pmdtypeint2->CreateInt2Datum(mp, 0, true);
 		}
 		break;
@@ -1637,7 +1636,7 @@ CUtils::PexprScalarConstNull(CMemoryPool *mp, const IMDType *typ,
 		case IMDType::EtiInt4:
 		{
 			const IMDTypeInt4 *pmdtypeint4 =
-				md_accessor->PtMDType<IMDTypeInt4>();
+				dynamic_cast<const IMDTypeInt4 *>(typ);
 			datum = pmdtypeint4->CreateInt4Datum(mp, 0, true);
 		}
 		break;
@@ -1645,7 +1644,7 @@ CUtils::PexprScalarConstNull(CMemoryPool *mp, const IMDType *typ,
 		case IMDType::EtiInt8:
 		{
 			const IMDTypeInt8 *pmdtypeint8 =
-				md_accessor->PtMDType<IMDTypeInt8>();
+				dynamic_cast<const IMDTypeInt8 *>(typ);
 			datum = pmdtypeint8->CreateInt8Datum(mp, 0, true);
 		}
 		break;
@@ -1653,29 +1652,26 @@ CUtils::PexprScalarConstNull(CMemoryPool *mp, const IMDType *typ,
 		case IMDType::EtiBool:
 		{
 			const IMDTypeBool *pmdtypebool =
-				md_accessor->PtMDType<IMDTypeBool>();
+				dynamic_cast<const IMDTypeBool *>(typ);
 			datum = pmdtypebool->CreateBoolDatum(mp, false, true);
 		}
 		break;
 
 		case IMDType::EtiOid:
 		{
-			const IMDTypeOid *pmdtypeoid = md_accessor->PtMDType<IMDTypeOid>();
+			const IMDTypeOid *pmdtypeoid =
+				dynamic_cast<const IMDTypeOid *>(typ);
 			datum = pmdtypeoid->CreateOidDatum(mp, 0, true);
 		}
 		break;
 
 		case IMDType::EtiGeneric:
-			// sorry, no IMDType interface to generate a generic datum
-			datum =
-				GPOS_NEW(mp) CDatumGenericGPDB(mp, mdid, type_modifier,
-											   NULL,  // source value buffer
-											   0,  // source value buffer length
-											   true,  // is NULL
-											   0,	  // LINT mapping for stats
-											   0.0	// CDouble mapping for stats
-				);
-			break;
+		{
+			const IMDTypeGeneric *pmdtypegeneric =
+				dynamic_cast<const IMDTypeGeneric *>(typ);
+			datum = pmdtypegeneric->CreateGenericNullDatum(mp, type_modifier);
+		}
+		break;
 
 		default:
 			// shouldn't come here
