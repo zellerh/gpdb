@@ -51,6 +51,7 @@ extern "C" {
 #include "gpopt/mdcache/CMDAccessor.h"
 
 #include "gpos/base.h"
+#include "gpos/common/CAutoRef.h"
 #include "gpos/error/CException.h"
 #include "gpos/io/COstreamString.h"
 
@@ -609,13 +610,12 @@ CTranslatorRelcacheToDXL::RetrieveRel(CMemoryPool *mp, CMDAccessor *md_accessor,
 	}
 	else
 	{
-		CMDPartConstraintGPDB *mdpart_constraint = NULL;
+		CDXLNode *mdpart_constraint = NULL;
 
-#if 0
 		// retrieve the part constraints if relation is partitioned
-		if (is_partitioned)
-			mdpart_constraint = RetrievePartConstraintForRel(mp, md_accessor, oid, mdcol_array, md_index_info_array->Size() > 0 /*has_index*/);
-#endif
+		// FIMXE: Do this only if Relation::rd_rel::relispartition is true
+		mdpart_constraint = RetrievePartConstraintForRel(
+			mp, md_accessor, rel.get(), mdcol_array);
 
 		// GPDB_12_MERGE_FIXME: this leaves dead code in CMDRelationGPDB. We
 		// should gut it all the way
@@ -3150,7 +3150,6 @@ CTranslatorRelcacheToDXL::RetrievePartConstraintForIndex(
 	return mdpart_constraint;
 }
 
-#if 0
 //---------------------------------------------------------------------------
 //	@function:
 //		CTranslatorRelcacheToDXL::RetrievePartConstraintForRel
@@ -3159,90 +3158,51 @@ CTranslatorRelcacheToDXL::RetrievePartConstraintForIndex(
 //		Retrieve part constraint for relation
 //
 //---------------------------------------------------------------------------
-CMDPartConstraintGPDB *
-CTranslatorRelcacheToDXL::RetrievePartConstraintForRel
-	(
-	CMemoryPool *mp,
-	CMDAccessor *md_accessor,
-	OID rel_oid,
-	CMDColumnArray *mdcol_array,
-	bool has_index
-	)
+CDXLNode *
+CTranslatorRelcacheToDXL::RetrievePartConstraintForRel(
+	CMemoryPool *mp, CMDAccessor *md_accessor, Relation rel,
+	CMDColumnArray *mdcol_array)
 {
 	// get the part constraints
-	List *default_levels_rel = NIL;
-	Node *node = gpdb::GetRelationPartContraints(rel_oid, &default_levels_rel);
+	Node *node = gpdb::GetRelationPartConstraints(rel);
 
-	// don't retrieve part constraints if there are no indices
-	// and no default partitions at any level
-	if (!has_index && NIL == default_levels_rel)
+	if (NULL == node)
 	{
 		return NULL;
 	}
 
-	List *part_keys = gpdb::GetPartitionAttrs(rel_oid);
-	const ULONG num_of_levels = gpdb::ListLength(part_keys);
-	gpdb::ListFree(part_keys);
-
-	BOOL is_unbounded = true;
-	ULongPtrArray *default_levels_derived = GPOS_NEW(mp) ULongPtrArray(mp);
-	for (ULONG ul = 0; ul < num_of_levels; ul++)
+	// create var-colid mapping for translating part constraints
+	CAutoRef<CDXLColDescrArray> dxl_col_descr_array(GPOS_NEW(mp)
+														CDXLColDescrArray(mp));
+	const ULONG num_columns = mdcol_array->Size();
+	for (ULONG ul = 0; ul < num_columns; ul++)
 	{
-		if (LevelHasDefaultPartition(default_levels_rel, ul))
-		{
-			default_levels_derived->Append(GPOS_NEW(mp) ULONG(ul));
-		}
-		else
-		{
-			is_unbounded = false;
-		}
+		const IMDColumn *md_col = (*mdcol_array)[ul];
+		CMDName *md_colname =
+			GPOS_NEW(mp) CMDName(mp, md_col->Mdname().GetMDName());
+		CMDIdGPDB *mdid_col_type = CMDIdGPDB::CastMdid(md_col->MdidType());
+		mdid_col_type->AddRef();
+
+		// create a column descriptor for the column
+		CDXLColDescr *dxl_col_descr = GPOS_NEW(mp) CDXLColDescr(
+			md_colname,
+			ul + 1,	 // colid
+			md_col->AttrNum(), mdid_col_type, md_col->TypeModifier(),
+			false  // fColDropped
+		);
+		dxl_col_descr_array->Append(dxl_col_descr);
 	}
 
-	CMDPartConstraintGPDB *mdpart_constraint = NULL;
+	CMappingVarColId var_colid_mapping(mp);
+	var_colid_mapping.LoadColumns(0 /*query_level */, 1 /* rteIndex */,
+								  dxl_col_descr_array.Value());
+	CDXLNode *scalar_dxlnode =
+		CTranslatorScalarToDXL::TranslateStandaloneExprToDXL(
+			mp, md_accessor, &var_colid_mapping, (Expr *) node);
 
-	if (!has_index)
-	{
-		// if there are no indices then we don't need to construct the partition constraint
-		// expression since ORCA is never going to use it.
-		// only send the default partition information.
-		default_levels_derived->AddRef();
-		mdpart_constraint = GPOS_NEW(mp) CMDPartConstraintGPDB(mp, default_levels_derived, is_unbounded, NULL);
-	}
-	else
-	{
-		CDXLColDescrArray *dxl_col_descr_array = GPOS_NEW(mp) CDXLColDescrArray(mp);
-		const ULONG num_columns = mdcol_array->Size();
-		for (ULONG ul = 0; ul < num_columns; ul++)
-		{
-			const IMDColumn *md_col = (*mdcol_array)[ul];
-			CMDName *md_colname = GPOS_NEW(mp) CMDName(mp, md_col->Mdname().GetMDName());
-			CMDIdGPDB *mdid_col_type = CMDIdGPDB::CastMdid(md_col->MdidType());
-			mdid_col_type->AddRef();
-
-			// create a column descriptor for the column
-			CDXLColDescr *dxl_col_descr = GPOS_NEW(mp) CDXLColDescr
-											(
-											mp,
-											md_colname,
-											ul + 1, // colid
-											md_col->AttrNum(),
-											mdid_col_type,
-											md_col->TypeModifier(),
-											false // fColDropped
-											);
-			dxl_col_descr_array->Append(dxl_col_descr);
-		}
-
-		mdpart_constraint = RetrievePartConstraintFromNode(mp, md_accessor, dxl_col_descr_array, node, default_levels_derived, is_unbounded);
-		dxl_col_descr_array->Release();
-	}
-
-	gpdb::ListFree(default_levels_rel);
-	default_levels_derived->Release();
-
-	return mdpart_constraint;
+	return scalar_dxlnode;
 }
-#endif
+
 
 //---------------------------------------------------------------------------
 //	@function:

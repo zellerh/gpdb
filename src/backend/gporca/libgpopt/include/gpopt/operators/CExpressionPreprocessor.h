@@ -199,6 +199,8 @@ private:
 	static CExpression *PexprReorderScalarCmpChildren(CMemoryPool *mp,
 													  CExpression *pexpr);
 
+	static CExpression *PrunePartitions(CMemoryPool *mp, CExpression *expr);
+
 	// private ctor
 	CExpressionPreprocessor();
 

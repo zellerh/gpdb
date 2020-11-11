@@ -54,9 +54,11 @@ CLogicalDynamicGet::CLogicalDynamicGet(CMemoryPool *mp, const CName *pnameAlias,
 									   CTableDescriptor *ptabdesc,
 									   ULONG ulPartIndex,
 									   CColRefArray *pdrgpcrOutput,
-									   CColRef2dArray *pdrgpdrgpcrPart)
+									   CColRef2dArray *pdrgpdrgpcrPart,
+									   IMdIdArray *partition_mdids)
 	: CLogicalDynamicGetBase(mp, pnameAlias, ptabdesc, ulPartIndex,
-							 pdrgpcrOutput, pdrgpdrgpcrPart)
+							 pdrgpcrOutput, pdrgpdrgpcrPart),
+	  m_partition_mdids(partition_mdids)
 {
 }
 
@@ -71,8 +73,10 @@ CLogicalDynamicGet::CLogicalDynamicGet(CMemoryPool *mp, const CName *pnameAlias,
 //---------------------------------------------------------------------------
 CLogicalDynamicGet::CLogicalDynamicGet(CMemoryPool *mp, const CName *pnameAlias,
 									   CTableDescriptor *ptabdesc,
-									   ULONG ulPartIndex)
-	: CLogicalDynamicGetBase(mp, pnameAlias, ptabdesc, ulPartIndex)
+									   ULONG ulPartIndex,
+									   IMdIdArray *partition_mdids)
+	: CLogicalDynamicGetBase(mp, pnameAlias, ptabdesc, ulPartIndex),
+	  m_partition_mdids(partition_mdids)
 {
 }
 
@@ -84,7 +88,10 @@ CLogicalDynamicGet::CLogicalDynamicGet(CMemoryPool *mp, const CName *pnameAlias,
 //		dtor
 //
 //---------------------------------------------------------------------------
-CLogicalDynamicGet::~CLogicalDynamicGet() = default;
+CLogicalDynamicGet::~CLogicalDynamicGet()
+{
+	CRefCount::SafeRelease(m_partition_mdids);
+}
 
 
 //---------------------------------------------------------------------------
@@ -149,9 +156,11 @@ CLogicalDynamicGet::PopCopyWithRemappedColumns(CMemoryPool *mp,
 		PdrgpdrgpcrCreatePartCols(mp, pdrgpcrOutput, m_ptabdesc->PdrgpulPart());
 	CName *pnameAlias = GPOS_NEW(mp) CName(mp, *m_pnameAlias);
 	m_ptabdesc->AddRef();
+	m_partition_mdids->AddRef();
 
-	return GPOS_NEW(mp) CLogicalDynamicGet(
-		mp, pnameAlias, m_ptabdesc, m_scan_id, pdrgpcrOutput, pdrgpdrgpcrPart);
+	return GPOS_NEW(mp)
+		CLogicalDynamicGet(mp, pnameAlias, m_ptabdesc, m_scan_id, pdrgpcrOutput,
+						   pdrgpdrgpcrPart, m_partition_mdids);
 }
 
 //---------------------------------------------------------------------------

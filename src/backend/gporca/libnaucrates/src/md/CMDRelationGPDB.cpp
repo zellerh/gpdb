@@ -37,7 +37,7 @@ CMDRelationGPDB::CMDRelationGPDB(
 	IMdIdArray *partition_oids, BOOL convert_hash_to_random,
 	ULongPtr2dArray *keyset_array, CMDIndexInfoArray *md_index_info_array,
 	IMdIdArray *mdid_triggers_array, IMdIdArray *mdid_check_constraint_array,
-	IMDPartConstraint *mdpart_constraint, BOOL has_oids)
+	CDXLNode *mdpart_constraint, BOOL has_oids)
 	: m_mp(mp),
 	  m_mdid(mdid),
 	  m_mdname(mdname),
@@ -643,7 +643,7 @@ CMDRelationGPDB::CheckConstraintMDidAt(ULONG pos) const
 //		Return the part constraint
 //
 //---------------------------------------------------------------------------
-IMDPartConstraint *
+CDXLNode *
 CMDRelationGPDB::MDPartConstraint() const
 {
 	return m_mdpart_constraint;
@@ -794,7 +794,19 @@ CMDRelationGPDB::Serialize(CXMLSerializer *xml_serializer) const
 	// serialize part constraint
 	if (NULL != m_mdpart_constraint)
 	{
-		m_mdpart_constraint->Serialize(xml_serializer);
+		xml_serializer->OpenElement(
+			CDXLTokens::GetDXLTokenStr(EdxltokenNamespacePrefix),
+			CDXLTokens::GetDXLTokenStr(EdxltokenPartConstraint));
+
+		// serialize the scalar expression
+		if (NULL != m_mdpart_constraint)
+			m_mdpart_constraint->SerializeToDXL(xml_serializer);
+
+		xml_serializer->CloseElement(
+			CDXLTokens::GetDXLTokenStr(EdxltokenNamespacePrefix),
+			CDXLTokens::GetDXLTokenStr(EdxltokenPartConstraint));
+
+		GPOS_CHECK_ABORT;
 	}
 
 	if (IsPartitioned())

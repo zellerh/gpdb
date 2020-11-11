@@ -345,6 +345,8 @@ public:
 	static CPropConstraint *PpcDeriveConstraintFromPredicates(
 		CMemoryPool *mp, CExpressionHandle &exprhdl);
 
+	static CConstraint *PcnstrFromRelation(const IMDRelation *pmdrel,
+										   CColRefArray *pdrgpcrOutput);
 
 };	// class CLogical
 

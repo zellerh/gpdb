@@ -22,6 +22,7 @@
 #include "gpopt/operators/CWindowPreprocessor.h"
 #include "gpopt/operators/CLogicalConstTableGet.h"
 #include "gpopt/operators/CLogicalCTEAnchor.h"
+#include "gpopt/operators/CLogicalDynamicGet.h"
 #include "gpopt/operators/CLogicalCTEConsumer.h"
 #include "gpopt/operators/CLogicalCTEProducer.h"
 #include "gpopt/operators/CLogicalGbAgg.h"
@@ -2534,6 +2535,114 @@ CExpressionPreprocessor::PexprExistWithPredFromINSubq(CMemoryPool *mp,
 	return pexprNew;
 }
 
+
+CExpression *
+CExpressionPreprocessor::PrunePartitions(CMemoryPool *mp, CExpression *expr)
+{
+	GPOS_ASSERT(NULL != expr);
+	CMDAccessor *mda = COptCtxt::PoctxtFromTLS()->Pmda();
+
+	COperator *pop = expr->Pop();
+	if (pop->Eopid() == COperator::EopLogicalSelect &&
+		(*expr)[0]->Pop()->Eopid() == COperator::EopLogicalDynamicGet)
+	{
+		CExpression *filter_pred = (*expr)[1];
+		//create a new pop & expr & return
+		CLogicalDynamicGet *dyn_get =
+			CLogicalDynamicGet::PopConvert((*expr)[0]->Pop());
+
+		CColRefSetArray *pdrgpcrsChild = NULL;
+		CConstraint *pred_cnstr =
+			CConstraint::PcnstrFromScalarExpr(mp, filter_pred, &pdrgpcrsChild);
+		CRefCount::SafeRelease(pdrgpcrsChild);
+
+		// TODO: skip all this if pred_cnstr = NULL
+
+		IMdIdArray *selected_partition_mdids = GPOS_NEW(mp) IMdIdArray(mp);
+
+		IMdIdArray *all_partition_mdids = dyn_get->GetPartitionMdids();
+		for (ULONG ul = 0; ul < all_partition_mdids->Size(); ++ul)
+		{
+			IMDId *part_mdid = (*all_partition_mdids)[ul];
+			const IMDRelation *part = mda->RetrieveRel(part_mdid);
+
+			// FIXME: This is unsafe, given dropped cols.
+			// We need to construct a mapping from child partition
+			// colid -> "root" partition colref to correctly derive constraints
+			CColRefArray *pdrgpcrOutput = dyn_get->PdrgpcrOutput();
+
+			CConstraint *rel_cnstr =
+				CLogical::PcnstrFromRelation(part, pdrgpcrOutput);
+
+			CConstraint *pcnstr = NULL;
+			{
+				CConstraintArray *preds = GPOS_NEW(mp) CConstraintArray(mp);
+				if (pred_cnstr != NULL)
+				{
+					pred_cnstr->AddRef();
+					preds->Append(pred_cnstr);
+				}
+				if (rel_cnstr != NULL)
+				{
+					preds->Append(rel_cnstr);
+				}
+				pcnstr = CConstraint::PcnstrConjunction(mp, preds);
+			}
+
+			// Include the partition if it's not a contradiction, or if it is
+			// undefined (e.g default partition)
+			if (NULL == pcnstr || !pcnstr->FContradiction())
+			{
+				part_mdid->AddRef();
+				selected_partition_mdids->Append(part_mdid);
+			}
+			CRefCount::SafeRelease(pcnstr);
+		}
+		CRefCount::SafeRelease(pred_cnstr);
+
+		if (selected_partition_mdids->Size() == 0)
+		{
+			selected_partition_mdids->Release();
+			CColRefArray *colref_array =
+				expr->DeriveOutputColumns()->Pdrgpcr(mp);
+
+			IDatum2dArray *pdrgpdrgpdatum = GPOS_NEW(mp) IDatum2dArray(mp);
+			COperator *popCTG = GPOS_NEW(mp)
+				CLogicalConstTableGet(mp, colref_array, pdrgpdrgpdatum);
+			return GPOS_NEW(mp) CExpression(mp, popCTG);
+		}
+
+		CName *new_alias = GPOS_NEW(mp) CName(mp, dyn_get->Name());
+		dyn_get->Ptabdesc()->AddRef();
+		dyn_get->PdrgpcrOutput()->AddRef();
+		dyn_get->PdrgpdrgpcrPart()->AddRef();
+		CLogicalDynamicGet *new_dyn_get = GPOS_NEW(mp) CLogicalDynamicGet(
+			mp, new_alias, dyn_get->Ptabdesc(), dyn_get->ScanId(),
+			dyn_get->PdrgpcrOutput(), dyn_get->PdrgpdrgpcrPart(),
+			selected_partition_mdids);
+
+		CExpressionArray *select_children = GPOS_NEW(mp) CExpressionArray(mp);
+		select_children->Append(GPOS_NEW(mp) CExpression(mp, new_dyn_get));
+		select_children->Append(PrunePartitions(mp, filter_pred));
+
+		pop->AddRef();
+		return GPOS_NEW(mp) CExpression(mp, pop, select_children);
+	}
+
+	// process children
+	CExpressionArray *children = GPOS_NEW(mp) CExpressionArray(mp);
+
+	for (ULONG ul = 0; ul < expr->Arity(); ul++)
+	{
+		CExpression *expr_child = (*expr)[ul];
+		CExpression *new_expr_child = PrunePartitions(mp, expr_child);
+		children->Append(new_expr_child);
+	}
+
+	pop->AddRef();
+	return GPOS_NEW(mp) CExpression(mp, pop, children);
+}
+
 // main driver, pre-processing of input logical expression
 CExpression *
 CExpressionPreprocessor::PexprPreprocess(
@@ -2709,11 +2818,17 @@ CExpressionPreprocessor::PexprPreprocess(
 	GPOS_CHECK_ABORT;
 	pexrReorderedScalarCmpChildren->Release();
 
-	// (26) normalize expression again
-	CExpression *pexprNormalized2 =
-		CNormalizer::PexprNormalize(mp, pexprExistWithPredFromINSubq);
+	// (26) prune partitions
+	CExpression *pexprPrunedPartitions =
+		PrunePartitions(mp, pexprExistWithPredFromINSubq);
 	GPOS_CHECK_ABORT;
 	pexprExistWithPredFromINSubq->Release();
+
+	// (27) normalize expression again
+	CExpression *pexprNormalized2 =
+		CNormalizer::PexprNormalize(mp, pexprPrunedPartitions);
+	GPOS_CHECK_ABORT;
+	pexprPrunedPartitions->Release();
 
 	return pexprNormalized2;
 }

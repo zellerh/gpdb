@@ -105,7 +105,7 @@ private:
 	IMdIdArray *m_mdid_check_constraint_array;
 
 	// partition constraint
-	IMDPartConstraint *m_mdpart_constraint;
+	CDXLNode *m_mdpart_constraint;
 
 	// does this table have oids
 	BOOL m_has_oids;
@@ -142,7 +142,7 @@ public:
 					CMDIndexInfoArray *md_index_info_array,
 					IMdIdArray *mdid_triggers_array,
 					IMdIdArray *mdid_check_constraint_array,
-					IMDPartConstraint *mdpart_constraint, BOOL has_oids);
+					CDXLNode *mdpart_constraint, BOOL has_oids);
 
 	// dtor
 	~CMDRelationGPDB() override;
@@ -259,7 +259,7 @@ public:
 	IMDId *CheckConstraintMDidAt(ULONG pos) const override;
 
 	// part constraint
-	IMDPartConstraint *MDPartConstraint() const override;
+	CDXLNode *MDPartConstraint() const override;
 
 	// child partition oids
 	IMdIdArray *ChildPartitionMdids() const override;

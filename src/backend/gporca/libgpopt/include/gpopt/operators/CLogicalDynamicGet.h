@@ -32,6 +32,9 @@ class CColRefSet;
 class CLogicalDynamicGet : public CLogicalDynamicGetBase
 {
 private:
+	// GPDB_12_MERGE_FIXME: Move this to the base class once supported by siblings
+	IMdIdArray *m_partition_mdids;
+
 public:
 	CLogicalDynamicGet(const CLogicalDynamicGet &) = delete;
 
@@ -41,10 +44,12 @@ public:
 	CLogicalDynamicGet(CMemoryPool *mp, const CName *pnameAlias,
 					   CTableDescriptor *ptabdesc, ULONG ulPartIndex,
 					   CColRefArray *pdrgpcrOutput,
-					   CColRef2dArray *pdrgpdrgpcrPart);
+					   CColRef2dArray *pdrgpdrgpcrPart,
+					   IMdIdArray *partition_mdids);
 
 	CLogicalDynamicGet(CMemoryPool *mp, const CName *pnameAlias,
-					   CTableDescriptor *ptabdesc, ULONG ulPartIndex);
+					   CTableDescriptor *ptabdesc, ULONG ulPartIndex,
+					   IMdIdArray *partition_mdids);
 
 	// dtor
 	~CLogicalDynamicGet() override;
@@ -71,6 +76,19 @@ public:
 
 	// sensitivity to order of inputs
 	BOOL FInputOrderSensitive() const override;
+
+	IMdIdArray *
+	GetPartitionMdids() const
+	{
+		return m_partition_mdids;
+	}
+
+	void
+	SetPartitionMdids(IMdIdArray *partition_mdids)
+	{
+		CRefCount::SafeRelease(m_partition_mdids);
+		m_partition_mdids = partition_mdids;
+	}
 
 	// return a copy of the operator with remapped columns
 	COperator *PopCopyWithRemappedColumns(CMemoryPool *mp,

@@ -1153,10 +1153,8 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 		filter_dxlnode = PdxlnFilter(pdxlnCond);
 	}
 
-	const IMDRelation *rel = m_pmda->RetrieveRel(popDTS->Ptabdesc()->MDId());
-	IMdIdArray *part_mdids = rel->ChildPartitionMdids();
-
 	CDXLNode *pdxlnResult = NULL;
+	IMdIdArray *part_mdids = popDTS->GetPartitionMdids();
 
 	if (part_mdids->Size() > 1)
 	{
@@ -1173,7 +1171,6 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 		const IMDRelation *part = m_pmda->RetrieveRel(part_mdid);
 
 		part_mdid->AddRef();
-
 		// Construct a new table descr for each child partition TableScan
 		CTableDescriptor *table_descr = GPOS_NEW(m_mp) CTableDescriptor(
 			m_mp, part_mdid, part->Mdname().GetMDName(),
@@ -1198,7 +1195,7 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 		CDXLNode *dxlnode = GPOS_NEW(m_mp) CDXLNode(
 			m_mp, GPOS_NEW(m_mp) CDXLPhysicalTableScan(m_mp, dxl_table_descr));
 
-		// FIXME: Computer stats & properties per scan
+		// GPDB_12_MERGE_FIXME: Computer stats & properties per scan
 		pdxlpropDTS->AddRef();
 		dxlnode->SetProperties(pdxlpropDTS);
 
@@ -1232,6 +1229,7 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 	pds->AddRef();
 	pdrgpdsBaseTables->Append(pds);
 
+	GPOS_ASSERT(pdxlnResult);
 	return pdxlnResult;
 }
 
@@ -4872,11 +4870,11 @@ CTranslatorExprToDXL::ConstructLevelFilters4PartitionSelector(
 
 	CColRef2dArray *pdrgpdrgpcrPartKeys = popSelector->Pdrgpdrgpcr();
 	CBitSet *pbsDefaultParts = NULL;
-	IMDPartConstraint *mdpart_constraint =
-		m_pmda->RetrieveRel(popSelector->MDId())->MDPartConstraint();
-	if (NULL != mdpart_constraint)
-		pbsDefaultParts =
-			CUtils::Pbs(m_mp, mdpart_constraint->GetDefaultPartsArray());
+	//	IMDPartConstraint *mdpart_constraint =
+	//		m_pmda->RetrieveRel(popSelector->MDId())->MDPartConstraint();
+	//	if (NULL != mdpart_constraint)
+	//		pbsDefaultParts =
+	//			CUtils::Pbs(m_mp, mdpart_constraint->GetDefaultPartsArray());
 
 	*ppdxlnFilters = GPOS_NEW(m_mp)
 		CDXLNode(m_mp, GPOS_NEW(m_mp) CDXLScalarOpList(

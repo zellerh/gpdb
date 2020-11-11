@@ -27,6 +27,9 @@ namespace gpopt
 class CPhysicalDynamicTableScan : public CPhysicalDynamicScan
 {
 private:
+	// GPDB_12_MERGE_FIXME: Move this to the base class once supported by siblings
+	IMdIdArray *m_partition_mdids;
+
 public:
 	CPhysicalDynamicTableScan(const CPhysicalDynamicTableScan &) = delete;
 
@@ -34,7 +37,8 @@ public:
 	CPhysicalDynamicTableScan(CMemoryPool *mp, const CName *pnameAlias,
 							  CTableDescriptor *ptabdesc, ULONG ulOriginOpId,
 							  ULONG scan_id, CColRefArray *pdrgpcrOutput,
-							  CColRef2dArray *pdrgpdrgpcrParts);
+							  CColRef2dArray *pdrgpdrgpcrParts,
+							  IMdIdArray *partition_mdids);
 
 	// ident accessors
 	EOperatorId
@@ -58,6 +62,12 @@ public:
 							  CReqdPropPlan *prpplan,
 							  IStatisticsArray *stats_ctxt) const override;
 
+	IMdIdArray *
+	GetPartitionMdids() const
+	{
+		return m_partition_mdids;
+	}
+
 	// conversion function
 	static CPhysicalDynamicTableScan *
 	PopConvert(COperator *pop)
@@ -66,6 +76,11 @@ public:
 		GPOS_ASSERT(EopPhysicalDynamicTableScan == pop->Eopid());
 
 		return dynamic_cast<CPhysicalDynamicTableScan *>(pop);
+	}
+
+	~CPhysicalDynamicTableScan() override
+	{
+		CRefCount::SafeRelease(m_partition_mdids);
 	}
 
 };	// class CPhysicalDynamicTableScan
