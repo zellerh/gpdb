@@ -106,8 +106,9 @@ CPropConstraint::FContradiction() const
 //
 //---------------------------------------------------------------------------
 CExpression *
-CPropConstraint::PexprScalarMappedFromEquivCols(CMemoryPool *mp,
-												CColRef *colref) const
+CPropConstraint::PexprScalarMappedFromEquivCols(
+	CMemoryPool *mp, CColRef *colref,
+	CPropConstraint *constraintsForOuterRefs) const
 {
 	if (NULL == m_pcnstr || NULL == m_phmcrcrs)
 	{
