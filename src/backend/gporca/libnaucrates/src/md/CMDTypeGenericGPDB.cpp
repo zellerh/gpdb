@@ -97,8 +97,7 @@ CMDTypeGenericGPDB::CMDTypeGenericGPDB(
 	m_mdid->AddRef();
 	m_datum_null = GPOS_NEW(m_mp) CDatumGenericGPDB(
 		m_mp, m_mdid, default_type_modifier, NULL /*pba*/, 0 /*length*/,
-		true /*constNull*/, 0 /*lValue */, 0 /*dValue */,
-		HasByte2IntMapping(this), HasByte2DoubleMapping(m_mdid));
+		true /*constNull*/, 0 /*lValue */, 0 /*dValue */);
 }
 
 //---------------------------------------------------------------------------
@@ -271,8 +270,7 @@ CMDTypeGenericGPDB::GetDatumForDXLConstVal(
 	m_mdid->AddRef();
 	return GPOS_NEW(m_mp) CDatumGenericGPDB(
 		m_mp, m_mdid, dxl_datum->TypeModifier(), dxl_datum->GetByteArray(),
-		dxl_datum->Length(), dxl_datum->IsNull(), lint_value, double_value,
-		is_mappable_to_lint, is_mappable_to_double);
+		dxl_datum->Length(), dxl_datum->IsNull(), lint_value, double_value);
 }
 
 //---------------------------------------------------------------------------
@@ -310,8 +308,7 @@ CMDTypeGenericGPDB::GetDatumForDXLDatum(CMemoryPool *mp,
 	return GPOS_NEW(m_mp) CDatumGenericGPDB(
 		mp, m_mdid, dxl_datum_generic->TypeModifier(),
 		dxl_datum_generic->GetByteArray(), dxl_datum_generic->Length(),
-		dxl_datum_generic->IsNull(), lint_value, double_value,
-		is_mappable_to_lint, is_mappable_to_double);
+		dxl_datum_generic->IsNull(), lint_value, double_value);
 }
 
 //---------------------------------------------------------------------------
@@ -502,9 +499,7 @@ CMDTypeGenericGPDB::CreateGenericNullDatum(CMemoryPool *mp,
 										  0,	 // source value buffer length
 										  true,	 // is NULL
 										  0,	 // LINT mapping for stats
-										  0.0,	 // CDouble mapping for stats
-										  HasByte2IntMapping(this),
-										  HasByte2DoubleMapping(MDId()));
+										  0.0);	 // CDouble mapping for stats
 }
 
 //---------------------------------------------------------------------------

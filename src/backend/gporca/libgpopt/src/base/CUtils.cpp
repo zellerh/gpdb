@@ -35,7 +35,6 @@
 #include "gpopt/operators/CExpressionPreprocessor.h"
 
 #include "naucrates/exception.h"
-#include "naucrates/base/CDatumGenericGPDB.h"
 #include "naucrates/base/IDatumBool.h"
 #include "naucrates/base/IDatumInt2.h"
 #include "naucrates/base/IDatumInt4.h"
@@ -46,6 +45,7 @@
 #include "naucrates/md/IMDScCmp.h"
 #include "naucrates/md/IMDType.h"
 #include "naucrates/md/IMDTypeBool.h"
+#include "naucrates/md/IMDTypeGeneric.h"
 #include "naucrates/md/IMDTypeInt2.h"
 #include "naucrates/md/IMDTypeInt4.h"
 #include "naucrates/md/IMDTypeInt8.h"
