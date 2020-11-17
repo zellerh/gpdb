@@ -281,11 +281,11 @@ CDatumGenericGPDB::OsPrint(IOstream &os) const
 }
 
 //---------------------------------------------------------------------------
-//  @function:
-//      CDatumGenericGPDB::IsDatumMappableToDouble
+//	@function:
+//		CDatumGenericGPDB::IsDatumMappableToDouble
 //
-//  @doc:
-//      For statistics computation, can this datum be mapped to a CDouble
+//	@doc:
+//		For statistics computation, can this datum be mapped to a CDouble
 //
 //---------------------------------------------------------------------------
 BOOL
@@ -295,11 +295,11 @@ CDatumGenericGPDB::IsDatumMappableToDouble() const
 }
 
 //---------------------------------------------------------------------------
-//  @function:
-//      CDatumGenericGPDB::IsDatumMappableToLINT
+//	@function:
+//		CDatumGenericGPDB::IsDatumMappableToLINT
 //
-//  @doc:
-//      For statistics computation, can this datum be mapped to a LINT
+//	@doc:
+//		For statistics computation, can this datum be mapped to a LINT
 //
 //---------------------------------------------------------------------------
 BOOL

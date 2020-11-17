@@ -1628,7 +1628,7 @@ CUtils::PexprScalarConstNull(CMemoryPool *mp, const IMDType *typ,
 		case IMDType::EtiInt2:
 		{
 			const IMDTypeInt2 *pmdtypeint2 =
-				dynamic_cast<const IMDTypeInt2 *>(typ);
+				static_cast<const IMDTypeInt2 *>(typ);
 			datum = pmdtypeint2->CreateInt2Datum(mp, 0, true);
 		}
 		break;
@@ -1636,7 +1636,7 @@ CUtils::PexprScalarConstNull(CMemoryPool *mp, const IMDType *typ,
 		case IMDType::EtiInt4:
 		{
 			const IMDTypeInt4 *pmdtypeint4 =
-				dynamic_cast<const IMDTypeInt4 *>(typ);
+				static_cast<const IMDTypeInt4 *>(typ);
 			datum = pmdtypeint4->CreateInt4Datum(mp, 0, true);
 		}
 		break;
@@ -1644,7 +1644,7 @@ CUtils::PexprScalarConstNull(CMemoryPool *mp, const IMDType *typ,
 		case IMDType::EtiInt8:
 		{
 			const IMDTypeInt8 *pmdtypeint8 =
-				dynamic_cast<const IMDTypeInt8 *>(typ);
+				static_cast<const IMDTypeInt8 *>(typ);
 			datum = pmdtypeint8->CreateInt8Datum(mp, 0, true);
 		}
 		break;
@@ -1652,15 +1652,14 @@ CUtils::PexprScalarConstNull(CMemoryPool *mp, const IMDType *typ,
 		case IMDType::EtiBool:
 		{
 			const IMDTypeBool *pmdtypebool =
-				dynamic_cast<const IMDTypeBool *>(typ);
+				static_cast<const IMDTypeBool *>(typ);
 			datum = pmdtypebool->CreateBoolDatum(mp, false, true);
 		}
 		break;
 
 		case IMDType::EtiOid:
 		{
-			const IMDTypeOid *pmdtypeoid =
-				dynamic_cast<const IMDTypeOid *>(typ);
+			const IMDTypeOid *pmdtypeoid = static_cast<const IMDTypeOid *>(typ);
 			datum = pmdtypeoid->CreateOidDatum(mp, 0, true);
 		}
 		break;
@@ -1668,7 +1667,7 @@ CUtils::PexprScalarConstNull(CMemoryPool *mp, const IMDType *typ,
 		case IMDType::EtiGeneric:
 		{
 			const IMDTypeGeneric *pmdtypegeneric =
-				dynamic_cast<const IMDTypeGeneric *>(typ);
+				static_cast<const IMDTypeGeneric *>(typ);
 			datum = pmdtypegeneric->CreateGenericNullDatum(mp, type_modifier);
 		}
 		break;

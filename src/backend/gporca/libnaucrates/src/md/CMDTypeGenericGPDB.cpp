@@ -249,22 +249,18 @@ CMDTypeGenericGPDB::GetDatumForDXLConstVal(
 {
 	CDXLDatumGeneric *dxl_datum =
 		CDXLDatumGeneric::Cast(const_cast<CDXLDatum *>(dxl_op->GetDatumVal()));
-	BOOL is_mappable_to_lint = false;
-	BOOL is_mappable_to_double = false;
 	GPOS_ASSERT(NULL != dxl_op);
 
 	LINT lint_value = 0;
 	if (dxl_datum->IsDatumMappableToLINT())
 	{
 		lint_value = dxl_datum->GetLINTMapping();
-		is_mappable_to_lint = true;
 	}
 
 	CDouble double_value = 0;
 	if (dxl_datum->IsDatumMappableToDouble())
 	{
 		double_value = dxl_datum->GetDoubleMapping();
-		is_mappable_to_double = true;
 	}
 
 	m_mdid->AddRef();
@@ -288,21 +284,17 @@ CMDTypeGenericGPDB::GetDatumForDXLDatum(CMemoryPool *mp,
 	m_mdid->AddRef();
 	CDXLDatumGeneric *dxl_datum_generic =
 		CDXLDatumGeneric::Cast(const_cast<CDXLDatum *>(dxl_datum));
-	BOOL is_mappable_to_lint = false;
-	BOOL is_mappable_to_double = false;
 
 	LINT lint_value = 0;
 	if (dxl_datum_generic->IsDatumMappableToLINT())
 	{
 		lint_value = dxl_datum_generic->GetLINTMapping();
-		is_mappable_to_lint = true;
 	}
 
 	CDouble double_value = 0;
 	if (dxl_datum_generic->IsDatumMappableToDouble())
 	{
 		double_value = dxl_datum_generic->GetDoubleMapping();
-		is_mappable_to_double = true;
 	}
 
 	return GPOS_NEW(m_mp) CDatumGenericGPDB(
@@ -475,12 +467,12 @@ CMDTypeGenericGPDB::GetDXLDatumNull(CMemoryPool *mp) const
 }
 
 //---------------------------------------------------------------------------
-//  @function:
-//      CMDTypeGenericGPDB::HasByte2IntMapping
+//	@function:
+//		CMDTypeGenericGPDB::HasByte2IntMapping
 //
-//  @doc:
-//      Does the datum of this type need bytea -> Lint mapping for
-//      statistics computation
+//	@doc:
+//		Does the datum of this type need bytea -> Lint mapping for
+//		statistics computation
 //---------------------------------------------------------------------------
 BOOL
 CMDTypeGenericGPDB::HasByte2IntMapping(const IMDType *mdtype)
