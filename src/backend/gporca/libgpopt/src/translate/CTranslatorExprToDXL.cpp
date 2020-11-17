@@ -1211,69 +1211,15 @@ CTranslatorExprToDXL::PdxlnDynamicBitmapTableScan(
 //---------------------------------------------------------------------------
 CDXLNode *
 CTranslatorExprToDXL::PdxlnDynamicBitmapTableScan(
-	CExpression *pexprScan, CColRefArray *colref_array,
-	CDistributionSpecArray *pdrgpdsBaseTables, CExpression *pexprScalar,
-	CDXLPhysicalProperties *dxl_properties)
+	CExpression *pexprScan GPOS_UNUSED, CColRefArray *colref_array GPOS_UNUSED,
+	CDistributionSpecArray *pdrgpdsBaseTables GPOS_UNUSED,
+	CExpression *pexprScalar GPOS_UNUSED,
+	CDXLPhysicalProperties *dxl_properties GPOS_UNUSED)
 {
 	GPOS_ASSERT(NULL != pexprScan);
 
-	CPhysicalDynamicBitmapTableScan *pop =
-		CPhysicalDynamicBitmapTableScan::PopConvert(pexprScan->Pop());
-	CColRefArray *pdrgpcrOutput = pop->PdrgpcrOutput();
-
-	CDXLTableDescr *table_descr =
-		MakeDXLTableDescr(pop->Ptabdesc(), pdrgpcrOutput, pexprScan->Prpp());
-	CDXLPhysicalDynamicBitmapTableScan *pdxlopScan =
-		GPOS_NEW(m_mp) CDXLPhysicalDynamicBitmapTableScan(
-			m_mp, table_descr, pop->UlSecondaryScanId(), pop->ScanId());
-
-	CDXLNode *pdxlnScan = GPOS_NEW(m_mp) CDXLNode(m_mp, pdxlopScan);
-
-	// construct plan costs
-	if (NULL == dxl_properties)
-	{
-		dxl_properties = GetProperties(pexprScan);
-	}
-	pdxlnScan->SetProperties(dxl_properties);
-
-	// translate predicates into DXL filter
-	CDXLNode *pdxlnCond = NULL;
-	if (NULL != pexprScalar)
-	{
-		pdxlnCond = PdxlnScalar(pexprScalar);
-	}
-	CDXLNode *filter_dxlnode = PdxlnFilter(pdxlnCond);
-
-	CExpression *pexprRecheckCond = (*pexprScan)[0];
-	CDXLNode *pdxlnRecheckCond = PdxlnScalar(pexprRecheckCond);
-	CDXLNode *pdxlnRecheckCondFilter = GPOS_NEW(m_mp)
-		CDXLNode(m_mp, GPOS_NEW(m_mp) CDXLScalarRecheckCondFilter(m_mp));
-	pdxlnRecheckCondFilter->AddChild(pdxlnRecheckCond);
-
-	// translate bitmap access path
-	CDXLNode *pdxlnBitmapAccessPath = PdxlnScalar((*pexprScan)[1]);
-
-	// build projection list
-	CColRefSet *pcrsOutput = pexprScan->Prpp()->PcrsRequired();
-	AddBitmapFilterColumns(m_mp, pop, pexprRecheckCond, pexprScalar,
-						   pcrsOutput);
-	CDXLNode *proj_list_dxlnode = PdxlnProjList(pcrsOutput, colref_array);
-
-	pdxlnScan->AddChild(proj_list_dxlnode);
-	pdxlnScan->AddChild(filter_dxlnode);
-	pdxlnScan->AddChild(pdxlnRecheckCondFilter);
-	pdxlnScan->AddChild(pdxlnBitmapAccessPath);
-
-#ifdef GPOS_DEBUG
-	pdxlnScan->GetOperator()->AssertValid(pdxlnScan,
-										  false /* validate_children */);
-#endif
-
-	CDistributionSpec *pds = pexprScan->GetDrvdPropPlan()->Pds();
-	pds->AddRef();
-	pdrgpdsBaseTables->Append(pds);
-
-	return pdxlnScan;
+	// GPDB_12_MERGE_FIXME: Implement support for partitioned indexes
+	std::terminate();
 }
 
 //---------------------------------------------------------------------------
@@ -1287,83 +1233,17 @@ CTranslatorExprToDXL::PdxlnDynamicBitmapTableScan(
 //---------------------------------------------------------------------------
 CDXLNode *
 CTranslatorExprToDXL::PdxlnDynamicIndexScan(
-	CExpression *pexprDIS, CColRefArray *colref_array,
-	CDXLPhysicalProperties *dxl_properties, CReqdPropPlan *prpp)
+	CExpression *pexprDIS GPOS_ASSERTS_ONLY,
+	CColRefArray *colref_array GPOS_UNUSED,
+	CDXLPhysicalProperties *dxl_properties GPOS_ASSERTS_ONLY,
+	CReqdPropPlan *prpp GPOS_ASSERTS_ONLY)
 {
 	GPOS_ASSERT(NULL != pexprDIS);
 	GPOS_ASSERT(NULL != dxl_properties);
 	GPOS_ASSERT(NULL != prpp);
 
-	CPhysicalDynamicIndexScan *popDIS =
-		CPhysicalDynamicIndexScan::PopConvert(pexprDIS->Pop());
-	CColRefArray *pdrgpcrOutput = popDIS->PdrgpcrOutput();
-
-	// translate table descriptor
-	CDXLTableDescr *table_descr =
-		MakeDXLTableDescr(popDIS->Ptabdesc(), pdrgpcrOutput, pexprDIS->Prpp());
-
-	// create index descriptor
-	CIndexDescriptor *pindexdesc = popDIS->Pindexdesc();
-	CMDName *pmdnameIndex =
-		GPOS_NEW(m_mp) CMDName(m_mp, pindexdesc->Name().Pstr());
-	IMDId *pmdidIndex = pindexdesc->MDId();
-	pmdidIndex->AddRef();
-	CDXLIndexDescr *dxl_index_descr =
-		GPOS_NEW(m_mp) CDXLIndexDescr(pmdidIndex, pmdnameIndex);
-
-	// TODO: vrgahavan; we assume that the index are always forward access.
-	// create the physical index scan operator
-	CDXLNode *pdxlnDIS = GPOS_NEW(m_mp)
-		CDXLNode(m_mp, GPOS_NEW(m_mp) CDXLPhysicalDynamicIndexScan(
-						   m_mp, table_descr, popDIS->UlSecondaryScanId(),
-						   popDIS->ScanId(), dxl_index_descr, EdxlisdForward));
-
-	// set plan costs
-	pdxlnDIS->SetProperties(dxl_properties);
-
-	// construct projection list
-	CColRefSet *pcrsOutput = prpp->PcrsRequired();
-	CDXLNode *pdxlnPrL = PdxlnProjList(pcrsOutput, colref_array);
-
-	// translate index predicates
-	CExpression *pexprCond = (*pexprDIS)[0];
-	CDXLNode *pdxlnIndexCondList = GPOS_NEW(m_mp)
-		CDXLNode(m_mp, GPOS_NEW(m_mp) CDXLScalarIndexCondList(m_mp));
-
-	CExpressionArray *pdrgpexprConds =
-		CPredicateUtils::PdrgpexprConjuncts(m_mp, pexprCond);
-	const ULONG length = pdrgpexprConds->Size();
-	for (ULONG ul = 0; ul < length; ul++)
-	{
-		CExpression *pexprIndexCond = (*pdrgpexprConds)[ul];
-		CDXLNode *pdxlnIndexCond = PdxlnScalar(pexprIndexCond);
-		pdxlnIndexCondList->AddChild(pdxlnIndexCond);
-	}
-	pdrgpexprConds->Release();
-
-	CDXLNode *pdxlnResidualCond = NULL;
-	if (2 == pexprDIS->Arity())
-	{
-		// translate residual predicates into the filter node
-		CExpression *pexprResidualCond = (*pexprDIS)[1];
-		if (COperator::EopScalarConst != pexprResidualCond->Pop()->Eopid())
-		{
-			pdxlnResidualCond = PdxlnScalar(pexprResidualCond);
-		}
-	}
-
-	CDXLNode *filter_dxlnode = PdxlnFilter(pdxlnResidualCond);
-
-	pdxlnDIS->AddChild(pdxlnPrL);
-	pdxlnDIS->AddChild(filter_dxlnode);
-	pdxlnDIS->AddChild(pdxlnIndexCondList);
-
-#ifdef GPOS_DEBUG
-	pdxlnDIS->GetOperator()->AssertValid(pdxlnDIS,
-										 false /* validate_children */);
-#endif
-
-	return pdxlnDIS;
+	// GPDB_12_MERGE_FIXME: Implement support for partitioned indexes
+	std::terminate();
 }
 
 
@@ -1380,9 +1260,7 @@ CDXLNode *
 CTranslatorExprToDXL::PdxlnDynamicIndexScan(
 	CExpression *pexprDIS, CColRefArray *colref_array,
 	CDistributionSpecArray *pdrgpdsBaseTables,
-	ULONG *,  // pulNonGatherMotions,
-	BOOL *	  // pfDML
-)
+	ULONG *pulNonGatherMotions GPOS_UNUSED, BOOL *pfDML GPOS_UNUSED)
 {
 	GPOS_ASSERT(NULL != pexprDIS);
 

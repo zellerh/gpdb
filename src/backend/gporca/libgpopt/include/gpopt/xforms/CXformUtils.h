@@ -76,9 +76,7 @@ private:
 	typedef CLogical *(*PDynamicIndexOpConstructor)(
 		CMemoryPool *mp, const IMDIndex *pmdindex, CTableDescriptor *ptabdesc,
 		ULONG ulOriginOpId, CName *pname, ULONG ulPartIndex,
-		CColRefArray *pdrgpcrOutput, CColRef2dArray *pdrgpdrgpcrPart,
-		ULONG ulSecondaryPartIndexId, CPartConstraint *ppartcnstr,
-		CPartConstraint *ppartcnstrRel);
+		CColRefArray *pdrgpcrOutput, CColRef2dArray *pdrgpdrgpcrPart);
 
 	typedef CLogical *(*PStaticIndexOpConstructor)(
 		CMemoryPool *mp, const IMDIndex *pmdindex, CTableDescriptor *ptabdesc,
@@ -223,17 +221,16 @@ private:
 
 	// create a dynamic operator for a btree index plan
 	static CLogical *
-	PopDynamicBtreeIndexOpConstructor(
-		CMemoryPool *mp, const IMDIndex *pmdindex, CTableDescriptor *ptabdesc,
-		ULONG ulOriginOpId, CName *pname, ULONG ulPartIndex,
-		CColRefArray *pdrgpcrOutput, CColRef2dArray *pdrgpdrgpcrPart,
-		ULONG ulSecondaryPartIndexId, CPartConstraint *ppartcnstr,
-		CPartConstraint *ppartcnstrRel)
+	PopDynamicBtreeIndexOpConstructor(CMemoryPool *mp, const IMDIndex *pmdindex,
+									  CTableDescriptor *ptabdesc,
+									  ULONG ulOriginOpId, CName *pname,
+									  ULONG ulPartIndex,
+									  CColRefArray *pdrgpcrOutput,
+									  CColRef2dArray *pdrgpdrgpcrPart)
 	{
 		return GPOS_NEW(mp) CLogicalDynamicIndexGet(
 			mp, pmdindex, ptabdesc, ulOriginOpId, pname, ulPartIndex,
-			pdrgpcrOutput, pdrgpdrgpcrPart, ulSecondaryPartIndexId, ppartcnstr,
-			ppartcnstrRel);
+			pdrgpcrOutput, pdrgpdrgpcrPart);
 	}
 
 	//	create a static operator for a btree index plan

@@ -33,14 +33,11 @@ using namespace gpopt;
 //
 //---------------------------------------------------------------------------
 CPhysicalDynamicTableScan::CPhysicalDynamicTableScan(
-	CMemoryPool *mp, BOOL is_partial, const CName *pnameAlias,
-	CTableDescriptor *ptabdesc, ULONG ulOriginOpId, ULONG scan_id,
-	CColRefArray *pdrgpcrOutput, CColRef2dArray *pdrgpdrgpcrParts,
-	ULONG ulSecondaryScanId, CPartConstraint *ppartcnstr,
-	CPartConstraint *ppartcnstrRel)
-	: CPhysicalDynamicScan(mp, is_partial, ptabdesc, ulOriginOpId, pnameAlias,
-						   scan_id, pdrgpcrOutput, pdrgpdrgpcrParts,
-						   ulSecondaryScanId, ppartcnstr, ppartcnstrRel)
+	CMemoryPool *mp, const CName *pnameAlias, CTableDescriptor *ptabdesc,
+	ULONG ulOriginOpId, ULONG scan_id, CColRefArray *pdrgpcrOutput,
+	CColRef2dArray *pdrgpdrgpcrParts)
+	: CPhysicalDynamicScan(mp, ptabdesc, ulOriginOpId, pnameAlias, scan_id,
+						   pdrgpcrOutput, pdrgpdrgpcrParts)
 {
 }
 

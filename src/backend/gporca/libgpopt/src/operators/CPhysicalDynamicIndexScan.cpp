@@ -35,14 +35,11 @@ using namespace gpopt;
 //
 //---------------------------------------------------------------------------
 CPhysicalDynamicIndexScan::CPhysicalDynamicIndexScan(
-	CMemoryPool *mp, BOOL is_partial, CIndexDescriptor *pindexdesc,
-	CTableDescriptor *ptabdesc, ULONG ulOriginOpId, const CName *pnameAlias,
-	CColRefArray *pdrgpcrOutput, ULONG scan_id, CColRef2dArray *pdrgpdrgpcrPart,
-	ULONG ulSecondaryScanId, CPartConstraint *ppartcnstr,
-	CPartConstraint *ppartcnstrRel, COrderSpec *pos)
-	: CPhysicalDynamicScan(mp, is_partial, ptabdesc, ulOriginOpId, pnameAlias,
-						   scan_id, pdrgpcrOutput, pdrgpdrgpcrPart,
-						   ulSecondaryScanId, ppartcnstr, ppartcnstrRel),
+	CMemoryPool *mp, CIndexDescriptor *pindexdesc, CTableDescriptor *ptabdesc,
+	ULONG ulOriginOpId, const CName *pnameAlias, CColRefArray *pdrgpcrOutput,
+	ULONG scan_id, CColRef2dArray *pdrgpdrgpcrPart, COrderSpec *pos)
+	: CPhysicalDynamicScan(mp, ptabdesc, ulOriginOpId, pnameAlias, scan_id,
+						   pdrgpcrOutput, pdrgpdrgpcrPart),
 	  m_pindexdesc(pindexdesc),
 	  m_pos(pos)
 {
@@ -148,13 +145,8 @@ CPhysicalDynamicIndexScan::OsPrint(IOstream &os) const
 	os << ")";
 	os << ", Columns: [";
 	CUtils::OsPrintDrgPcr(os, PdrgpcrOutput());
-	os << "] Scan Id: " << ScanId() << "." << UlSecondaryScanId();
+	os << "] Scan Id: " << ScanId();
 
-	if (!Ppartcnstr()->IsConstraintUnbounded())
-	{
-		os << ", ";
-		Ppartcnstr()->OsPrint(os);
-	}
 
 	return os;
 }

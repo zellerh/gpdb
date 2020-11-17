@@ -36,24 +36,16 @@ using namespace gpos;
 //
 //---------------------------------------------------------------------------
 CPhysicalDynamicScan::CPhysicalDynamicScan(
-	CMemoryPool *mp, BOOL is_partial, CTableDescriptor *ptabdesc,
-	ULONG ulOriginOpId, const CName *pnameAlias, ULONG scan_id,
-	CColRefArray *pdrgpcrOutput, CColRef2dArray *pdrgpdrgpcrParts,
-	ULONG ulSecondaryScanId, CPartConstraint *ppartcnstr,
-	CPartConstraint *ppartcnstrRel)
+	CMemoryPool *mp, CTableDescriptor *ptabdesc, ULONG ulOriginOpId,
+	const CName *pnameAlias, ULONG scan_id, CColRefArray *pdrgpcrOutput,
+	CColRef2dArray *pdrgpdrgpcrParts)
 	: CPhysicalScan(mp, pnameAlias, ptabdesc, pdrgpcrOutput),
 	  m_ulOriginOpId(ulOriginOpId),
-	  m_is_partial(is_partial),
 	  m_scan_id(scan_id),
-	  m_pdrgpdrgpcrPart(pdrgpdrgpcrParts),
-	  m_ulSecondaryScanId(ulSecondaryScanId),
-	  m_part_constraint(ppartcnstr),
-	  m_ppartcnstrRel(ppartcnstrRel)
+	  m_pdrgpdrgpcrPart(pdrgpdrgpcrParts)
 {
 	GPOS_ASSERT(NULL != pdrgpdrgpcrParts);
 	GPOS_ASSERT(0 < pdrgpdrgpcrParts->Size());
-	GPOS_ASSERT(NULL != ppartcnstr);
-	GPOS_ASSERT(NULL != ppartcnstrRel);
 }
 
 //---------------------------------------------------------------------------
@@ -67,8 +59,6 @@ CPhysicalDynamicScan::CPhysicalDynamicScan(
 CPhysicalDynamicScan::~CPhysicalDynamicScan()
 {
 	m_pdrgpdrgpcrPart->Release();
-	m_part_constraint->Release();
-	m_ppartcnstrRel->Release();
 }
 
 //---------------------------------------------------------------------------
@@ -113,13 +103,8 @@ CPhysicalDynamicScan::OsPrint(IOstream &os) const
 	m_ptabdesc->Name().OsPrint(os);
 	os << "), Columns: [";
 	CUtils::OsPrintDrgPcr(os, m_pdrgpcrOutput);
-	os << "] Scan Id: " << m_scan_id << "." << m_ulSecondaryScanId;
+	os << "] Scan Id: " << m_scan_id;
 
-	if (!m_part_constraint->IsConstraintUnbounded())
-	{
-		os << ", ";
-		m_part_constraint->OsPrint(os);
-	}
 
 	return os;
 }
