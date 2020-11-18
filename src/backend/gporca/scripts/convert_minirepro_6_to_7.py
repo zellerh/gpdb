@@ -78,9 +78,6 @@ def convert_insert_statement(infile, outfile):
 		if line_number in range(11,16):
 			# read the 5 operator oids and translate them into collation oids
 			oid_match = re.search("([0-9]*)::oid", line)
-			print("Line %s" % line)
-			print(("oid match result:", oid_match))
-			print("Found oid, value is %s" % oid_match.group(1))
 			col_oid = int(oid_match.group(1))
 			coll = collation_map.get(col_oid)
 			if coll is None:
