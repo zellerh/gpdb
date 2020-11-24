@@ -30,6 +30,10 @@ private:
 	// GPDB_12_MERGE_FIXME: Move this to the base class once supported by siblings
 	IMdIdArray *m_partition_mdids;
 
+	// Map of Root colref -> col index in child tabledesc
+	// per child partition in m_partition_mdid
+	ColRefToUlongMapArray *m_root_col_mapping_per_part = NULL;
+
 public:
 	CPhysicalDynamicTableScan(const CPhysicalDynamicTableScan &) = delete;
 
@@ -38,7 +42,8 @@ public:
 							  CTableDescriptor *ptabdesc, ULONG ulOriginOpId,
 							  ULONG scan_id, CColRefArray *pdrgpcrOutput,
 							  CColRef2dArray *pdrgpdrgpcrParts,
-							  IMdIdArray *partition_mdids);
+							  IMdIdArray *partition_mdids,
+							  ColRefToUlongMapArray *root_col_mapping_per_part);
 
 	// ident accessors
 	EOperatorId
@@ -68,6 +73,12 @@ public:
 		return m_partition_mdids;
 	}
 
+	ColRefToUlongMapArray *
+	GetRootColMappingPerPart() const
+	{
+		return m_root_col_mapping_per_part;
+	}
+
 	// conversion function
 	static CPhysicalDynamicTableScan *
 	PopConvert(COperator *pop)
@@ -81,6 +92,7 @@ public:
 	~CPhysicalDynamicTableScan() override
 	{
 		CRefCount::SafeRelease(m_partition_mdids);
+		CRefCount::SafeRelease(m_root_col_mapping_per_part);
 	}
 
 };	// class CPhysicalDynamicTableScan

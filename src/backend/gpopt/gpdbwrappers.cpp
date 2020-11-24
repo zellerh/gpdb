@@ -40,6 +40,7 @@ extern "C" {
 #include "utils/fmgroids.h"
 #include "utils/memutils.h"
 #include "partitioning/partdesc.h"
+#include "utils/partcache.h"
 }
 #define GP_WRAP_START                                            \
 	sigjmp_buf local_sigjmp_buf;                                 \

@@ -43,9 +43,6 @@
 #include "naucrates/statistics/CStatistics.h"
 #include "naucrates/statistics/CStatisticsUtils.h"
 
-// FIXME: Remove this include form here ASAP!
-#include "gpopt/translate/CTranslatorDXLToExpr.h"
-
 using namespace gpnaucrates;
 using namespace gpopt;
 using namespace gpmd;
@@ -1402,39 +1399,6 @@ CLogical::PcrsDist(CMemoryPool *mp, const CTableDescriptor *ptabdesc,
 	phmicr->Release();
 
 	return pcrsDist;
-}
-
-CConstraint *
-CLogical::PcnstrFromRelation(const IMDRelation *pmdrel,
-							 CColRefArray *pdrgpcrOutput)
-{
-	CMDAccessor *md_accessor = COptCtxt::PoctxtFromTLS()->Pmda();
-	CMemoryPool *mp = COptCtxt::PoctxtFromTLS()->Pmp();
-
-	CExpression *part_constraint_expr = NULL;
-
-	CDXLNode *dxlnode = pmdrel->MDPartConstraint();
-
-	if (NULL == dxlnode)
-	{
-		return NULL;
-	}
-
-	CTranslatorDXLToExpr dxltr(mp, md_accessor);
-	part_constraint_expr = dxltr.PexprTranslateScalar(dxlnode, pdrgpcrOutput);
-
-	GPOS_ASSERT(CUtils::FPredicate(part_constraint_expr));
-
-	CColRefSetArray *pdrgpcrsChild = NULL;
-	// Check constraints are satisfied if the check expression evaluates to
-	// true or NULL, so infer NULLs as true here.
-	CConstraint *cnstr = CConstraint::PcnstrFromScalarExpr(
-		mp, part_constraint_expr, &pdrgpcrsChild, true /* infer_nulls_as */);
-
-	CRefCount::SafeRelease(part_constraint_expr);
-	CRefCount::SafeRelease(pdrgpcrsChild);
-	GPOS_ASSERT(cnstr);
-	return cnstr;
 }
 
 // EOF

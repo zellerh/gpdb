@@ -1096,6 +1096,39 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 								 pexprScalarCond, dxl_properties);
 }
 
+// Construct a dxl table descr for a child partition
+CTableDescriptor *
+CTranslatorExprToDXL::MakeTableDescForPart(const IMDRelation *part,
+										   CTableDescriptor *root_table_desc)
+{
+	IMDId *part_mdid = part->MDId();
+	part_mdid->AddRef();
+
+	CTableDescriptor *table_descr = GPOS_NEW(m_mp) CTableDescriptor(
+		m_mp, part_mdid, part->Mdname().GetMDName(),
+		part->ConvertHashToRandom(), part->GetRelDistribution(),
+		part->RetrieveRelStorageType(), root_table_desc->GetExecuteAsUserId());
+
+	for (ULONG ul = 0; ul < part->ColumnCount(); ++ul)
+	{
+		const IMDColumn *mdCol = part->GetMdCol(ul);
+		if (mdCol->IsDropped())
+		{
+			continue;
+		}
+		CWStringConst strColName{m_mp,
+								 mdCol->Mdname().GetMDName()->GetBuffer()};
+		CName colname(m_mp, &strColName);
+		CColumnDescriptor *coldesc = GPOS_NEW(m_mp)
+			CColumnDescriptor(m_mp, m_pmda->RetrieveType(mdCol->MdidType()),
+							  mdCol->TypeModifier(), colname, mdCol->AttrNum(),
+							  mdCol->IsNullable(), mdCol->Length());
+		table_descr->AddColumn(coldesc);
+	}
+
+	return table_descr;
+}
+
 //---------------------------------------------------------------------------
 //	@function:
 //		CTranslatorExprToDXL::PdxlnDynamicTableScan
@@ -1116,7 +1149,6 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 
 	CPhysicalDynamicTableScan *popDTS =
 		CPhysicalDynamicTableScan::PopConvert(pexprDTS->Pop());
-	CColRefArray *pdrgpcrOutput = popDTS->PdrgpcrOutput();
 
 	// construct plan costs
 	CDXLPhysicalProperties *pdxlpropDTS = GetProperties(pexprDTS);
@@ -1140,18 +1172,7 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 	GPOS_ASSERT(NULL != pexprDTS->Prpp());
 
 	CColRefSet *pcrsOutput = pexprDTS->Prpp()->PcrsRequired();
-	CDXLNode *pdxlnPrL = PdxlnProjList(pcrsOutput, colref_array);
-
-	// construct the filter
-	CDXLNode *filter_dxlnode = NULL;
-	{
-		CDXLNode *pdxlnCond = NULL;
-		if (NULL != pexprScalarCond)
-		{
-			pdxlnCond = PdxlnScalar(pexprScalarCond);
-		}
-		filter_dxlnode = PdxlnFilter(pdxlnCond);
-	}
+	CDXLNode *pdxlnPrLAppend = PdxlnProjList(pcrsOutput, colref_array);
 
 	CDXLNode *pdxlnResult = NULL;
 	IMdIdArray *part_mdids = popDTS->GetPartitionMdids();
@@ -1161,8 +1182,13 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 		pdxlnResult = GPOS_NEW(m_mp) CDXLNode(
 			m_mp, GPOS_NEW(m_mp) CDXLPhysicalAppend(m_mp, false, false));
 		pdxlnResult->SetProperties(pdxlpropDTS);
-		pdxlnResult->AddChild(pdxlnPrL);
+		pdxlnResult->AddChild(pdxlnPrLAppend);
 		pdxlnResult->AddChild(PdxlnFilter(NULL));
+	}
+	else
+	{
+		GPOS_RTL_ASSERT(part_mdids != NULL && part_mdids->Size() == 1 &&
+						"DTS has no partitions to scan!");
 	}
 
 	for (ULONG ul = 0; ul < part_mdids->Size(); ++ul)
@@ -1170,27 +1196,22 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 		IMDId *part_mdid = (*part_mdids)[ul];
 		const IMDRelation *part = m_pmda->RetrieveRel(part_mdid);
 
-		part_mdid->AddRef();
-		// Construct a new table descr for each child partition TableScan
-		CTableDescriptor *table_descr = GPOS_NEW(m_mp) CTableDescriptor(
-			m_mp, part_mdid, part->Mdname().GetMDName(),
-			part->ConvertHashToRandom(), part->GetRelDistribution(),
-			part->RetrieveRelStorageType(),
-			popDTS->Ptabdesc()->GetExecuteAsUserId());
+		CTableDescriptor *part_tabdesc =
+			MakeTableDescForPart(part, pexprDTS->DeriveTableDescriptor());
 
-		CColumnDescriptorArray *dts_col_desc =
-			popDTS->Ptabdesc()->Pdrgpcoldesc();
-		for (ULONG ul = 0; ul < dts_col_desc->Size(); ul++)
+		// create new colrefs for every child partition
+		CColRefArray *part_colrefs = GPOS_NEW(m_mp) CColRefArray(m_mp);
+		for (ULONG ul = 0; ul < part_tabdesc->ColumnCount(); ++ul)
 		{
-			CColumnDescriptor *col_desc = (*dts_col_desc)[ul];
-			col_desc->AddRef();
-			table_descr->AddColumn(col_desc);
+			const CColumnDescriptor *cd = part_tabdesc->Pcoldesc(ul);
+			CColRef *cr = m_pcf->PcrCreate(cd->RetrieveType(),
+										   cd->TypeModifier(), cd->Name());
+			part_colrefs->Append(cr);
 		}
 
 		CDXLTableDescr *dxl_table_descr =
-			MakeDXLTableDescr(table_descr, pdrgpcrOutput, pexprDTS->Prpp());
-		table_descr->Release();
-
+			MakeDXLTableDescr(part_tabdesc, part_colrefs, pexprDTS->Prpp());
+		part_tabdesc->Release();
 		// Finally create the TableScan DXL node
 		CDXLNode *dxlnode = GPOS_NEW(m_mp) CDXLNode(
 			m_mp, GPOS_NEW(m_mp) CDXLPhysicalTableScan(m_mp, dxl_table_descr));
@@ -1202,10 +1223,16 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 		// construct projection list - same as the upper Append node
 		GPOS_ASSERT(NULL != pexprDTS->Prpp());
 
-		pdxlnPrL->AddRef();
+		auto root_col_mapping = (*popDTS->GetRootColMappingPerPart())[ul];
+
+		CDXLNode *pdxlnPrL = PdxlnProjListForChildPart(
+			root_col_mapping, part_colrefs, pcrsOutput, colref_array);
 		dxlnode->AddChild(pdxlnPrL);  // project list
 
-		filter_dxlnode->AddRef();
+		// construct the filter
+		CDXLNode *filter_dxlnode =
+			PdxlnFilterForChildPart(root_col_mapping, part_colrefs,
+									popDTS->PdrgpcrOutput(), pexprScalarCond);
 		dxlnode->AddChild(filter_dxlnode);	// filter
 
 		if (NULL == pdxlnResult)
@@ -1214,7 +1241,6 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 			pdxlnResult = dxlnode;
 			GPOS_ASSERT(1 == part_mdids->Size());
 			CRefCount::SafeRelease(pdxlpropDTS);
-			CRefCount::SafeRelease(pdxlnPrL);
 		}
 		else
 		{
@@ -1222,8 +1248,6 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 			pdxlnResult->AddChild(dxlnode);
 		}
 	}
-
-	CRefCount::SafeRelease(filter_dxlnode);
 
 	CDistributionSpec *pds = pexprDTS->GetDrvdPropPlan()->Pds();
 	pds->AddRef();
@@ -3769,7 +3793,8 @@ CTranslatorExprToDXL::StoreIndexNLJOuterRefs(CPhysical *pop)
 		if (NULL == m_phmcrdxlnIndexLookup->Find(colref))
 		{
 			CDXLNode *dxlnode = CTranslatorExprToDXLUtils::PdxlnIdent(
-				m_mp, m_phmcrdxln, m_phmcrdxlnIndexLookup, colref);
+				m_mp, m_phmcrdxln, m_phmcrdxlnIndexLookup, m_phmcrulPartColId,
+				colref);
 #ifdef GPOS_DEBUG
 			BOOL fInserted =
 #endif	// GPOS_DEBUG
@@ -6064,7 +6089,7 @@ CTranslatorExprToDXL::PdxlnScId(CExpression *pexprIdent)
 	CColRef *colref = const_cast<CColRef *>(popScId->Pcr());
 
 	return CTranslatorExprToDXLUtils::PdxlnIdent(
-		m_mp, m_phmcrdxln, m_phmcrdxlnIndexLookup, colref);
+		m_mp, m_phmcrdxln, m_phmcrdxlnIndexLookup, m_phmcrulPartColId, colref);
 }
 
 //---------------------------------------------------------------------------
@@ -7107,13 +7132,9 @@ CTranslatorExprToDXL::PdxlnFilter(CDXLNode *pdxlnCond)
 //
 //---------------------------------------------------------------------------
 CDXLTableDescr *
-CTranslatorExprToDXL::MakeDXLTableDescr(const CTableDescriptor *ptabdesc,
-										const CColRefArray *pdrgpcrOutput,
-										const CReqdPropPlan *
-#ifdef GPOS_DEBUG
-											reqd_prop_plan
-#endif
-)
+CTranslatorExprToDXL::MakeDXLTableDescr(
+	const CTableDescriptor *ptabdesc, const CColRefArray *pdrgpcrOutput,
+	const CReqdPropPlan *reqd_prop_plan GPOS_ASSERTS_ONLY)
 {
 	GPOS_ASSERT(NULL != ptabdesc);
 	GPOS_ASSERT_IMP(NULL != pdrgpcrOutput,
@@ -7247,6 +7268,80 @@ CTranslatorExprToDXL::GetProperties(const CExpression *pexpr)
 
 	return dxl_properties;
 }
+
+
+CDXLNode *
+CTranslatorExprToDXL::PdxlnProjListForChildPart(
+	const ColRefToUlongMap *root_col_mapping, const CColRefArray *part_colrefs,
+	const CColRefSet *reqd_colrefs, const CColRefArray *colref_array)
+{
+	CColRefArray *mapped_colrefs = GPOS_NEW(m_mp) CColRefArray(m_mp);
+	CColRefSet *pcrs = GPOS_NEW(m_mp) CColRefSet(m_mp);
+	if (NULL != colref_array)
+	{
+		for (ULONG i = 0; i < colref_array->Size(); ++i)
+		{
+			CColRef *cr = (*colref_array)[i];
+			ULONG *idx = root_col_mapping->Find(cr);
+			GPOS_ASSERT(NULL != idx);
+			CColRef *mapped_cr = (*part_colrefs)[*idx];
+			mapped_colrefs->Append(mapped_cr);
+			pcrs->Include(mapped_cr);
+		}
+	}
+
+	CColRefSetIter crsi(*reqd_colrefs);
+	while (crsi.Advance())
+	{
+		CColRef *cr = crsi.Pcr();
+		ULONG *idx = root_col_mapping->Find(cr);
+		GPOS_ASSERT(NULL != idx);
+		CColRef *mapped_cr = (*part_colrefs)[*idx];
+		if (!pcrs->FMember(mapped_cr))
+		{
+			mapped_colrefs->Append(mapped_cr);
+		}
+	}
+
+	CColRefSet *empty_set = GPOS_NEW(m_mp) CColRefSet(m_mp);
+	CDXLNode *pdxlnPrL = PdxlnProjList(empty_set, mapped_colrefs);
+	empty_set->Release();
+	return pdxlnPrL;
+}
+
+CDXLNode *
+CTranslatorExprToDXL::PdxlnFilterForChildPart(
+	const ColRefToUlongMap *root_col_mapping, const CColRefArray *part_colrefs,
+	const CColRefArray *colref_array, CExpression *pred)
+{
+	GPOS_ASSERT(part_colrefs->Size() == colref_array->Size());
+
+	// Set up a temporary col->ul mapping for translating the filter
+	m_phmcrulPartColId = GPOS_NEW(m_mp) ColRefToUlongMap(m_mp);
+
+	for (ULONG i = 0; i < colref_array->Size(); ++i)
+	{
+		CColRef *cr = (*colref_array)[i];
+		ULONG *idx = root_col_mapping->Find(cr);
+		GPOS_ASSERT(NULL != idx);
+
+		CColRef *mapped_cr = (*part_colrefs)[*idx];
+		m_phmcrulPartColId->Insert(cr, GPOS_NEW(m_mp) ULONG(mapped_cr->Id()));
+	}
+
+	CDXLNode *pdxlnCond = NULL;
+	if (NULL != pred)
+	{
+		pdxlnCond = PdxlnScalar(pred);
+	}
+
+	// clean up the temporary mapping
+	m_phmcrulPartColId->Release();
+	m_phmcrulPartColId = NULL;
+
+	return PdxlnFilter(pdxlnCond);
+}
+
 
 //---------------------------------------------------------------------------
 //	@function:

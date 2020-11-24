@@ -35,6 +35,15 @@ private:
 	// GPDB_12_MERGE_FIXME: Move this to the base class once supported by siblings
 	IMdIdArray *m_partition_mdids;
 
+	// Map of Root colref -> col index in child tabledesc
+	// per child partition in m_partition_mdid
+	ColRefToUlongMapArray *m_root_col_mapping_per_part = NULL;
+
+	// Construct a mapping from each column in root table to an index in each
+	// child partition's table descr by matching column names$
+	static ColRefToUlongMapArray *ConstructRootColMappingPerPart(
+		CMemoryPool *mp, CColRefArray *root_cols, IMdIdArray *partition_mdids);
+
 public:
 	CLogicalDynamicGet(const CLogicalDynamicGet &) = delete;
 
@@ -81,6 +90,12 @@ public:
 	GetPartitionMdids() const
 	{
 		return m_partition_mdids;
+	}
+
+	ColRefToUlongMapArray *
+	GetRootColMappingPerPart() const
+	{
+		return m_root_col_mapping_per_part;
 	}
 
 	void

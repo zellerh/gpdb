@@ -1889,6 +1889,8 @@ CTranslatorRelcacheToDXL::RetrieveCheckConstraints(CMemoryPool *mp,
 		CMDIdGPDB *mdid_col_type = CMDIdGPDB::CastMdid(md_col->MdidType());
 		mdid_col_type->AddRef();
 
+		// GPDB_12_MERGE_FIXME: Skip dropped columns similar to RetrievePartConstraintForRel()
+
 		// create a column descriptor for the column
 		CDXLColDescr *dxl_col_descr = GPOS_NEW(mp) CDXLColDescr(
 			md_colname, ul + 1 /*colid*/, md_col->AttrNum(), mdid_col_type,
@@ -3175,9 +3177,15 @@ CTranslatorRelcacheToDXL::RetrievePartConstraintForRel(
 	CAutoRef<CDXLColDescrArray> dxl_col_descr_array(GPOS_NEW(mp)
 														CDXLColDescrArray(mp));
 	const ULONG num_columns = mdcol_array->Size();
-	for (ULONG ul = 0; ul < num_columns; ul++)
+	for (ULONG ul = 0, idx = 0; ul < num_columns; ul++)
 	{
 		const IMDColumn *md_col = (*mdcol_array)[ul];
+
+		if (md_col->IsDropped())
+		{
+			continue;
+		}
+
 		CMDName *md_colname =
 			GPOS_NEW(mp) CMDName(mp, md_col->Mdname().GetMDName());
 		CMDIdGPDB *mdid_col_type = CMDIdGPDB::CastMdid(md_col->MdidType());
@@ -3186,11 +3194,12 @@ CTranslatorRelcacheToDXL::RetrievePartConstraintForRel(
 		// create a column descriptor for the column
 		CDXLColDescr *dxl_col_descr = GPOS_NEW(mp) CDXLColDescr(
 			md_colname,
-			ul + 1,	 // colid
+			idx + 1,  // colid
 			md_col->AttrNum(), mdid_col_type, md_col->TypeModifier(),
 			false  // fColDropped
 		);
 		dxl_col_descr_array->Append(dxl_col_descr);
+		++idx;
 	}
 
 	CMappingVarColId var_colid_mapping(mp);

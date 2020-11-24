@@ -18,6 +18,7 @@
 #include "gpos/common/CAutoTimer.h"
 #include "gpos/common/CAutoRef.h"
 #include "gpopt/exception.h"
+#include "gpopt/translate/CTranslatorDXLToExpr.h"
 
 #include "gpopt/operators/CWindowPreprocessor.h"
 #include "gpopt/operators/CLogicalConstTableGet.h"
@@ -2564,15 +2565,11 @@ CExpressionPreprocessor::PrunePartitions(CMemoryPool *mp, CExpression *expr)
 		for (ULONG ul = 0; ul < all_partition_mdids->Size(); ++ul)
 		{
 			IMDId *part_mdid = (*all_partition_mdids)[ul];
-			const IMDRelation *part = mda->RetrieveRel(part_mdid);
+			const IMDRelation *partrel = mda->RetrieveRel(part_mdid);
 
-			// FIXME: This is unsafe, given dropped cols.
-			// We need to construct a mapping from child partition
-			// colid -> "root" partition colref to correctly derive constraints
-			CColRefArray *pdrgpcrOutput = dyn_get->PdrgpcrOutput();
-
-			CConstraint *rel_cnstr =
-				CLogical::PcnstrFromRelation(part, pdrgpcrOutput);
+			CConstraint *rel_cnstr = PcnstrFromChildPartition(
+				partrel, dyn_get->PdrgpcrOutput(),
+				(*dyn_get->GetRootColMappingPerPart())[ul]);
 
 			CConstraint *pcnstr = NULL;
 			{
@@ -2641,6 +2638,52 @@ CExpressionPreprocessor::PrunePartitions(CMemoryPool *mp, CExpression *expr)
 
 	pop->AddRef();
 	return GPOS_NEW(mp) CExpression(mp, pop, children);
+}
+
+
+CConstraint *
+CExpressionPreprocessor::PcnstrFromChildPartition(const IMDRelation *partrel,
+												  CColRefArray *pdrgpcrOutput,
+												  ColRefToUlongMap *col_mapping)
+{
+	CMDAccessor *md_accessor = COptCtxt::PoctxtFromTLS()->Pmda();
+	CMemoryPool *mp = COptCtxt::PoctxtFromTLS()->Pmp();
+
+	CExpression *part_constraint_expr = NULL;
+
+	CDXLNode *dxlnode = partrel->MDPartConstraint();
+
+	if (NULL == dxlnode)
+	{
+		return NULL;
+	}
+
+	ULongPtrArray *mapped_colids = GPOS_NEW(mp) ULongPtrArray(mp);
+	for (ULONG ul = 0; ul < pdrgpcrOutput->Size(); ++ul)
+	{
+		CColRef *colref = (*pdrgpcrOutput)[ul];
+		ULONG *colid = col_mapping->Find(colref);
+		GPOS_ASSERT(NULL != colid);
+		mapped_colids->Append(GPOS_NEW(mp) ULONG(*colid));
+	}
+
+	CTranslatorDXLToExpr dxltr(mp, md_accessor);
+	part_constraint_expr =
+		dxltr.PexprTranslateScalar(dxlnode, pdrgpcrOutput, mapped_colids);
+	mapped_colids->Release();
+
+	GPOS_ASSERT(CUtils::FPredicate(part_constraint_expr));
+
+	CColRefSetArray *pdrgpcrsChild = NULL;
+	// Check constraints are satisfied if the check expression evaluates to
+	// true or NULL, so infer NULLs as true here.
+	CConstraint *cnstr = CConstraint::PcnstrFromScalarExpr(
+		mp, part_constraint_expr, &pdrgpcrsChild, true /* infer_nulls_as */);
+
+	CRefCount::SafeRelease(part_constraint_expr);
+	CRefCount::SafeRelease(pdrgpcrsChild);
+	GPOS_ASSERT(cnstr);
+	return cnstr;
 }
 
 // main driver, pre-processing of input logical expression
