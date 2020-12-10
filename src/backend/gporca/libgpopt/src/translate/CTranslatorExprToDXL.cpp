@@ -3742,6 +3742,7 @@ CTranslatorExprToDXL::PdxlnResultFromNLJoinOuter(
 		// In case the OuterChild is a physical sequence, it will already have the filter in the partition selector and
 		// dynamic scan, thus we should not replace the filter.
 		case EdxlopPhysicalSequence:
+		case EdxlopPhysicalAppend:
 		{
 			dxl_properties->AddRef();
 			GPOS_ASSERT(NULL != pexprOuterChildRelational->Prpp());
