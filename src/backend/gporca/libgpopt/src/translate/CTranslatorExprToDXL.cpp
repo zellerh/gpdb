@@ -1177,19 +1177,11 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 	CDXLNode *pdxlnResult = NULL;
 	IMdIdArray *part_mdids = popDTS->GetPartitionMdids();
 
-	if (part_mdids->Size() > 1)
-	{
-		pdxlnResult = GPOS_NEW(m_mp) CDXLNode(
-			m_mp, GPOS_NEW(m_mp) CDXLPhysicalAppend(m_mp, false, false));
-		pdxlnResult->SetProperties(pdxlpropDTS);
-		pdxlnResult->AddChild(pdxlnPrLAppend);
-		pdxlnResult->AddChild(PdxlnFilter(NULL));
-	}
-	else
-	{
-		GPOS_RTL_ASSERT(part_mdids != NULL && part_mdids->Size() == 1 &&
-						"DTS has no partitions to scan!");
-	}
+	pdxlnResult = GPOS_NEW(m_mp)
+		CDXLNode(m_mp, GPOS_NEW(m_mp) CDXLPhysicalAppend(m_mp, false, false));
+	pdxlnResult->SetProperties(pdxlpropDTS);
+	pdxlnResult->AddChild(pdxlnPrLAppend);
+	pdxlnResult->AddChild(PdxlnFilter(NULL));
 
 	for (ULONG ul = 0; ul < part_mdids->Size(); ++ul)
 	{
@@ -1235,18 +1227,8 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 									popDTS->PdrgpcrOutput(), pexprScalarCond);
 		dxlnode->AddChild(filter_dxlnode);	// filter
 
-		if (NULL == pdxlnResult)
-		{
-			// no Append node created - there must be only one node to scan!
-			pdxlnResult = dxlnode;
-			GPOS_ASSERT(1 == part_mdids->Size());
-			CRefCount::SafeRelease(pdxlpropDTS);
-		}
-		else
-		{
-			// add to the other scans under the created Append node
-			pdxlnResult->AddChild(dxlnode);
-		}
+		// add to the other scans under the created Append node
+		pdxlnResult->AddChild(dxlnode);
 	}
 
 	CDistributionSpec *pds = pexprDTS->GetDrvdPropPlan()->Pds();
