@@ -133,7 +133,7 @@ CXformExpandNAryJoinDPv2::Transform(CXformContext *pxfctxt,
 
 	// create join order using dynamic programming v2, record topk results in jodp
 	CJoinOrderDPv2 jodp(mp, pdrgpexpr, innerJoinPreds, onPreds,
-						childPredIndexes, outerRefs);
+						childPredIndexes, outerRefs, pxfres);
 	jodp.PexprExpand();
 
 	// Retrieve top K join orders from jodp and add as alternatives

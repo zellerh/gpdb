@@ -62,7 +62,7 @@ CJoinOrderDPv2::CJoinOrderDPv2(CMemoryPool *mp,
 							   CExpressionArray *innerJoinConjuncts,
 							   CExpressionArray *onPredConjuncts,
 							   ULongPtrArray *childPredIndexes,
-							   CColRefSet *outerRefs)
+							   CColRefSet *outerRefs, CXformResult *pxfres)
 	: CJoinOrder(mp, pdrgpexprAtoms, innerJoinConjuncts, onPredConjuncts,
 				 childPredIndexes),
 	  m_expression_to_edge_map(NULL),
@@ -70,7 +70,8 @@ CJoinOrderDPv2::CJoinOrderDPv2(CMemoryPool *mp,
 	  m_child_pred_indexes(childPredIndexes),
 	  m_non_inner_join_dependencies(NULL),
 	  m_cross_prod_penalty(GPOPT_DPV2_CROSS_JOIN_DEFAULT_PENALTY),
-	  m_outer_refs(outerRefs)
+	  m_outer_refs(outerRefs),
+	  m_pxfres(pxfres)
 {
 	m_join_levels = GPOS_NEW(mp) DPv2Levels(mp, m_ulComps + 1);
 	// populate levels array with n+1 levels for an n-way join
@@ -1407,6 +1408,7 @@ CJoinOrderDPv2::PexprExpand()
 	EnumerateQuery();
 	EnumerateMinCard();
 	EnumerateGreedyAvoidXProd();
+	AddCommonSubgroups();
 }
 
 
@@ -1666,6 +1668,43 @@ CJoinOrderDPv2::GetNextOfTopK()
 	join_result_info->Release();
 
 	return AddSelectNodeForRemainingEdges(join_result);
+}
+
+
+void
+CJoinOrderDPv2::AddCommonSubgroups()
+{
+	// Loop over all the 3 ... n-1-way joins and record the groups the
+	// expressions belong to. Note that we don't visit 2-way joins, since
+	// DPv2 tries to avoid generating both alternatives (a join b) and
+	// (b join a), it leaves that to the commutativity rule.
+	// Note also that we leave out the top-level group, since all
+	// alternatives will end up in the same MEMO group.
+	for (ULONG l = 3; l < m_ulComps; l++)
+	{
+		SLevelInfo *levelInfo = Level(l);
+
+		// Loop over all the groups in this join level.
+		// Example of 2 groups: { t1, t2, t3 }, { t1, t2, t4 }
+		for (ULONG g = 0; g < levelInfo->m_groups->Size(); g++)
+		{
+			SGroupInfo *groupInfo = (*levelInfo->m_groups)[g];
+
+			// Loop over the individual join expressions in the group.
+			// Example of 2 expressions in group { t1, t2, t3 }:
+			// (t1 join t2) join t3,     (t1 join t3) join t2
+			for (ULONG e = 0; e < groupInfo->m_best_expr_info_array->Size();
+				 e++)
+			{
+				SExpressionInfo *exprInfo =
+					(*groupInfo->m_best_expr_info_array)[e];
+
+				// associate the expression with its groupInfo, so that we
+				// can later associate it and groupInfo with the MEMO group
+				m_pxfres->assignCommonSubgroup(exprInfo->m_expr, groupInfo);
+			}
+		}
+	}
 }
 
 

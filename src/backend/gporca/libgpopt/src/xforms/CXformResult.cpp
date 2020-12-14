@@ -10,6 +10,7 @@
 //---------------------------------------------------------------------------
 
 #include "gpopt/xforms/CXformResult.h"
+#include "gpopt/xforms/CXformResultSubGroup.h"
 
 #include "gpos/base.h"
 
@@ -24,7 +25,8 @@ using namespace gpopt;
 //		ctor
 //
 //---------------------------------------------------------------------------
-CXformResult::CXformResult(CMemoryPool *mp) : m_ulExpr(0)
+CXformResult::CXformResult(CMemoryPool *mp)
+	: m_ulExpr(0), m_mp(mp), m_commonSubgroups(NULL)
 {
 	GPOS_ASSERT(NULL != mp);
 	m_pdrgpexpr = GPOS_NEW(mp) CExpressionArray(mp);
@@ -43,6 +45,7 @@ CXformResult::~CXformResult()
 {
 	// release array (releases all elements)
 	m_pdrgpexpr->Release();
+	CRefCount::SafeRelease(m_commonSubgroups);
 }
 
 
@@ -86,6 +89,29 @@ CXformResult::PexprNext()
 	m_ulExpr++;
 
 	return pexpr;
+}
+
+
+void
+CXformResult::assignCommonSubgroup(CExpression *subexpr,
+								   CXformResultSubGroup *subgroup)
+{
+	if (NULL == m_commonSubgroups)
+	{
+		m_commonSubgroups = GPOS_NEW(m_mp) CCommonSubgroups(m_mp);
+	}
+	if (m_commonSubgroups->Insert(subexpr, subgroup))
+	{
+		subexpr->AddRef();
+		subgroup->AddRef();
+	}
+}
+
+
+CXformResultSubGroup *
+CXformResult::getCommonSubgroup(CExpression *subexpr)
+{
+	return m_commonSubgroups->Find(subexpr);
 }
 
 

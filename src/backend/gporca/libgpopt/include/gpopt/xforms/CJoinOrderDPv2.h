@@ -18,6 +18,8 @@
 
 #include "gpopt/base/CKHeap.h"
 #include "gpopt/base/CUtils.h"
+#include "gpopt/xforms/CJoinOrder.h"
+#include "gpopt/xforms/CXformResultSubGroup.h"
 #include "gpopt/operators/CExpression.h"
 #include "gpopt/xforms/CJoinOrder.h"
 
@@ -315,7 +317,7 @@ private:
 	//		Struct containing a bitset, representing a group, its best expression, and cost
 	//
 	//---------------------------------------------------------------------------
-	struct SGroupInfo : public CRefCount
+	struct SGroupInfo : public CXformResultSubGroup
 	{
 		// the set of atoms, this uniquely identifies the group
 		CBitSet *m_atoms;
@@ -326,7 +328,10 @@ private:
 		CDouble m_lowest_expr_cost;
 
 		SGroupInfo(CMemoryPool *mp, CBitSet *atoms)
-			: m_atoms(atoms), m_cardinality(-1.0), m_lowest_expr_cost(-1.0)
+			: CXformResultSubGroup(),
+			  m_atoms(atoms),
+			  m_cardinality(-1.0),
+			  m_lowest_expr_cost(-1.0)
 		{
 			m_best_expr_info_array = GPOS_NEW(mp) SExpressionInfoArray(mp);
 		}
@@ -446,6 +451,9 @@ private:
 
 	CMemoryPool *m_mp;
 
+	// xform result, to keep track of common subgroups
+	CXformResult *m_pxfres;
+
 	SLevelInfo *
 	Level(ULONG l)
 	{
@@ -540,7 +548,8 @@ public:
 	CJoinOrderDPv2(CMemoryPool *mp, CExpressionArray *pdrgpexprAtoms,
 				   CExpressionArray *innerJoinConjuncts,
 				   CExpressionArray *onPredConjuncts,
-				   ULongPtrArray *childPredIndexes, CColRefSet *outerRefs);
+				   ULongPtrArray *childPredIndexes, CColRefSet *outerRefs,
+				   CXformResult *pxfres);
 
 	// dtor
 	~CJoinOrderDPv2() override;
@@ -549,6 +558,8 @@ public:
 	virtual void PexprExpand();
 
 	CExpression *GetNextOfTopK();
+
+	void AddCommonSubgroups();
 
 	// check for NIJs
 	BOOL IsRightChildOfNIJ(SGroupInfo *groupInfo,

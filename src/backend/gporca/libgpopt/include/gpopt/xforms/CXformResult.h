@@ -12,12 +12,19 @@
 #define GPOPT_CXformResult_H
 
 #include "gpos/base.h"
-
+#include "gpopt/base/CUtils.h"
 #include "gpopt/operators/CExpression.h"
+#include "gpopt/xforms/CXformResultSubGroup.h"
 
 namespace gpopt
 {
 using namespace gpos;
+
+typedef CHashMap<class CExpression, class CXformResultSubGroup,
+				 CExpression::HashValue, CUtils::Equals,
+				 CleanupRelease<CExpression>,
+				 CleanupRelease<CXformResultSubGroup> >
+	CCommonSubgroups;
 
 //---------------------------------------------------------------------------
 //	@class:
@@ -35,6 +42,11 @@ private:
 
 	// cursor for retrieval
 	ULONG m_ulExpr;
+
+	CMemoryPool *m_mp;
+
+	// optional subgroups
+	CCommonSubgroups *m_commonSubgroups;
 
 public:
 	CXformResult(const CXformResult &) = delete;
@@ -57,6 +69,13 @@ public:
 
 	// retrieve next alternative
 	CExpression *PexprNext();
+
+	// assign an expression in an added alternative to a common subgroup
+	void assignCommonSubgroup(CExpression *subexpr,
+							  CXformResultSubGroup *subgroup);
+
+	// check whether an expression belongs to a common subgroup
+	CXformResultSubGroup *getCommonSubgroup(CExpression *subexpr);
 
 	// print function
 	IOstream &OsPrint(IOstream &os) const override;
