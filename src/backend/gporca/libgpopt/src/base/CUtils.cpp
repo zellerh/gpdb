@@ -4700,16 +4700,27 @@ CUtils::MakeJoinWithoutInferredPreds(CMemoryPool *mp, CExpression *join_expr)
 		CPredicateUtils::PexprRemoveImpliedConjuncts(mp, scalar_expr,
 													 expression_handle);
 
-	// create a new join expression using the scalar expr without inferred predicate
-	CExpression *left_child_expr = (*join_expr)[0];
-	CExpression *right_child_expr = (*join_expr)[1];
-	left_child_expr->AddRef();
-	right_child_expr->AddRef();
-	COperator *join_op = join_expr->Pop();
-	join_op->AddRef();
-	return GPOS_NEW(mp)
-		CExpression(mp, join_op, left_child_expr, right_child_expr,
-					scalar_expr_without_inferred_pred);
+	if (scalar_expr_without_inferred_pred == scalar_expr)
+	{
+		// nothing changed, return the original expression
+		scalar_expr_without_inferred_pred->Release();
+		join_expr->AddRef();
+
+		return join_expr;
+	}
+	else
+	{
+		// create a new join expression using the scalar expr without inferred predicate
+		CExpression *left_child_expr = (*join_expr)[0];
+		CExpression *right_child_expr = (*join_expr)[1];
+		left_child_expr->AddRef();
+		right_child_expr->AddRef();
+		COperator *join_op = join_expr->Pop();
+		join_op->AddRef();
+		return GPOS_NEW(mp)
+			CExpression(mp, join_op, left_child_expr, right_child_expr,
+						scalar_expr_without_inferred_pred);
+	}
 }
 
 // check if the input expr array contains the expr
@@ -4842,4 +4853,47 @@ CUtils::AddExprs(CExpressionArrays *results_exprs,
 	}
 	GPOS_ASSERT(results_exprs->Size() >= input_exprs->Size());
 }
+
+CExpressionArray *
+CUtils::BuildLazyChildArray(CMemoryPool *mp, CExpression *parentExpr,
+							ULONG childIndex, CExpression *newChildExpr,
+							CExpressionArray *newChildrenArraySoFar)
+{
+	CExpression *oldChildExpr = (*parentExpr)[childIndex];
+
+	GPOS_ASSERT_IMP(0 == childIndex, NULL == newChildrenArraySoFar);
+
+	if (NULL == newChildrenArraySoFar && oldChildExpr == newChildExpr)
+	{
+		// none of the new children so far have been different from the
+		// existing children of the expression, no need to build a new
+		// child array - yet
+		newChildExpr->Release();
+		return NULL;
+	}
+
+	CExpressionArray *result = newChildrenArraySoFar;
+
+	// at least one child is different from the existing expression, so we will need
+	// to build a new child array to form a new CExpression
+	if (NULL == result)
+	{
+		result = GPOS_NEW(mp) CExpressionArray(mp);
+
+		for (ULONG ul = 0; ul < childIndex; ul++)
+		{
+			CExpression *unchangedChild = (*parentExpr)[ul];
+
+			unchangedChild->AddRef();
+			result->Append(unchangedChild);
+		}
+	}
+
+	GPOS_ASSERT(childIndex == result->Size());
+
+	result->Append(newChildExpr);
+
+	return result;
+}
+
 // EOF

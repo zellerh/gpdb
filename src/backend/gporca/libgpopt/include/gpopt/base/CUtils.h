@@ -982,6 +982,12 @@ public:
 	static void AddExprs(CExpressionArrays *results_exprs,
 						 CExpressionArrays *input_exprs);
 
+	// build a child array one child at a time, but only if any of the
+	// new children is different from the current children of the parent
+	static CExpressionArray *BuildLazyChildArray(
+		CMemoryPool *mp, CExpression *parentExpr, ULONG childIndex,
+		CExpression *newChildExpr, CExpressionArray *newChildrenArraySoFar);
+
 	static BOOL FScalarConstBoolNull(CExpression *pexpr);
 };	// class CUtils
 

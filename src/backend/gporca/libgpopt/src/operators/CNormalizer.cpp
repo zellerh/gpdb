@@ -31,36 +31,6 @@
 using namespace gpopt;
 
 
-// initialization of push through handler
-const CNormalizer::SPushThru CNormalizer::m_rgpt[] = {
-	{COperator::EopLogicalSelect, PushThruSelect},
-	{COperator::EopLogicalProject, PushThruUnaryWithScalarChild},
-	{COperator::EopLogicalSequenceProject, PushThruSeqPrj},
-	{COperator::EopLogicalGbAgg, PushThruUnaryWithScalarChild},
-	{COperator::EopLogicalCTEAnchor, PushThruUnaryWithoutScalarChild},
-	{COperator::EopLogicalUnion, PushThruSetOp},
-	{COperator::EopLogicalUnionAll, PushThruSetOp},
-	{COperator::EopLogicalIntersect, PushThruSetOp},
-	{COperator::EopLogicalIntersectAll, PushThruSetOp},
-	{COperator::EopLogicalDifference, PushThruSetOp},
-	{COperator::EopLogicalDifferenceAll, PushThruSetOp},
-	{COperator::EopLogicalInnerJoin, PushThruJoin},
-	{COperator::EopLogicalNAryJoin, PushThruJoin},
-	{COperator::EopLogicalInnerApply, PushThruJoin},
-	{COperator::EopLogicalInnerCorrelatedApply, PushThruJoin},
-	{COperator::EopLogicalLeftOuterJoin, PushThruJoin},
-	{COperator::EopLogicalLeftOuterApply, PushThruJoin},
-	{COperator::EopLogicalLeftOuterCorrelatedApply, PushThruJoin},
-	{COperator::EopLogicalLeftSemiApply, PushThruJoin},
-	{COperator::EopLogicalLeftSemiApplyIn, PushThruJoin},
-	{COperator::EopLogicalLeftSemiCorrelatedApplyIn, PushThruJoin},
-	{COperator::EopLogicalLeftAntiSemiApply, PushThruJoin},
-	{COperator::EopLogicalLeftAntiSemiApplyNotIn, PushThruJoin},
-	{COperator::EopLogicalLeftAntiSemiCorrelatedApplyNotIn, PushThruJoin},
-	{COperator::EopLogicalLeftSemiJoin, PushThruJoin},
-};
-
-
 //---------------------------------------------------------------------------
 //	@function:
 //		CNormalizer::FPushThruOuterChild
@@ -180,17 +150,31 @@ CNormalizer::PexprRecursiveNormalize(CMemoryPool *mp, CExpression *pexpr)
 	GPOS_ASSERT(NULL != pexpr);
 
 	const ULONG arity = pexpr->Arity();
-	CExpressionArray *pdrgpexpr = GPOS_NEW(mp) CExpressionArray(mp);
+	CExpressionArray *newChildArray = NULL;
+
 	for (ULONG ul = 0; ul < arity; ul++)
 	{
-		CExpression *pexprChild = PexprNormalize(mp, (*pexpr)[ul]);
-		pdrgpexpr->Append(pexprChild);
+		CExpression *newChild = PexprNormalize(mp, (*pexpr)[ul]);
+
+		// build a new child array if any of the children changed
+		// (doing this the lazy way saves not only time but also
+		// helps us find common subgroups in transformations like
+		// CXformExpandNAryJoinDPv2)
+		newChildArray =
+			CUtils::BuildLazyChildArray(mp, pexpr, ul, newChild, newChildArray);
+	}
+
+	if (NULL == newChildArray)
+	{
+		// nothing changed
+		pexpr->AddRef();
+		return pexpr;
 	}
 
 	COperator *pop = pexpr->Pop();
 	pop->AddRef();
 
-	return GPOS_NEW(mp) CExpression(mp, pop, pdrgpexpr);
+	return GPOS_NEW(mp) CExpression(mp, pop, newChildArray);
 }
 
 
@@ -294,20 +278,33 @@ CNormalizer::PushThruOuterChild(CMemoryPool *mp, CExpression *pexpr,
 		PushThru(mp, pexprNewSelect, pexprNewConj, &pexprNewOuter);
 		pexprNewSelect->Release();
 
-		// create a new outer join using the new outer child and the new inner child
-		COperator *pop = pexpr->Pop();
-		pop->AddRef();
-		pexprInner->AddRef();
-		pexprPred->AddRef();
-		CExpression *pexprNew = GPOS_NEW(mp)
-			CExpression(mp, pop, pexprNewOuter, pexprInner, pexprPred);
+		CExpression *pexprWithPushedOuter = pexpr;
+
+		if (pexprNewOuter == pexprOuter)
+		{
+			// no change, continue with pexpr
+			pexprNewOuter->Release();
+		}
+		else
+		{
+			// create a new left join using the new outer child and the existing inner child and pred
+			COperator *pop = pexpr->Pop();
+			pop->AddRef();
+			pexprInner->AddRef();
+			pexprPred->AddRef();
+			pexprWithPushedOuter = GPOS_NEW(mp)
+				CExpression(mp, pop, pexprNewOuter, pexprInner, pexprPred);
+		}
 
 		// call push down predicates on the new outer join
 		CExpression *pexprConstTrue =
 			CUtils::PexprScalarConstBool(mp, true /*value*/);
-		PushThru(mp, pexprNew, pexprConstTrue, ppexprResult);
+		PushThru(mp, pexprWithPushedOuter, pexprConstTrue, ppexprResult);
 		pexprConstTrue->Release();
-		pexprNew->Release();
+		if (pexprWithPushedOuter != pexpr)
+		{
+			pexprWithPushedOuter->Release();
+		}
 	}
 
 	if (0 < pdrgpexprUnpushable->Size())
@@ -914,7 +911,7 @@ CNormalizer::PushThruJoin(CMemoryPool *mp, CExpression *pexprJoin,
 	pexprPred->Release();
 
 	// push predicates through children and compute new child expressions
-	CExpressionArray *pdrgpexprChildren = GPOS_NEW(mp) CExpressionArray(mp);
+	CExpressionArray *newChildren = NULL;
 
 	for (ULONG ul = 0; ul < arity - 1; ul++)
 	{
@@ -924,7 +921,8 @@ CNormalizer::PushThruJoin(CMemoryPool *mp, CExpression *pexprJoin,
 		{
 			// do not push anti-semi-apply predicates to any of the children
 			pexprNewChild = PexprNormalize(mp, pexprChild);
-			pdrgpexprChildren->Append(pexprNewChild);
+			newChildren = CUtils::BuildLazyChildArray(
+				mp, pexprJoin, ul, pexprNewChild, newChildren);
 			continue;
 		}
 
@@ -934,7 +932,8 @@ CNormalizer::PushThruJoin(CMemoryPool *mp, CExpression *pexprJoin,
 			// otherwise, we will throw away outer child's tuples that should
 			// be part of the join result
 			pexprNewChild = PexprNormalize(mp, pexprChild);
-			pdrgpexprChildren->Append(pexprNewChild);
+			newChildren = CUtils::BuildLazyChildArray(
+				mp, pexprJoin, ul, pexprNewChild, newChildren);
 			continue;
 		}
 
@@ -943,14 +942,16 @@ CNormalizer::PushThruJoin(CMemoryPool *mp, CExpression *pexprJoin,
 			// this is similar to what PushThruOuterChild does, only push the
 			// preds to those children that are using an inner join
 			pexprNewChild = PexprNormalize(mp, pexprChild);
-			pdrgpexprChildren->Append(pexprNewChild);
+			newChildren = CUtils::BuildLazyChildArray(
+				mp, pexprJoin, ul, pexprNewChild, newChildren);
 			continue;
 		}
 
 		CExpressionArray *pdrgpexprRemaining = NULL;
 		PushThru(mp, pexprChild, pdrgpexprConjuncts, &pexprNewChild,
 				 &pdrgpexprRemaining);
-		pdrgpexprChildren->Append(pexprNewChild);
+		newChildren = CUtils::BuildLazyChildArray(mp, pexprJoin, ul,
+												  pexprNewChild, newChildren);
 
 		pdrgpexprConjuncts->Release();
 		pdrgpexprConjuncts = pdrgpexprRemaining;
@@ -976,17 +977,30 @@ CNormalizer::PushThruJoin(CMemoryPool *mp, CExpression *pexprJoin,
 
 		CExpression *nAryJoinPredicateList = GPOS_NEW(mp) CExpression(
 			mp, GPOS_NEW(mp) CScalarNAryJoinPredList(mp), naryJoinPredicates);
-		pdrgpexprChildren->Append(nAryJoinPredicateList);
+		newChildren = CUtils::BuildLazyChildArray(
+			mp, pexprJoin, arity - 1, nAryJoinPredicateList, newChildren);
 	}
 	else
 	{
-		pdrgpexprChildren->Append(pexprNewScalar);
+		newChildren = CUtils::BuildLazyChildArray(mp, pexprJoin, arity - 1,
+												  pexprNewScalar, newChildren);
 	}
 
-	// create a new join expression
-	pop->AddRef();
-	CExpression *pexprJoinWithInferredPred =
-		GPOS_NEW(mp) CExpression(mp, pop, pdrgpexprChildren);
+	CExpression *pexprJoinWithInferredPred;
+
+	if (NULL == newChildren)
+	{
+		pexprJoin->AddRef();
+		pexprJoinWithInferredPred = pexprJoin;
+	}
+	else
+	{
+		// create a new join expression
+		pop->AddRef();
+		pexprJoinWithInferredPred =
+			GPOS_NEW(mp) CExpression(mp, pop, newChildren);
+	}
+
 	CExpression *pexprJoinWithoutInferredPred = NULL;
 
 	// remove inferred predicate from the join expression. inferred predicate can impact the cost
@@ -1070,32 +1084,68 @@ CNormalizer::PushThru(CMemoryPool *mp, CExpression *pexprLogical,
 		return;
 	}
 
-	FnPushThru *pfnpt = NULL;
-	COperator::EOperatorId op_id = pexprLogical->Pop()->Eopid();
-	const ULONG size = GPOS_ARRAY_SIZE(m_rgpt);
 	// find the push thru function corresponding to the given operator
-	for (ULONG ul = 0; pfnpt == NULL && ul < size; ul++)
+	switch (pexprLogical->Pop()->Eopid())
 	{
-		if (op_id == m_rgpt[ul].m_eopid)
+		case COperator::EopLogicalSelect:
+			PushThruSelect(mp, pexprLogical, pexprConj, ppexprResult);
+			break;
+
+		case COperator::EopLogicalProject:
+		case COperator::EopLogicalGbAgg:
+			PushThruUnaryWithScalarChild(mp, pexprLogical, pexprConj,
+										 ppexprResult);
+			break;
+
+		case COperator::EopLogicalSequenceProject:
+			PushThruSeqPrj(mp, pexprLogical, pexprConj, ppexprResult);
+			break;
+
+		case COperator::EopLogicalCTEAnchor:
+			PushThruUnaryWithoutScalarChild(mp, pexprLogical, pexprConj,
+											ppexprResult);
+			break;
+
+		case COperator::EopLogicalUnion:
+		case COperator::EopLogicalUnionAll:
+		case COperator::EopLogicalIntersect:
+		case COperator::EopLogicalIntersectAll:
+		case COperator::EopLogicalDifference:
+		case COperator::EopLogicalDifferenceAll:
+			PushThruSetOp(mp, pexprLogical, pexprConj, ppexprResult);
+			break;
+
+		case COperator::EopLogicalInnerJoin:
+		case COperator::EopLogicalNAryJoin:
+		case COperator::EopLogicalInnerApply:
+		case COperator::EopLogicalInnerCorrelatedApply:
+		case COperator::EopLogicalLeftOuterJoin:
+		case COperator::EopLogicalLeftOuterApply:
+		case COperator::EopLogicalLeftOuterCorrelatedApply:
+		case COperator::EopLogicalLeftSemiApply:
+		case COperator::EopLogicalLeftSemiApplyIn:
+		case COperator::EopLogicalLeftSemiCorrelatedApplyIn:
+		case COperator::EopLogicalLeftAntiSemiApply:
+		case COperator::EopLogicalLeftAntiSemiApplyNotIn:
+		case COperator::EopLogicalLeftAntiSemiCorrelatedApplyNotIn:
+		case COperator::EopLogicalLeftSemiJoin:
+			PushThruJoin(mp, pexprLogical, pexprConj, ppexprResult);
+			break;
+
+		default:
 		{
-			pfnpt = m_rgpt[ul].m_pfnpt;
+			// can't push predicates through, start a new normalization path
+			CExpression *pexprNormalized =
+				PexprRecursiveNormalize(mp, pexprLogical);
+			*ppexprResult = pexprNormalized;
+			if (!FChild(pexprLogical, pexprConj))
+			{
+				// add select node on top of the result for the given predicate
+				pexprConj->AddRef();
+				*ppexprResult =
+					CUtils::PexprSafeSelect(mp, pexprNormalized, pexprConj);
+			}
 		}
-	}
-
-	if (NULL != pfnpt)
-	{
-		pfnpt(mp, pexprLogical, pexprConj, ppexprResult);
-		return;
-	}
-
-	// can't push predicates through, start a new normalization path
-	CExpression *pexprNormalized = PexprRecursiveNormalize(mp, pexprLogical);
-	*ppexprResult = pexprNormalized;
-	if (!FChild(pexprLogical, pexprConj))
-	{
-		// add select node on top of the result for the given predicate
-		pexprConj->AddRef();
-		*ppexprResult = CUtils::PexprSafeSelect(mp, pexprNormalized, pexprConj);
 	}
 }
 
@@ -1160,7 +1210,11 @@ CNormalizer::PushThru(CMemoryPool *mp, CExpression *pexprLogical,
 //		CNormalizer::PexprNormalize
 //
 //	@doc:
-//		Main driver
+//		Main driver for normalization (predicate pushdown)
+//
+//		Note that this method tries to return the input expression pexpr
+//		and not a copy when there is no change, i.e. no predicates get
+//		pushed.
 //
 //---------------------------------------------------------------------------
 CExpression *
@@ -1189,29 +1243,50 @@ CNormalizer::PexprNormalize(CMemoryPool *mp, CExpression *pexpr)
 		}
 		else
 		{
-			// add-ref all children except scalar predicate
-			const ULONG arity = pexpr->Arity();
-			CExpressionArray *pdrgpexpr = GPOS_NEW(mp) CExpressionArray(mp);
-			for (ULONG ul = 0; ul < arity - 1; ul++)
-			{
-				CExpression *pexprChild = (*pexpr)[ul];
-				pexprChild->AddRef();
-				pdrgpexpr->Append(pexprChild);
-			}
-
 			// normalize scalar predicate and construct a new expression
+			CExpression *pexprWithNormalizedPred = pexpr;
 			CExpression *pexprPred = (*pexpr)[pexpr->Arity() - 1];
 			CExpression *pexprPredNormalized =
 				PexprRecursiveNormalize(mp, pexprPred);
-			pdrgpexpr->Append(pexprPredNormalized);
-			COperator *pop = pexpr->Pop();
-			pop->AddRef();
-			CExpression *pexprNew =
-				GPOS_NEW(mp) CExpression(mp, pop, pdrgpexpr);
+
+			if (pexprPredNormalized == pexprPred)
+			{
+				// no change while normalizing pred, continue with pexpr
+				GPOS_ASSERT(pexprPredNormalized->RefCount() > (ULONG_PTR) 1);
+				// we now own a refcount on pexprPredNormalized, which is really
+				// pexprPred, let go of it (pexpr still owns another refcount)
+				pexprPredNormalized->Release();
+			}
+			else
+			{
+				// the predicate changed during normalization, make a new
+				// expression with the normalized pred to use in PushThru below
+
+				// add-ref all children except for the scalar predicate, for which
+				// we already own a refcount
+				const ULONG arity = pexpr->Arity();
+				CExpressionArray *pdrgpexpr = GPOS_NEW(mp) CExpressionArray(mp);
+				for (ULONG ul = 0; ul < arity - 1; ul++)
+				{
+					CExpression *pexprChild = (*pexpr)[ul];
+					pexprChild->AddRef();
+					pdrgpexpr->Append(pexprChild);
+				}
+
+				pdrgpexpr->Append(pexprPredNormalized);
+				COperator *pop = pexpr->Pop();
+				pop->AddRef();
+				pexprWithNormalizedPred =
+					GPOS_NEW(mp) CExpression(mp, pop, pdrgpexpr);
+			}
 
 			// push normalized predicate through
-			PushThru(mp, pexprNew, pexprPredNormalized, &pexprResult);
-			pexprNew->Release();
+			PushThru(mp, pexprWithNormalizedPred, pexprPredNormalized,
+					 &pexprResult);
+			if (pexprWithNormalizedPred != pexpr)
+			{
+				pexprWithNormalizedPred->Release();
+			}
 		}
 	}
 	else

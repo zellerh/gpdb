@@ -54,9 +54,6 @@ private:
 
 	};	// struct SPushThru
 
-	// array of mappings
-	static const SPushThru m_rgpt[];
-
 	//  return true if second expression is a child of first expression
 	static BOOL FChild(CExpression *pexpr, CExpression *pexprChild);
 

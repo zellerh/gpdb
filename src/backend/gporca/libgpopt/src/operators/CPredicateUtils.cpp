@@ -767,7 +767,10 @@ CPredicateUtils::PexprConjDisj(CMemoryPool *mp, CExpression *pexprOne,
 	GPOS_ASSERT(NULL != pexprOne);
 	GPOS_ASSERT(NULL != pexprTwo);
 
-	if (pexprOne == pexprTwo)
+	// shortcuts, the first one is necessary, the second helps the normalizer
+	// return the original expression when no predicates get pushed down
+	if (pexprOne == pexprTwo ||
+		(fConjunction && CUtils::FScalarConstTrue(pexprTwo)))
 	{
 		pexprOne->AddRef();
 		return pexprOne;
@@ -2310,6 +2313,8 @@ CPredicateUtils::PexprRemoveImpliedConjuncts(CMemoryPool *mp,
 	CExpressionArray *pdrgpexprConjuncts = PdrgpexprConjuncts(mp, pexprScalar);
 	const ULONG size = pdrgpexprConjuncts->Size();
 	CExpressionArray *pdrgpexprNewConjuncts = GPOS_NEW(mp) CExpressionArray(mp);
+	BOOL eliminatedImpliedPreds = false;
+
 	for (ULONG ul = 0; ul < size; ul++)
 	{
 		CExpression *pexprConj = (*pdrgpexprConjuncts)[ul];
@@ -2317,6 +2322,7 @@ CPredicateUtils::PexprRemoveImpliedConjuncts(CMemoryPool *mp,
 			FImpliedPredicate(pexprConj, pdrgpcrs))
 		{
 			// skip implied conjunct
+			eliminatedImpliedPreds = true;
 			continue;
 		}
 
@@ -2339,8 +2345,19 @@ CPredicateUtils::PexprRemoveImpliedConjuncts(CMemoryPool *mp,
 		pdrgpexprNewConjuncts->Append(pexprConj);
 	}
 
+	GPOS_ASSERT_IMP(!eliminatedImpliedPreds, pdrgpexprNewConjuncts->Size() ==
+												 pdrgpexprConjuncts->Size());
 	pdrgpexprConjuncts->Release();
 	pdrgpcrs->Release();
+
+	if (!eliminatedImpliedPreds)
+	{
+		// no predicates got eliminated, return the original expression
+		pdrgpexprNewConjuncts->Release();
+		pexprScalar->AddRef();
+
+		return pexprScalar;
+	}
 
 	return PexprConjunction(mp, pdrgpexprNewConjuncts);
 }
