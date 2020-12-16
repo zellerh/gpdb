@@ -50,6 +50,8 @@
 #include "gpopt/search/CScheduler.h"
 #include "gpopt/search/CSchedulerContext.h"
 #include "gpopt/xforms/CXformFactory.h"
+#include "gpopt/xforms/CXformResultSubGroup.h"
+
 #include "naucrates/traceflags/traceflags.h"
 
 
@@ -134,9 +136,9 @@ CEngine::InitLogicalExpression(CExpression *pexpr)
 	GPOS_ASSERT(NULL == m_pmemo->PgroupRoot() && "Root is already set");
 	GPOS_ASSERT(pexpr->Pop()->FLogical());
 
-	CGroup *pgroupRoot =
-		PgroupInsert(NULL /*pgroupTarget*/, pexpr, CXform::ExfInvalid,
-					 NULL /*pgexprOrigin*/, false /*fIntermediate*/);
+	CGroup *pgroupRoot = PgroupInsert(NULL /*pgroupTarget*/, pexpr,
+									  CXform::ExfInvalid, NULL /*pgexprOrigin*/,
+									  false /*fIntermediate*/, NULL /*pxfres*/);
 	m_pmemo->SetRoot(pgroupRoot);
 }
 
@@ -226,7 +228,8 @@ CEngine::AddEnforcers(
 		CGroup *pgroup =
 #endif	// GPOS_DEBUG
 			PgroupInsert(pgexpr->Pgroup(), pexprEnforcer, CXform::ExfInvalid,
-						 NULL /*pgexprOrigin*/, false /*fIntermediate*/);
+						 NULL /*pgexprOrigin*/, false /*fIntermediate*/,
+						 NULL /*pxfres*/);
 		GPOS_ASSERT(pgroup == pgexpr->Pgroup());
 	}
 }
@@ -245,7 +248,8 @@ void
 CEngine::InsertExpressionChildren(CExpression *pexpr,
 								  CGroupArray *pdrgpgroupChildren,
 								  CXform::EXformId exfidOrigin,
-								  CGroupExpression *pgexprOrigin)
+								  CGroupExpression *pgexprOrigin,
+								  CXformResult *pxfres)
 {
 	GPOS_ASSERT(NULL != pexpr);
 	GPOS_ASSERT(NULL != pdrgpgroupChildren);
@@ -266,9 +270,37 @@ CEngine::InsertExpressionChildren(CExpression *pexpr,
 		else
 		{
 			// insert child expression recursively
+			CExpression *childExpr = (*pexpr)[i];
+			CXformResultSubGroup *commonSubgroup = NULL;
+			CGroup *pgroupTarget = NULL;
+
+			if (pxfres != NULL)
+			{
+				commonSubgroup = pxfres->getCommonSubgroup(childExpr);
+			}
+
+			if (commonSubgroup != NULL && commonSubgroup->getGroup() != NULL)
+			{
+				// This is a subexpression of an xform alternative and it shares a
+				// common group with another expression that has already been inserted
+				// into MEMO. Force this expression into the same MEMO group. Note that
+				// this must not happen on the top-level expression, which has the
+				// original group as the target group.
+				GPOS_ASSERT(pgroupTarget == NULL);
+				pgroupTarget = commonSubgroup->getGroup();
+			}
+
 			pgroupChild =
-				PgroupInsert(NULL /*pgroupTarget*/, (*pexpr)[i], exfidOrigin,
-							 pgexprOrigin, true /*fIntermediate*/);
+				PgroupInsert(pgroupTarget, childExpr, exfidOrigin, pgexprOrigin,
+							 true /*fIntermediate*/, pxfres);
+
+			if (commonSubgroup != NULL && commonSubgroup->getGroup() == NULL)
+			{
+				// remember the assigned MEMO group, to be used when we see other
+				// expressions that share a common group with this one
+				// (see the code a few lines above)
+				commonSubgroup->SetGroup(pgroupChild);
+			}
 		}
 		pdrgpgroupChildren->Append(pgroupChild);
 	}
@@ -288,7 +320,8 @@ CEngine::InsertExpressionChildren(CExpression *pexpr,
 CGroup *
 CEngine::PgroupInsert(CGroup *pgroupTarget, CExpression *pexpr,
 					  CXform::EXformId exfidOrigin,
-					  CGroupExpression *pgexprOrigin, BOOL fIntermediate)
+					  CGroupExpression *pgexprOrigin, BOOL fIntermediate,
+					  CXformResult *pxfres)
 {
 	// recursive function - check stack
 	GPOS_CHECK_STACK_SIZE;
@@ -317,7 +350,7 @@ CEngine::PgroupInsert(CGroup *pgroupTarget, CExpression *pexpr,
 	CGroupArray *pdrgpgroupChildren =
 		GPOS_NEW(m_mp) CGroupArray(m_mp, pexpr->Arity());
 	InsertExpressionChildren(pexpr, pdrgpgroupChildren, exfidOrigin,
-							 pgexprOrigin);
+							 pgexprOrigin, pxfres);
 
 	COperator *pop = pexpr->Pop();
 	pop->AddRef();
@@ -377,7 +410,7 @@ CEngine::InsertXformResult(
 	{
 		CGroup *pgroupContainer =
 			PgroupInsert(pgroupOrigin, pexpr, exfidOrigin, pgexprOrigin,
-						 false /*fIntermediate*/);
+						 false /*fIntermediate*/, pxfres);
 		if (pgroupContainer != pgroupOrigin &&
 			FPossibleDuplicateGroups(pgroupContainer, pgroupOrigin))
 		{

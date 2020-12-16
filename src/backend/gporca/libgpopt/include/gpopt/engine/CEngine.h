@@ -144,7 +144,8 @@ private:
 	void InsertExpressionChildren(CExpression *pexpr,
 								  CGroupArray *pdrgpgroupChildren,
 								  CXform::EXformId exfidOrigin,
-								  CGroupExpression *pgexprOrigin);
+								  CGroupExpression *pgexprOrigin,
+								  CXformResult *pxfres);
 
 	// create and schedule the main optimization job
 	void ScheduleMainJob(CSchedulerContext *psc, COptimizationContext *poc);
@@ -233,7 +234,8 @@ public:
 	// insert expression tree to memo
 	CGroup *PgroupInsert(CGroup *pgroupTarget, CExpression *pexpr,
 						 CXform::EXformId exfidOrigin,
-						 CGroupExpression *pgexprOrigin, BOOL fIntermediate);
+						 CGroupExpression *pgexprOrigin, BOOL fIntermediate,
+						 CXformResult *pxfres);
 
 	// insert a set of xform results into the memo
 	void InsertXformResult(CGroup *pgroupOrigin, CXformResult *pxfres,

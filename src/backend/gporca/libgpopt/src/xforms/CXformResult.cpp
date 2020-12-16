@@ -111,6 +111,11 @@ CXformResult::assignCommonSubgroup(CExpression *subexpr,
 CXformResultSubGroup *
 CXformResult::getCommonSubgroup(CExpression *subexpr)
 {
+	if (NULL == m_commonSubgroups)
+	{
+		return NULL;
+	}
+
 	return m_commonSubgroups->Find(subexpr);
 }
 
