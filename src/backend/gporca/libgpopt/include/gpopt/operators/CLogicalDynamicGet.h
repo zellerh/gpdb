@@ -133,6 +133,11 @@ public:
 		return m_ptabdesc;
 	}
 
+	// derive max card
+	CMaxCard DeriveMaxCard(CMemoryPool *mp,
+						   CExpressionHandle &exprhdl) const override;
+
+
 	//-------------------------------------------------------------------------------------
 	// Required Relational Properties
 	//-------------------------------------------------------------------------------------

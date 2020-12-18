@@ -244,6 +244,18 @@ CLogicalDynamicGet::FInputOrderSensitive() const
 	return false;
 }
 
+CMaxCard
+CLogicalDynamicGet::DeriveMaxCard(CMemoryPool *mp,
+								  CExpressionHandle &exprhdl) const
+{
+	if (NULL == GetPartitionMdids() || GetPartitionMdids()->Size() == 0)
+	{
+		return CMaxCard(0);
+	}
+
+	return CLogical::DeriveMaxCard(mp, exprhdl);
+}
+
 //---------------------------------------------------------------------------
 //	@function:
 //		CLogicalDynamicGet::PxfsCandidates
