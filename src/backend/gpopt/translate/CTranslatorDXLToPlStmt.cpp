@@ -3228,10 +3228,10 @@ ExecuteSaticPruning(PartitionPruneInfo *part_prune_info, List *rtable)
 	// static pruning for different partitioned tables into one partition selector
 	GPOS_ASSERT(estate->es_range_table_size == 1);
 
-	for (int i = 0; i < estate->es_range_table_size; ++i)
-		if (estate->es_relations[i])
+	for (ULONG ul = 0; ul < estate->es_range_table_size; ++ul)
+		if (estate->es_relations[ul])
 			// FIXME: this doesn't quite seem to handle locking, is this correct?
-			gpdb::CloseRelation(estate->es_relations[i]);
+			gpdb::CloseRelation(estate->es_relations[ul]);
 	FreeExecutorState(estate);
 	return prune_result;
 }

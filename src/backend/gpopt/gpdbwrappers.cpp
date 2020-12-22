@@ -2843,9 +2843,9 @@ gpdb::GetRelChildPartitions(Oid reloid)
 			return NIL;
 		}
 
-		for (ULONG ul = 0; ul < rel->rd_partdesc->nparts; ul++)
+		for (int i = 0; i < rel->rd_partdesc->nparts; i++)
 		{
-			partoids = lappend_oid(partoids, rel->rd_partdesc->oids[ul]);
+			partoids = lappend_oid(partoids, rel->rd_partdesc->oids[i]);
 		}
 	}
 	GP_WRAP_END;
