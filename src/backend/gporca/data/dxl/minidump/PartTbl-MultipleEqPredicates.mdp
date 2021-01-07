@@ -5284,6 +5284,7 @@
           <dxl:UpperBound Closed="true" TypeMdid="0.23.1.0" Value="2000"/>
         </dxl:StatsBucket>
       </dxl:ColumnStatistics>
+      <dxl:MDCast Mdid="3.1043.1.0;25.1.0" Name="text" BinaryCoercible="true" SourceTypeId="0.1043.1.0" DestinationTypeId="0.25.1.0" CastFuncId="0.0.0.0" CoercePathType="0"/>
     </dxl:Metadata>
     <dxl:Query>
       <dxl:OutputColumns>
