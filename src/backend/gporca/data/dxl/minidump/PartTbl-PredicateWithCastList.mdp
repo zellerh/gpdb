@@ -334,6 +334,14 @@ explain select * from L where b::numeric < 3::numeric;
         </dxl:Opfamilies>
       </dxl:GPDBScalarOp>
       <dxl:MDCast Mdid="3.23.1.0;1700.1.0" Name="numeric" BinaryCoercible="false" SourceTypeId="0.23.1.0" DestinationTypeId="0.1700.1.0" CastFuncId="0.1740.1.0" CoercePathType="1"/>
+      <dxl:GPDBScalarOp Mdid="0.96.1.0" Name="=" ComparisonType="Eq" ReturnsNullOnNullInput="true">
+        <dxl:LeftType Mdid="0.23.1.0"/>
+        <dxl:RightType Mdid="0.23.1.0"/>
+        <dxl:ResultType Mdid="0.16.1.0"/>
+        <dxl:OpFunc Mdid="0.65.1.0"/>
+        <dxl:Commutator Mdid="0.96.1.0"/>
+        <dxl:InverseOp Mdid="0.518.1.0"/>
+      </dxl:GPDBScalarOp>
     </dxl:Metadata>
     <dxl:Query>
       <dxl:OutputColumns>
