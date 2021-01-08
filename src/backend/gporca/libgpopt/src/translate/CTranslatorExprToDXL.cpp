@@ -1130,15 +1130,13 @@ CTranslatorExprToDXL::MakeTableDescForPart(const IMDRelation *part,
 	return table_descr;
 }
 
-//---------------------------------------------------------------------------
-//	@function:
-//		CTranslatorExprToDXL::PdxlnDynamicTableScan
+// Translate CPhysicalDynamicTableScan node. It creates a CDXLPhysicalAppend
+// node over a number of CDXLPhysicalTableScan nodes - one for each unpruned
+// child partition of the root partition in CPhysicalDynamicTableScan.
 //
-//	@doc:
-//		Create a DXL dynamic table scan node from an optimizer
-//		dynamic table scan node.
-//
-//---------------------------------------------------------------------------
+// To handle dropped and re-ordered columns, the project list and any filter
+// expression from the root table are modified using the per partition mappings
+// for each child CDXLPhysicalTableScan
 CDXLNode *
 CTranslatorExprToDXL::PdxlnDynamicTableScan(
 	CExpression *pexprDTS, CColRefArray *colref_array,
@@ -1168,22 +1166,19 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 		pdxlpropDTS->GetDXLOperatorCost()->SetCost(pstrCost);
 		dxl_properties->Release();
 	}
-
-	// construct projection list
 	GPOS_ASSERT(NULL != pexprDTS->Prpp());
 
+	// construct projection list for top-level Append node
 	CColRefSet *pcrsOutput = pexprDTS->Prpp()->PcrsRequired();
 	CDXLNode *pdxlnPrLAppend = PdxlnProjList(pcrsOutput, colref_array);
 
-	CDXLNode *pdxlnResult = NULL;
-	IMdIdArray *part_mdids = popDTS->GetPartitionMdids();
-
-	pdxlnResult = GPOS_NEW(m_mp)
+	CDXLNode *pdxlnAppend = GPOS_NEW(m_mp)
 		CDXLNode(m_mp, GPOS_NEW(m_mp) CDXLPhysicalAppend(m_mp, false, false));
-	pdxlnResult->SetProperties(pdxlpropDTS);
-	pdxlnResult->AddChild(pdxlnPrLAppend);
-	pdxlnResult->AddChild(PdxlnFilter(NULL));
+	pdxlnAppend->SetProperties(pdxlpropDTS);
+	pdxlnAppend->AddChild(pdxlnPrLAppend);
+	pdxlnAppend->AddChild(PdxlnFilter(NULL));
 
+	IMdIdArray *part_mdids = popDTS->GetPartitionMdids();
 	for (ULONG ul = 0; ul < part_mdids->Size(); ++ul)
 	{
 		IMDId *part_mdid = (*part_mdids)[ul];
@@ -1192,7 +1187,10 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 		CTableDescriptor *part_tabdesc =
 			MakeTableDescForPart(part, pexprDTS->DeriveTableDescriptor());
 
-		// create new colrefs for every child partition
+		// Create new colrefs for the child partition. The ColRefs from root
+		// DTS, which may be used in any parent node, can no longer be exported
+		// by a child of the Append node. Thus it is exported by the Append
+		// node itself, and new colrefs are created here.
 		CColRefArray *part_colrefs = GPOS_NEW(m_mp) CColRefArray(m_mp);
 		for (ULONG ul = 0; ul < part_tabdesc->ColumnCount(); ++ul)
 		{
@@ -1205,7 +1203,7 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 		CDXLTableDescr *dxl_table_descr =
 			MakeDXLTableDescr(part_tabdesc, part_colrefs, pexprDTS->Prpp());
 		part_tabdesc->Release();
-		// Finally create the TableScan DXL node
+
 		CDXLNode *dxlnode = GPOS_NEW(m_mp) CDXLNode(
 			m_mp, GPOS_NEW(m_mp) CDXLPhysicalTableScan(m_mp, dxl_table_descr));
 
@@ -1213,11 +1211,14 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 		pdxlpropDTS->AddRef();
 		dxlnode->SetProperties(pdxlpropDTS);
 
-		// construct projection list - same as the upper Append node
-		GPOS_ASSERT(NULL != pexprDTS->Prpp());
-
+		// ColRef -> index in child table desc (per partition)
 		auto root_col_mapping = (*popDTS->GetRootColMappingPerPart())[ul];
 
+		// NB: since the order of part_colrefs matches that of columns in
+		// part_tabdesc, a value from root_col_mapping can be correctly used to
+		// index part_colrefs as well.
+
+		// construct projection list, re-ordered to match root DTS
 		CDXLNode *pdxlnPrL = PdxlnProjListForChildPart(
 			root_col_mapping, part_colrefs, pcrsOutput, colref_array);
 		dxlnode->AddChild(pdxlnPrL);  // project list
@@ -1226,18 +1227,18 @@ CTranslatorExprToDXL::PdxlnDynamicTableScan(
 		CDXLNode *filter_dxlnode =
 			PdxlnFilterForChildPart(root_col_mapping, part_colrefs,
 									popDTS->PdrgpcrOutput(), pexprScalarCond);
-		dxlnode->AddChild(filter_dxlnode);	// filter
+		dxlnode->AddChild(filter_dxlnode);
 
 		// add to the other scans under the created Append node
-		pdxlnResult->AddChild(dxlnode);
+		pdxlnAppend->AddChild(dxlnode);
 	}
 
 	CDistributionSpec *pds = pexprDTS->GetDrvdPropPlan()->Pds();
 	pds->AddRef();
 	pdrgpdsBaseTables->Append(pds);
 
-	GPOS_ASSERT(pdxlnResult);
-	return pdxlnResult;
+	GPOS_ASSERT(pdxlnAppend);
+	return pdxlnAppend;
 }
 
 //---------------------------------------------------------------------------
@@ -7254,7 +7255,17 @@ CTranslatorExprToDXL::GetProperties(const CExpression *pexpr)
 	return dxl_properties;
 }
 
-
+// Construct a project list for a child partition using:
+//   root_col_mapping - root col to part col mapping
+//   part_colrefs - (new) colrefs of the child partition
+//   reqd_colrefs - required colrefs from the root DTS
+//   colref_array - colrefs requested in explicit order
+//
+// NB: Even though we're passed a "set" of reqd colrefs, there is an implicit
+// order in which the set needs to be iterated. This order is in increasing
+// order of colref ids of the root partition. However, since the order can be
+// different when mapped to child partition cols, they are handled in this
+// method and an empty_set sent to the general PdxlnProjList()
 CDXLNode *
 CTranslatorExprToDXL::PdxlnProjListForChildPart(
 	const ColRefToUlongMap *root_col_mapping, const CColRefArray *part_colrefs,
@@ -7262,6 +7273,8 @@ CTranslatorExprToDXL::PdxlnProjListForChildPart(
 {
 	CColRefArray *mapped_colrefs = GPOS_NEW(m_mp) CColRefArray(m_mp);
 	CColRefSet *pcrs = GPOS_NEW(m_mp) CColRefSet(m_mp);
+
+	// project columns in order if explicitly asked
 	if (NULL != colref_array)
 	{
 		for (ULONG i = 0; i < colref_array->Size(); ++i)
@@ -7275,6 +7288,7 @@ CTranslatorExprToDXL::PdxlnProjListForChildPart(
 		}
 	}
 
+	// project other reqd columns
 	CColRefSetIter crsi(*reqd_colrefs);
 	while (crsi.Advance())
 	{
@@ -7294,19 +7308,27 @@ CTranslatorExprToDXL::PdxlnProjListForChildPart(
 	return pdxlnPrL;
 }
 
+// Translate a filter expr on the root for a child partition using:
+//   root_col_mapping - root col to part col mapping
+//   part_colrefs - (new) colrefs of the child partition
+//   root_colrefs - (original) root DTS colrefs
+//   pred - filter predicate to translate
+//
+// The method first creates a temporary mapping from root colrefs to (new) child
+// partition colref ids, which is used when translating via PdxlnScalar().
 CDXLNode *
 CTranslatorExprToDXL::PdxlnFilterForChildPart(
 	const ColRefToUlongMap *root_col_mapping, const CColRefArray *part_colrefs,
-	const CColRefArray *colref_array, CExpression *pred)
+	const CColRefArray *root_colrefs, CExpression *pred)
 {
-	GPOS_ASSERT(part_colrefs->Size() == colref_array->Size());
+	GPOS_ASSERT(part_colrefs->Size() == root_colrefs->Size());
 
-	// Set up a temporary col->ul mapping for translating the filter
+	// Set up a temporary mapping from root colrefs to partition colref ids
 	m_phmcrulPartColId = GPOS_NEW(m_mp) ColRefToUlongMap(m_mp);
 
-	for (ULONG i = 0; i < colref_array->Size(); ++i)
+	for (ULONG i = 0; i < root_colrefs->Size(); ++i)
 	{
-		CColRef *cr = (*colref_array)[i];
+		CColRef *cr = (*root_colrefs)[i];
 		ULONG *idx = root_col_mapping->Find(cr);
 		GPOS_ASSERT(NULL != idx);
 

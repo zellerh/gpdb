@@ -646,14 +646,16 @@ private:
 	CDXLNode *PdxlnProjList(const CColRefSet *pcrsOutput,
 							CColRefArray *colref_array);
 
+	// Construct a project list for a child partition
 	CDXLNode *PdxlnProjListForChildPart(
 		const ColRefToUlongMap *root_col_mapping,
 		const CColRefArray *part_colrefs, const CColRefSet *reqd_colrefs,
 		const CColRefArray *colref_array);
 
+	// translate a filter expr on the root for a child partition
 	CDXLNode *PdxlnFilterForChildPart(const ColRefToUlongMap *root_col_mapping,
 									  const CColRefArray *part_colrefs,
-									  const CColRefArray *colref_array,
+									  const CColRefArray *root_colrefs,
 									  CExpression *pred);
 
 	// translate a project list expression into a DXL proj list node

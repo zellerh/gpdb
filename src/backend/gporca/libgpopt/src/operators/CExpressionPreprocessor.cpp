@@ -2548,7 +2548,6 @@ CExpressionPreprocessor::PrunePartitions(CMemoryPool *mp, CExpression *expr)
 		(*expr)[0]->Pop()->Eopid() == COperator::EopLogicalDynamicGet)
 	{
 		CExpression *filter_pred = (*expr)[1];
-		//create a new pop & expr & return
 		CLogicalDynamicGet *dyn_get =
 			CLogicalDynamicGet::PopConvert((*expr)[0]->Pop());
 
@@ -2557,7 +2556,7 @@ CExpressionPreprocessor::PrunePartitions(CMemoryPool *mp, CExpression *expr)
 			CConstraint::PcnstrFromScalarExpr(mp, filter_pred, &pdrgpcrsChild);
 		CRefCount::SafeRelease(pdrgpcrsChild);
 
-		// TODO: skip all this if pred_cnstr = NULL
+		// GPDB_12_MERGE_FIXME: skip all this if pred_cnstr = NULL
 
 		IMdIdArray *selected_partition_mdids = GPOS_NEW(mp) IMdIdArray(mp);
 
@@ -2586,7 +2585,7 @@ CExpressionPreprocessor::PrunePartitions(CMemoryPool *mp, CExpression *expr)
 				pcnstr = CConstraint::PcnstrConjunction(mp, preds);
 			}
 
-			// Include the partition if it's not a contradiction, or if it is
+			// Include the partition if it's not a contradiction, or if it's
 			// undefined (e.g default partition)
 			if (NULL == pcnstr || !pcnstr->FContradiction())
 			{
@@ -2599,6 +2598,7 @@ CExpressionPreprocessor::PrunePartitions(CMemoryPool *mp, CExpression *expr)
 
 		if (selected_partition_mdids->Size() == 0)
 		{
+			// Return const false if there are no partitions left to scan
 			selected_partition_mdids->Release();
 			CColRefArray *colref_array =
 				expr->DeriveOutputColumns()->Pdrgpcr(mp);
@@ -2640,11 +2640,13 @@ CExpressionPreprocessor::PrunePartitions(CMemoryPool *mp, CExpression *expr)
 	return GPOS_NEW(mp) CExpression(mp, pop, children);
 }
 
-
+// Translate the part constraint of a child partition into an ORCA expr using
+// corresponding colrefs of the root table, instead of those from the child
+// partition.
 CConstraint *
-CExpressionPreprocessor::PcnstrFromChildPartition(const IMDRelation *partrel,
-												  CColRefArray *pdrgpcrOutput,
-												  ColRefToUlongMap *col_mapping)
+CExpressionPreprocessor::PcnstrFromChildPartition(
+	const IMDRelation *partrel, CColRefArray *pdrgpcrOutput,
+	ColRefToUlongMap *root_col_mapping)
 {
 	CMDAccessor *md_accessor = COptCtxt::PoctxtFromTLS()->Pmda();
 	CMemoryPool *mp = COptCtxt::PoctxtFromTLS()->Pmp();
@@ -2658,11 +2660,18 @@ CExpressionPreprocessor::PcnstrFromChildPartition(const IMDRelation *partrel,
 		return NULL;
 	}
 
+	// Create a list of indexes into the columns of the table descriptor of the
+	// child partition. This is used in PexprTranslateScalar() to construct a
+	// reverse mapping from the colid of  each (non-dropped) column in the child
+	// partition to it's corresponding colref in the root table.
+	// NB: For the indexes in root_col_mapping to be applied correctly here, the
+	// part constraint should have been translated without dropped cols
+	// (see RetrievePartConstraintForRel()).
 	ULongPtrArray *mapped_colids = GPOS_NEW(mp) ULongPtrArray(mp);
 	for (ULONG ul = 0; ul < pdrgpcrOutput->Size(); ++ul)
 	{
 		CColRef *colref = (*pdrgpcrOutput)[ul];
-		ULONG *colid = col_mapping->Find(colref);
+		ULONG *colid = root_col_mapping->Find(colref);
 		GPOS_ASSERT(NULL != colid);
 		mapped_colids->Append(GPOS_NEW(mp) ULONG(*colid));
 	}
@@ -2675,8 +2684,6 @@ CExpressionPreprocessor::PcnstrFromChildPartition(const IMDRelation *partrel,
 	GPOS_ASSERT(CUtils::FPredicate(part_constraint_expr));
 
 	CColRefSetArray *pdrgpcrsChild = NULL;
-	// Check constraints are satisfied if the check expression evaluates to
-	// true or NULL, so infer NULLs as true here.
 	CConstraint *cnstr = CConstraint::PcnstrFromScalarExpr(
 		mp, part_constraint_expr, &pdrgpcrsChild, true /* infer_nulls_as */);
 
