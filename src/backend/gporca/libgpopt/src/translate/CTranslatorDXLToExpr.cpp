@@ -570,18 +570,7 @@ CTranslatorDXLToExpr::PexprLogicalGet(const CDXLNode *dxlnode)
 	{
 		GPOS_ASSERT(EdxlopLogicalGet == edxlopid);
 
-		// generate a part index id
-		ULONG part_idx_id = COptCtxt::PoctxtFromTLS()->UlPartIndexNextVal();
 		IMdIdArray *partition_mdids = pmdrel->ChildPartitionMdids();
-		partition_mdids->AddRef();
-		popGet = GPOS_NEW(m_mp) CLogicalDynamicGet(
-			m_mp, pname, ptabdesc, part_idx_id, partition_mdids);
-		CLogicalDynamicGet *popDynamicGet =
-			CLogicalDynamicGet::PopConvert(popGet);
-
-		// get the output column references from the dynamic get
-		colref_array = popDynamicGet->PdrgpcrOutput();
-
 		for (ULONG ul = 0; ul < partition_mdids->Size(); ++ul)
 		{
 			IMDId *part_mdid = (*partition_mdids)[ul];
@@ -600,6 +589,17 @@ CTranslatorDXLToExpr::PexprLogicalGet(const CDXLNode *dxlnode)
 						   GPOS_WSZ_LIT("Multi-level partitioned tables"));
 			}
 		}
+
+		// generate a part index id
+		ULONG part_idx_id = COptCtxt::PoctxtFromTLS()->UlPartIndexNextVal();
+		partition_mdids->AddRef();
+		popGet = GPOS_NEW(m_mp) CLogicalDynamicGet(
+			m_mp, pname, ptabdesc, part_idx_id, partition_mdids);
+		CLogicalDynamicGet *popDynamicGet =
+			CLogicalDynamicGet::PopConvert(popGet);
+
+		// get the output column references from the dynamic get
+		colref_array = popDynamicGet->PdrgpcrOutput();
 
 #if 0
 		// if there are no indices, we only generate a dummy partition constraint because
