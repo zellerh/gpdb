@@ -4,7 +4,7 @@
     <dxl:OptimizerConfig>
       <dxl:EnumeratorConfig Id="0" PlanSamples="0" CostThreshold="0"/>
       <dxl:StatisticsConfig DampingFactorFilter="0.750000" DampingFactorJoin="0.010000" DampingFactorGroupBy="0.750000" MaxStatsBuckets="100"/>
-      <dxl:CTEConfig CTEInliningCutoff="0"/> 
+      <dxl:CTEConfig CTEInliningCutoff="0"/>
       <dxl:WindowOids RowNumber="7000" Rank="7001"/>
       <dxl:TraceFlags Value="103027,103001"/>
     </dxl:OptimizerConfig>
@@ -3274,7 +3274,219 @@
         <dxl:IndexInfoList/>
         <dxl:Triggers/>
         <dxl:CheckConstraints/>
-        <dxl:PartConstraint DefaultPartition="0" Unbounded="true">
+        <dxl:Partitions>
+          <dxl:Partition Mdid="0.328475001.1.1"/>
+          <dxl:Partition Mdid="0.328475002.1.1"/>
+          <dxl:Partition Mdid="0.328475003.1.1"/>
+          <dxl:Partition Mdid="0.328475004.1.1"/>
+        </dxl:Partitions>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.328475001.1.1" Name="fact_sales_prt_1" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="3" Keys="9,7" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="sales_date" Attno="1" Mdid="0.1082.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="shop_code" Attno="2" Mdid="0.1043.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="prod_code" Attno="3" Mdid="0.1043.1.0" Nullable="false" ColWidth="10">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="cust_code" Attno="4" Mdid="0.1043.1.0" Nullable="false" ColWidth="14">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="receipt_no" Attno="5" Mdid="0.1700.1.0" Nullable="false" ColWidth="7">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="receipt_subno" Attno="6" Mdid="0.1700.1.0" Nullable="false" ColWidth="7">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="sales" Attno="7" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="1" ColName="sales_date" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="1" ColName="sales_date" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="vPH//w==" DoubleValue="-315532800000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="1" ColName="sales_date" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="AAAAAA==" DoubleValue="0.0"/>
+            </dxl:Comparison>
+          </dxl:And>
+        </dxl:PartConstraint>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.328475002.1.1" Name="fact_sales_prt_2" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="3" Keys="9,7" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="sales_date" Attno="1" Mdid="0.1082.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="shop_code" Attno="2" Mdid="0.1043.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="prod_code" Attno="3" Mdid="0.1043.1.0" Nullable="false" ColWidth="10">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="cust_code" Attno="4" Mdid="0.1043.1.0" Nullable="false" ColWidth="14">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="receipt_no" Attno="5" Mdid="0.1700.1.0" Nullable="false" ColWidth="7">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="receipt_subno" Attno="6" Mdid="0.1700.1.0" Nullable="false" ColWidth="7">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="sales" Attno="7" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="1" ColName="sales_date" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="1" ColName="sales_date" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="AAAAAA==" DoubleValue="0.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="1" ColName="sales_date" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="RQ4AAA==" DoubleValue="315619200000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
+        </dxl:PartConstraint>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.328475003.1.1" Name="fact_sales_prt_3" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="3" Keys="9,7" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="sales_date" Attno="1" Mdid="0.1082.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="shop_code" Attno="2" Mdid="0.1043.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="prod_code" Attno="3" Mdid="0.1043.1.0" Nullable="false" ColWidth="10">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="cust_code" Attno="4" Mdid="0.1043.1.0" Nullable="false" ColWidth="14">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="receipt_no" Attno="5" Mdid="0.1700.1.0" Nullable="false" ColWidth="7">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="receipt_subno" Attno="6" Mdid="0.1700.1.0" Nullable="false" ColWidth="7">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="sales" Attno="7" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="1" ColName="sales_date" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="1" ColName="sales_date" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="RQ4AAA==" DoubleValue="315619200000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="1" ColName="sales_date" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="iRwAAA==" DoubleValue="631152000000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
+        </dxl:PartConstraint>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.328475004.1.1" Name="fact_sales_prt_4" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="3" Keys="9,7" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="sales_date" Attno="1" Mdid="0.1082.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="shop_code" Attno="2" Mdid="0.1043.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="prod_code" Attno="3" Mdid="0.1043.1.0" Nullable="false" ColWidth="10">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="cust_code" Attno="4" Mdid="0.1043.1.0" Nullable="false" ColWidth="14">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="receipt_no" Attno="5" Mdid="0.1700.1.0" Nullable="false" ColWidth="7">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="receipt_subno" Attno="6" Mdid="0.1700.1.0" Nullable="false" ColWidth="7">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="sales" Attno="7" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="1" ColName="sales_date" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="1" ColName="sales_date" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="iRwAAA==" DoubleValue="631152000000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="1" ColName="sales_date" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="zioAAA==" DoubleValue="946771200000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
         </dxl:PartConstraint>
       </dxl:Relation>
       <dxl:ColumnStatistics Mdid="1.353643.1.1.13" Name="gp_segment_id" Width="4.000000" NullFreq="0.000000" NdvRemain="0.000000" FreqRemain="0.000000"/>

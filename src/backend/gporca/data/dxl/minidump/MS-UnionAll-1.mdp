@@ -4,7 +4,7 @@
     <dxl:OptimizerConfig>
       <dxl:EnumeratorConfig Id="0" PlanSamples="0" CostThreshold="0"/>
       <dxl:StatisticsConfig DampingFactorFilter="0.750000" DampingFactorJoin="0.010000" DampingFactorGroupBy="0.750000" MaxStatsBuckets="100"/>
-      <dxl:CTEConfig CTEInliningCutoff="0"/> 
+      <dxl:CTEConfig CTEInliningCutoff="0"/>
       <dxl:WindowOids RowNumber="7000" Rank="7001"/>
       <dxl:CostModelConfig CostModelType="1" SegmentsForCosting="3">
         <dxl:CostParams>
@@ -568,7 +568,245 @@
         <dxl:IndexInfoList/>
         <dxl:Triggers/>
         <dxl:CheckConstraints/>
-        <dxl:PartConstraint DefaultPartition="0" Unbounded="true">
+        <dxl:Partitions>
+          <dxl:Partition Mdid="0.17364111001.1.1"/>
+          <dxl:Partition Mdid="0.17364111002.1.1"/>
+        </dxl:Partitions>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17364111001.1.1" Name="mr_star1_deltas_col_part_prt_1" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="RQ4AAA==" DoubleValue="315619200000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
+        </dxl:PartConstraint>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17364111002.1.1" Name="mr_star1_deltas_col_part_prt_2" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="iRwAAA==" DoubleValue="631152000000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
         </dxl:PartConstraint>
       </dxl:Relation>
       <dxl:ColumnStatistics Mdid="1.17364111.1.1.25" Name="productid" Width="4.000000" NullFreq="0.000000" NdvRemain="0.000000" FreqRemain="0.000000" ColStatsMissing="true"/>
@@ -690,7 +928,245 @@
         <dxl:IndexInfoList/>
         <dxl:Triggers/>
         <dxl:CheckConstraints/>
-        <dxl:PartConstraint DefaultPartition="0" Unbounded="true">
+        <dxl:Partitions>
+          <dxl:Partition Mdid="0.17355788001.1.1"/>
+          <dxl:Partition Mdid="0.17355788002.1.1"/>
+        </dxl:Partitions>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17355788001.1.1" Name="mr_star1_decorrelation_col_part_prt_1" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="RQ4AAA==" DoubleValue="315619200000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
+        </dxl:PartConstraint>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17355788002.1.1" Name="mr_star1_decorrelation_col_part_prt_2" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="iRwAAA==" DoubleValue="631152000000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
         </dxl:PartConstraint>
       </dxl:Relation>
       <dxl:GPDBScalarOp Mdid="0.1098.1.0" Name="&gt;=" ComparisonType="GEq" ReturnsNullOnNullInput="true">
@@ -832,7 +1308,245 @@
         <dxl:IndexInfoList/>
         <dxl:Triggers/>
         <dxl:CheckConstraints/>
-        <dxl:PartConstraint DefaultPartition="0" Unbounded="true">
+        <dxl:Partitions>
+          <dxl:Partition Mdid="0.17347476001.1.1"/>
+          <dxl:Partition Mdid="0.17347476002.1.1"/>
+        </dxl:Partitions>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17347476001.1.1" Name="mr_star1_cashflows_col_part_prt_1" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="RQ4AAA==" DoubleValue="315619200000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
+        </dxl:PartConstraint>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17347476002.1.1" Name="mr_star1_cashflows_col_part_prt_2" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="iRwAAA==" DoubleValue="631152000000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
         </dxl:PartConstraint>
       </dxl:Relation>
       <dxl:ColumnStatistics Mdid="1.17463072.1.1.31" Name="gp_segment_id" Width="4.000000" NullFreq="0.000000" NdvRemain="0.000000" FreqRemain="0.000000" ColStatsMissing="true"/>
@@ -978,7 +1692,245 @@
         <dxl:IndexInfoList/>
         <dxl:Triggers/>
         <dxl:CheckConstraints/>
-        <dxl:PartConstraint DefaultPartition="0" Unbounded="true">
+        <dxl:Partitions>
+          <dxl:Partition Mdid="0.17471384001.1.1"/>
+          <dxl:Partition Mdid="0.17471384002.1.1"/>
+        </dxl:Partitions>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17471384001.1.1" Name="mr_star1_volofvol_col_part_prt_1" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="RQ4AAA==" DoubleValue="315619200000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
+        </dxl:PartConstraint>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17471384002.1.1" Name="mr_star1_volofvol_col_part_prt_2" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="iRwAAA==" DoubleValue="631152000000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
         </dxl:PartConstraint>
       </dxl:Relation>
       <dxl:RelationStatistics Mdid="2.17463072.1.1" Name="mr_star1_voldrip_col_part" Rows="0.000000" EmptyRelation="true"/>
@@ -1100,7 +2052,245 @@
         <dxl:IndexInfoList/>
         <dxl:Triggers/>
         <dxl:CheckConstraints/>
-        <dxl:PartConstraint DefaultPartition="0" Unbounded="true">
+        <dxl:Partitions>
+          <dxl:Partition Mdid="0.17463072001.1.1"/>
+          <dxl:Partition Mdid="0.17463072002.1.1"/>
+        </dxl:Partitions>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17463072001.1.1" Name="mr_star1_voldrip_col_part_prt_1" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="RQ4AAA==" DoubleValue="315619200000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
+        </dxl:PartConstraint>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17463072002.1.1" Name="mr_star1_voldrip_col_part_prt_2" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="iRwAAA==" DoubleValue="631152000000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
         </dxl:PartConstraint>
       </dxl:Relation>
       <dxl:RelationStatistics Mdid="2.17446437.1.1" Name="mr_star1_skew_col_part" Rows="0.000000" EmptyRelation="true"/>
@@ -1207,7 +2397,245 @@
         <dxl:IndexInfoList/>
         <dxl:Triggers/>
         <dxl:CheckConstraints/>
-        <dxl:PartConstraint DefaultPartition="0" Unbounded="true">
+        <dxl:Partitions>
+          <dxl:Partition Mdid="0.17446437001.1.1"/>
+          <dxl:Partition Mdid="0.17446437002.1.1"/>
+        </dxl:Partitions>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17446437001.1.1" Name="mr_star1_skew_col_part_prt_1" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="RQ4AAA==" DoubleValue="315619200000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
+        </dxl:PartConstraint>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17446437002.1.1" Name="mr_star1_skew_col_part_prt_2" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="iRwAAA==" DoubleValue="631152000000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
         </dxl:PartConstraint>
       </dxl:Relation>
       <dxl:Relation Mdid="0.17392806.1.1" Name="mr_star1_gammas_col_part" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" PartitionColumns="2" PartitionTypes="r">
@@ -1312,7 +2740,245 @@
         <dxl:IndexInfoList/>
         <dxl:Triggers/>
         <dxl:CheckConstraints/>
-        <dxl:PartConstraint DefaultPartition="0" Unbounded="true">
+        <dxl:Partitions>
+          <dxl:Partition Mdid="0.17392806001.1.1"/>
+          <dxl:Partition Mdid="0.17392806002.1.1"/>
+        </dxl:Partitions>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17392806001.1.1" Name="mr_star1_gammas_col_part_prt_1" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="RQ4AAA==" DoubleValue="315619200000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
+        </dxl:PartConstraint>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17392806002.1.1" Name="mr_star1_gammas_col_part_prt_2" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="iRwAAA==" DoubleValue="631152000000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
         </dxl:PartConstraint>
       </dxl:Relation>
       <dxl:ColumnStatistics Mdid="1.17471384.1.1.27" Name="valuationmodelid" Width="4.000000" NullFreq="0.000000" NdvRemain="0.000000" FreqRemain="0.000000" ColStatsMissing="true"/>
@@ -1458,7 +3124,245 @@
         <dxl:IndexInfoList/>
         <dxl:Triggers/>
         <dxl:CheckConstraints/>
-        <dxl:PartConstraint DefaultPartition="0" Unbounded="true">
+        <dxl:Partitions>
+          <dxl:Partition Mdid="0.17454760001.1.1"/>
+          <dxl:Partition Mdid="0.17454760002.1.1"/>
+        </dxl:Partitions>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17454760001.1.1" Name="mr_star1_theta_col_part_prt_1" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="RQ4AAA==" DoubleValue="315619200000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
+        </dxl:PartConstraint>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17454760002.1.1" Name="mr_star1_theta_col_part_prt_2" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="iRwAAA==" DoubleValue="631152000000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
         </dxl:PartConstraint>
       </dxl:Relation>
       <dxl:ColumnStatistics Mdid="1.17421490.1.1.29" Name="ctid" Width="6.000000" NullFreq="0.000000" NdvRemain="0.000000" FreqRemain="0.000000" ColStatsMissing="true"/>
@@ -1589,7 +3493,245 @@
         <dxl:IndexInfoList/>
         <dxl:Triggers/>
         <dxl:CheckConstraints/>
-        <dxl:PartConstraint DefaultPartition="0" Unbounded="true">
+        <dxl:Partitions>
+          <dxl:Partition Mdid="0.17438125001.1.1"/>
+          <dxl:Partition Mdid="0.17438125002.1.1"/>
+        </dxl:Partitions>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17438125001.1.1" Name="mr_star1_seasonality_col_part_prt_1" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="RQ4AAA==" DoubleValue="315619200000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
+        </dxl:PartConstraint>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17438125002.1.1" Name="mr_star1_seasonality_col_part_prt_2" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="iRwAAA==" DoubleValue="631152000000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
         </dxl:PartConstraint>
       </dxl:Relation>
       <dxl:Relation Mdid="0.17384494.1.1" Name="mr_star1_fxdeltas_col_part" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" PartitionColumns="2" PartitionTypes="r">
@@ -1694,7 +3836,245 @@
         <dxl:IndexInfoList/>
         <dxl:Triggers/>
         <dxl:CheckConstraints/>
-        <dxl:PartConstraint DefaultPartition="0" Unbounded="true">
+        <dxl:Partitions>
+          <dxl:Partition Mdid="0.17384494001.1.1"/>
+          <dxl:Partition Mdid="0.17384494002.1.1"/>
+        </dxl:Partitions>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17384494001.1.1" Name="mr_star1_fxdeltas_col_part_prt_1" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="RQ4AAA==" DoubleValue="315619200000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
+        </dxl:PartConstraint>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17384494002.1.1" Name="mr_star1_fxdeltas_col_part_prt_2" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="iRwAAA==" DoubleValue="631152000000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
         </dxl:PartConstraint>
       </dxl:Relation>
       <dxl:RelationStatistics Mdid="2.17429813.1.1" Name="mr_star1_position_col_part" Rows="0.000000" EmptyRelation="true"/>
@@ -1800,7 +4180,245 @@
         <dxl:IndexInfoList/>
         <dxl:Triggers/>
         <dxl:CheckConstraints/>
-        <dxl:PartConstraint DefaultPartition="0" Unbounded="true">
+        <dxl:Partitions>
+          <dxl:Partition Mdid="0.17429813001.1.1"/>
+          <dxl:Partition Mdid="0.17429813002.1.1"/>
+        </dxl:Partitions>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17429813001.1.1" Name="mr_star1_position_col_part_prt_1" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="RQ4AAA==" DoubleValue="315619200000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
+        </dxl:PartConstraint>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17429813002.1.1" Name="mr_star1_position_col_part_prt_2" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="iRwAAA==" DoubleValue="631152000000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
         </dxl:PartConstraint>
       </dxl:Relation>
       <dxl:RelationStatistics Mdid="2.17421490.1.1" Name="mr_star1_netexposure_col_part" Rows="0.000000" EmptyRelation="true"/>
@@ -1906,7 +4524,245 @@
         <dxl:IndexInfoList/>
         <dxl:Triggers/>
         <dxl:CheckConstraints/>
-        <dxl:PartConstraint DefaultPartition="0" Unbounded="true">
+        <dxl:Partitions>
+          <dxl:Partition Mdid="0.17421490001.1.1"/>
+          <dxl:Partition Mdid="0.17421490002.1.1"/>
+        </dxl:Partitions>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17421490001.1.1" Name="mr_star1_netexposure_col_part_prt_1" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="RQ4AAA==" DoubleValue="315619200000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
+        </dxl:PartConstraint>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17421490002.1.1" Name="mr_star1_netexposure_col_part_prt_2" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="iRwAAA==" DoubleValue="631152000000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
         </dxl:PartConstraint>
       </dxl:Relation>
       <dxl:ColumnStatistics Mdid="1.17463072.1.1.29" Name="ctid" Width="6.000000" NullFreq="0.000000" NdvRemain="0.000000" FreqRemain="0.000000" ColStatsMissing="true"/>
@@ -2052,7 +4908,245 @@
         <dxl:IndexInfoList/>
         <dxl:Triggers/>
         <dxl:CheckConstraints/>
-        <dxl:PartConstraint DefaultPartition="0" Unbounded="true">
+        <dxl:Partitions>
+          <dxl:Partition Mdid="0.17413178001.1.1"/>
+          <dxl:Partition Mdid="0.17413178002.1.1"/>
+        </dxl:Partitions>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17413178001.1.1" Name="mr_star1_kappa_col_part_prt_1" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="RQ4AAA==" DoubleValue="315619200000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
+        </dxl:PartConstraint>
+      </dxl:Relation>
+      <dxl:Relation Mdid="0.17413178002.1.1" Name="mr_star1_kappa_col_part_prt_2" IsTemporary="false" HasOids="false" StorageType="AppendOnly, Column-oriented" DistributionPolicy="Hash" DistributionColumns="9,18,19" Keys="30,31,29" NumberLeafPartitions="0">
+        <dxl:Columns>
+          <dxl:Column Name="riskrunid" Attno="1" Mdid="0.20.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="riskrunsubid" Attno="2" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="businessdate" Attno="3" Mdid="0.1082.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ticket" Attno="4" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="longticket" Attno="5" Mdid="0.1042.1.0" Nullable="true" ColWidth="12">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="counterpartyid" Attno="6" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entity" Attno="7" Mdid="0.1042.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetype" Attno="8" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="subtype" Attno="9" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="contractid" Attno="10" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradingaccount" Attno="11" Mdid="0.1042.1.0" Nullable="true" ColWidth="9">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productidtype" Attno="12" Mdid="0.1043.1.0" Nullable="true" ColWidth="32">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="measurename" Attno="13" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="value" Attno="14" Mdid="0.701.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="uomname" Attno="15" Mdid="0.1042.1.0" Nullable="true" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="marketstatename" Attno="16" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="process2" Attno="17" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="observablename" Attno="18" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis1" Attno="19" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="axis2" Attno="20" Mdid="0.1043.1.0" Nullable="true" ColWidth="128">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="errormessage" Attno="21" Mdid="0.25.1.0" Nullable="true" ColWidth="8">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="partyid" Attno="22" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="entityid" Attno="23" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookid" Attno="24" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ccyid" Attno="25" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="productid" Attno="26" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tradetypeid" Attno="27" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="valuationmodelid" Attno="28" Mdid="0.23.1.0" Nullable="true" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="bookname" Attno="29" Mdid="0.1043.1.0" Nullable="true" ColWidth="64">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="ctid" Attno="-1" Mdid="0.27.1.0" Nullable="false" ColWidth="6">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="tableoid" Attno="-7" Mdid="0.26.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+          <dxl:Column Name="gp_segment_id" Attno="-8" Mdid="0.23.1.0" Nullable="false" ColWidth="4">
+            <dxl:DefaultValue/>
+          </dxl:Column>
+        </dxl:Columns>
+        <dxl:IndexInfoList/>
+        <dxl:Triggers/>
+        <dxl:CheckConstraints/>
+        <dxl:PartConstraint>
+          <dxl:And>
+            <dxl:IsNotNull>
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+            </dxl:IsNotNull>
+            <dxl:Comparison ComparisonOperator="&gt;=" OperatorMdid="0.1098.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="ZxUAAA==" DoubleValue="473385600000000.0"/>
+            </dxl:Comparison>
+            <dxl:Comparison ComparisonOperator="&lt;" OperatorMdid="0.1095.1.0">
+              <dxl:Ident ColId="3" ColName="businessdate" TypeMdid="0.1082.1.0"/>
+              <dxl:ConstValue TypeMdid="0.1082.1.0" Value="iRwAAA==" DoubleValue="631152000000000.0"/>
+            </dxl:Comparison>
+          </dxl:And>
         </dxl:PartConstraint>
       </dxl:Relation>
     </dxl:Metadata>
