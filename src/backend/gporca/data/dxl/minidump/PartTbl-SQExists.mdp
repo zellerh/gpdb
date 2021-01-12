@@ -665,6 +665,22 @@
       <dxl:ColumnStatistics Mdid="1.24756.1.1.6" Name="cmax" Width="4.000000"/>
       <dxl:ColumnStatistics Mdid="1.24588.1.1.7" Name="tableoid" Width="4.000000"/>
       <dxl:ColumnStatistics Mdid="1.24588.1.1.6" Name="cmax" Width="4.000000"/>
+      <dxl:GPDBScalarOp Mdid="0.1098.1.0" Name="&gt;=" ComparisonType="GEq" ReturnsNullOnNullInput="true">
+        <dxl:LeftType Mdid="0.1082.1.0"/>
+        <dxl:RightType Mdid="0.1082.1.0"/>
+        <dxl:ResultType Mdid="0.16.1.0"/>
+        <dxl:OpFunc Mdid="0.1090.1.0"/>
+        <dxl:Commutator Mdid="0.1096.1.0"/>
+        <dxl:InverseOp Mdid="0.1095.1.0"/>
+      </dxl:GPDBScalarOp>
+      <dxl:GPDBScalarOp Mdid="0.1095.1.0" Name="&lt;" ComparisonType="LT" ReturnsNullOnNullInput="true">
+        <dxl:LeftType Mdid="0.1082.1.0"/>
+        <dxl:RightType Mdid="0.1082.1.0"/>
+        <dxl:ResultType Mdid="0.16.1.0"/>
+        <dxl:OpFunc Mdid="0.1087.1.0"/>
+        <dxl:Commutator Mdid="0.1097.1.0"/>
+        <dxl:InverseOp Mdid="0.1098.1.0"/>
+      </dxl:GPDBScalarOp>
     </dxl:Metadata>
     <dxl:Query>
       <dxl:OutputColumns>

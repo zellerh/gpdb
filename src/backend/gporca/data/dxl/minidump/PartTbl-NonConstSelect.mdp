@@ -658,6 +658,14 @@
           </dxl:And>
         </dxl:PartConstraint>
       </dxl:Relation>
+      <dxl:GPDBScalarOp Mdid="0.1098.1.0" Name="&gt;=" ComparisonType="GEq" ReturnsNullOnNullInput="true">
+        <dxl:LeftType Mdid="0.1082.1.0"/>
+        <dxl:RightType Mdid="0.1082.1.0"/>
+        <dxl:ResultType Mdid="0.16.1.0"/>
+        <dxl:OpFunc Mdid="0.1090.1.0"/>
+        <dxl:Commutator Mdid="0.1096.1.0"/>
+        <dxl:InverseOp Mdid="0.1095.1.0"/>
+      </dxl:GPDBScalarOp>
     </dxl:Metadata>
     <dxl:Query>
       <dxl:OutputColumns>
