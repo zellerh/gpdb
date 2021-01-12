@@ -1323,6 +1323,22 @@
       <dxl:ColumnStatistics Mdid="1.17298420.1.1.28" Name="bookname" Width="8.000000" NullFreq="0.000000" NdvRemain="0.000000" FreqRemain="0.000000" ColStatsMissing="true"/>
       <dxl:ColumnStatistics Mdid="1.17298420.1.1.13" Name="value" Width="8.000000" NullFreq="0.000000" NdvRemain="0.000000" FreqRemain="0.000000" ColStatsMissing="true"/>
       <dxl:ColumnStatistics Mdid="1.17298420.1.1.12" Name="measurename" Width="8.000000" NullFreq="0.000000" NdvRemain="0.000000" FreqRemain="0.000000" ColStatsMissing="true"/>
+      <dxl:GPDBScalarOp Mdid="0.1098.1.0" Name="&gt;=" ComparisonType="GEq" ReturnsNullOnNullInput="true">
+        <dxl:LeftType Mdid="0.1082.1.0"/>
+        <dxl:RightType Mdid="0.1082.1.0"/>
+        <dxl:ResultType Mdid="0.16.1.0"/>
+        <dxl:OpFunc Mdid="0.1090.1.0"/>
+        <dxl:Commutator Mdid="0.1096.1.0"/>
+        <dxl:InverseOp Mdid="0.1095.1.0"/>
+      </dxl:GPDBScalarOp>
+      <dxl:GPDBScalarOp Mdid="0.1095.1.0" Name="&lt;" ComparisonType="LT" ReturnsNullOnNullInput="true">
+        <dxl:LeftType Mdid="0.1082.1.0"/>
+        <dxl:RightType Mdid="0.1082.1.0"/>
+        <dxl:ResultType Mdid="0.16.1.0"/>
+        <dxl:OpFunc Mdid="0.1087.1.0"/>
+        <dxl:Commutator Mdid="0.1097.1.0"/>
+        <dxl:InverseOp Mdid="0.1098.1.0"/>
+      </dxl:GPDBScalarOp>
     </dxl:Metadata>
     <dxl:Query>
       <dxl:OutputColumns>
