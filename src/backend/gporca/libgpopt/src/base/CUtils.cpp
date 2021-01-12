@@ -2987,14 +2987,20 @@ CUtils::FConstrainableType(IMDId *mdid_type)
 	{
 		return true;
 	}
-	if (!GPOS_FTRACE(EopttraceEnableConstantExpressionEvaluation))
+	if (GPOS_FTRACE(EopttraceEnableConstantExpressionEvaluation))
 	{
-		return false;
-	}
-	CMDAccessor *md_accessor = COptCtxt::PoctxtFromTLS()->Pmda();
-	const IMDType *pmdtype = md_accessor->RetrieveType(mdid_type);
+		CMDAccessor *md_accessor = COptCtxt::PoctxtFromTLS()->Pmda();
+		const IMDType *pmdtype = md_accessor->RetrieveType(mdid_type);
 
-	return FHasAllDefaultComparisons(pmdtype);
+		return FHasAllDefaultComparisons(pmdtype);
+	}
+	else
+	{
+		// also allow date/time/timestamp
+		return (CMDIdGPDB::m_mdid_date.Equals(mdid_type) ||
+				CMDIdGPDB::m_mdid_time.Equals(mdid_type) ||
+				CMDIdGPDB::m_mdid_timestamp.Equals(mdid_type));
+	}
 }
 
 // determine whether a type is an integer type

@@ -67,14 +67,10 @@ private:
 						 const IDatum *datum2,
 						 IMDType::ECmpType cmp_type) const;
 
-	// return true iff we use built-in evaluation for integers
+	// return true iff we should use the internal (stats-based) evaluation
 	static BOOL
-	FUseBuiltinIntEvaluators()
-	{
-		return !GPOS_FTRACE(EopttraceEnableConstantExpressionEvaluation) ||
-			   !GPOS_FTRACE(
-				   EopttraceUseExternalConstantExpressionEvaluationForInts);
-	}
+	FUseInternalEvaluator(const IDatum *datum1, const IDatum *datum2,
+						  BOOL *can_use_external_evaluator);
 
 public:
 	CDefaultComparator(const CDefaultComparator &) = delete;
