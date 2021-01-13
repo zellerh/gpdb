@@ -115,10 +115,14 @@ CDefaultComparator::FUseInternalEvaluator(const IDatum *datum1, const IDatum *da
 		// For now, specifically target date and timestamp columns, since they
 		// are mappable to a double value that represents the number of microseconds
 		// since Jan 1, 2000 and therefore those can be compared precisely, just like
-		// integer types
+		// integer types. Same goes for float types, since they map naturally to a
+		// double value
 		if (!(CMDIdGPDB::m_mdid_date.Equals(mdid1) ||
 			  CMDIdGPDB::m_mdid_time.Equals(mdid1) ||
-			  CMDIdGPDB::m_mdid_timestamp.Equals(mdid1)))
+			  CMDIdGPDB::m_mdid_timestamp.Equals(mdid1) ||
+			  CMDIdGPDB::m_mdid_float4.Equals(mdid1) ||
+			  CMDIdGPDB::m_mdid_float8.Equals(mdid1) ||
+			  CMDIdGPDB::m_mdid_numeric.Equals(mdid1)))
 		{
 			result = false;
 		}

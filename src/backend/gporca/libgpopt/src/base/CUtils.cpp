@@ -2996,10 +2996,13 @@ CUtils::FConstrainableType(IMDId *mdid_type)
 	}
 	else
 	{
-		// also allow date/time/timestamp
+		// also allow date/time/timestamp/float4/float8
 		return (CMDIdGPDB::m_mdid_date.Equals(mdid_type) ||
 				CMDIdGPDB::m_mdid_time.Equals(mdid_type) ||
-				CMDIdGPDB::m_mdid_timestamp.Equals(mdid_type));
+				CMDIdGPDB::m_mdid_timestamp.Equals(mdid_type) ||
+				CMDIdGPDB::m_mdid_float4.Equals(mdid_type) ||
+				CMDIdGPDB::m_mdid_float8.Equals(mdid_type) ||
+				CMDIdGPDB::m_mdid_numeric.Equals(mdid_type));
 	}
 }
 
