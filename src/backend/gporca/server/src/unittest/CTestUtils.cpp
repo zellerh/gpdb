@@ -429,11 +429,13 @@ CTestUtils::PexprLogicalDynamicGetWithIndexes(CMemoryPool *mp)
 		mp, ulAttributes, mdid, CName(&strName), true /*fPartitioned*/);
 	CWStringConst strAlias(GPOS_WSZ_LIT("P1Alias"));
 
+	IMdIdArray *partition_mdids = GPOS_NEW(mp) IMdIdArray(mp);
+
 	return GPOS_NEW(mp) CExpression(
 		mp, GPOS_NEW(mp) CLogicalDynamicGet(
 				mp, GPOS_NEW(mp) CName(mp, CName(&strAlias)), ptabdesc,
 				0,	// ulPartIndex
-				NULL /* GPDB_12_MERGE_FIXME: partition_mdids */));
+				partition_mdids));
 }
 
 
@@ -1806,10 +1808,12 @@ CTestUtils::PexprLogicalDynamicGet(CMemoryPool *mp, CTableDescriptor *ptabdesc,
 {
 	GPOS_ASSERT(NULL != ptabdesc);
 
+	IMdIdArray *partition_mdids = GPOS_NEW(mp) IMdIdArray(mp);
+
 	return GPOS_NEW(mp) CExpression(
 		mp, GPOS_NEW(mp) CLogicalDynamicGet(
 				mp, GPOS_NEW(mp) CName(mp, CName(pstrTableAlias)), ptabdesc,
-				ulPartIndex, NULL /* GPDB_12_MERGE_FIXME: partition_mdids */));
+				ulPartIndex, partition_mdids));
 }
 
 //---------------------------------------------------------------------------
