@@ -33,7 +33,7 @@ class CLogicalDynamicGet : public CLogicalDynamicGetBase
 {
 private:
 	// GPDB_12_MERGE_FIXME: Move this to the base class once supported by siblings
-	IMdIdArray *m_partition_mdids;
+	IMdIdArray *m_partition_mdids = NULL;
 
 	// Map of Root colref -> col index in child tabledesc
 	// per child partition in m_partition_mdid

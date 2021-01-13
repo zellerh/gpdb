@@ -809,7 +809,9 @@ CMDRelationGPDB::Serialize(CXMLSerializer *xml_serializer) const
 		GPOS_CHECK_ABORT;
 	}
 
-	if (IsPartitioned())
+	// GPDB_12_MERGE_FIXME: Convert m_partition_oids check to an assert
+	// after md.xml is fixed
+	if (IsPartitioned() && m_partition_oids)
 	{
 		SerializeMDIdList(xml_serializer, m_partition_oids,
 						  CDXLTokens::GetDXLTokenStr(EdxltokenPartitions),
