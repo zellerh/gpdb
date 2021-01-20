@@ -986,7 +986,7 @@ OR
       </dxl:LogicalJoin>
     </dxl:Query>
     <dxl:Plan Id="0" SpaceSize="375168">
-      <dxl:Result>
+      <dxl:HashJoin JoinType="Inner">
         <dxl:Properties>
           <dxl:Cost StartupCost="0" TotalCost="9921.832259" Rows="521.833333" Width="246"/>
         </dxl:Properties>

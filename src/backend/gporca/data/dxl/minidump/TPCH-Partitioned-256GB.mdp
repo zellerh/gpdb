@@ -3673,10 +3673,10 @@
         </dxl:And>
       </dxl:LogicalJoin>
     </dxl:Query>
-    <dxl:Plan Id="0" SpaceSize="245475">
+    <dxl:Plan Id="0" SpaceSize="225448">
       <dxl:GatherMotion InputSegments="0,1" OutputSegments="-1">
         <dxl:Properties>
-          <dxl:Cost StartupCost="0" TotalCost="905063310.668257" Rows="10325183.250315" Width="697"/>
+          <dxl:Cost StartupCost="0" TotalCost="2449307.347267" Rows="10325183.250315" Width="697"/>
         </dxl:Properties>
         <dxl:ProjList>
           <dxl:ProjElem ColId="0" Alias="p_partkey">
@@ -3795,7 +3795,7 @@
         <dxl:SortingColumnList/>
         <dxl:HashJoin JoinType="Inner">
           <dxl:Properties>
-            <dxl:Cost StartupCost="0" TotalCost="901549319.079649" Rows="10325183.250315" Width="697"/>
+            <dxl:Cost StartupCost="0" TotalCost="2416994.376530" Rows="10325183.250315" Width="697"/>
           </dxl:Properties>
           <dxl:ProjList>
             <dxl:ProjElem ColId="0" Alias="p_partkey">
@@ -3920,7 +3920,7 @@
           </dxl:HashCondList>
           <dxl:RedistributeMotion InputSegments="0,1" OutputSegments="0,1">
             <dxl:Properties>
-              <dxl:Cost StartupCost="0" TotalCost="893796213.040429" Rows="10325183.250323" Width="500"/>
+              <dxl:Cost StartupCost="0" TotalCost="2386370.844305" Rows="10325183.250323" Width="500"/>
             </dxl:Properties>
             <dxl:ProjList>
               <dxl:ProjElem ColId="0" Alias="p_partkey">
@@ -4023,7 +4023,7 @@
             </dxl:HashExprList>
             <dxl:HashJoin JoinType="Inner">
               <dxl:Properties>
-                <dxl:Cost StartupCost="0" TotalCost="891275415.348456" Rows="10325183.250323" Width="500"/>
+                <dxl:Cost StartupCost="0" TotalCost="2378291.388412" Rows="10325183.250323" Width="500"/>
               </dxl:Properties>
               <dxl:ProjList>
                 <dxl:ProjElem ColId="0" Alias="p_partkey">
@@ -4127,7 +4127,7 @@
               </dxl:HashCondList>
               <dxl:HashJoin JoinType="Inner">
                 <dxl:Properties>
-                  <dxl:Cost StartupCost="0" TotalCost="862155491.156250" Rows="24060859.229183" Width="357"/>
+                  <dxl:Cost StartupCost="0" TotalCost="2305315.183208" Rows="24060859.229183" Width="357"/>
                 </dxl:Properties>
                 <dxl:ProjList>
                   <dxl:ProjElem ColId="30" Alias="l_orderkey">
@@ -4208,7 +4208,7 @@
                 </dxl:HashCondList>
                 <dxl:RedistributeMotion InputSegments="0,1" OutputSegments="0,1">
                   <dxl:Properties>
-                    <dxl:Cost StartupCost="0" TotalCost="414013491.500000" Rows="1536050048.000000" Width="138"/>
+                    <dxl:Cost StartupCost="0" TotalCost="706261.357556" Rows="1536050048.000000" Width="138"/>
                   </dxl:Properties>
                   <dxl:ProjList>
                     <dxl:ProjElem ColId="30" Alias="l_orderkey">
@@ -4344,7 +4344,7 @@
                     </dxl:PartitionSelector>
                     <dxl:DynamicTableScan PartIndexId="1">
                       <dxl:Properties>
-                        <dxl:Cost StartupCost="0" TotalCost="103503372.375000" Rows="1536050048.000000" Width="138"/>
+                        <dxl:Cost StartupCost="0" TotalCost="71396.512218" Rows="1536050048.000000" Width="138"/>
                       </dxl:Properties>
                       <dxl:ProjList>
                         <dxl:ProjElem ColId="30" Alias="l_orderkey">
@@ -4469,7 +4469,7 @@
               </dxl:HashJoin>
               <dxl:TableScan>
                 <dxl:Properties>
-                  <dxl:Cost StartupCost="0" TotalCost="6433920.121094" Rows="20476560.000000" Width="143"/>
+                  <dxl:Cost StartupCost="0" TotalCost="6727.337434" Rows="20476560.000000" Width="143"/>
                 </dxl:Properties>
                 <dxl:ProjList>
                   <dxl:ProjElem ColId="0" Alias="p_partkey">
