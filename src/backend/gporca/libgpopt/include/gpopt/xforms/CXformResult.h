@@ -71,11 +71,11 @@ public:
 	CExpression *PexprNext();
 
 	// assign an expression in an added alternative to a common subgroup
-	void assignCommonSubgroup(CExpression *subexpr,
+	void AssignCommonSubgroup(CExpression *subexpr,
 							  CXformResultSubGroup *subgroup);
 
 	// check whether an expression belongs to a common subgroup
-	CXformResultSubGroup *getCommonSubgroup(CExpression *subexpr);
+	CXformResultSubGroup *GetCommonSubgroup(CExpression *subexpr);
 
 	// print function
 	IOstream &OsPrint(IOstream &os) const override;

@@ -2,7 +2,7 @@
 // Greenplum Database
 // Copyright (c) 2020 VMware and affiliates, Inc.
 //
-// Generate multiple xform alternatives that share common subgroups.
+// Facilitate multiple xform alternatives that share common subgroups.
 //
 // This happens mainly with NAry joins: Let's say we transform a
 // 4-way join of tables { a, b, c, d } and the two generated alternatives are

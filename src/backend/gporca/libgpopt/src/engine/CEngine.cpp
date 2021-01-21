@@ -276,7 +276,7 @@ CEngine::InsertExpressionChildren(CExpression *pexpr,
 
 			if (pxfres != NULL)
 			{
-				commonSubgroup = pxfres->getCommonSubgroup(childExpr);
+				commonSubgroup = pxfres->GetCommonSubgroup(childExpr);
 			}
 
 			if (commonSubgroup != NULL && commonSubgroup->getGroup() != NULL)

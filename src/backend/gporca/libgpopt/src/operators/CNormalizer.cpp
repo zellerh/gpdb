@@ -1245,39 +1245,25 @@ CNormalizer::PexprNormalize(CMemoryPool *mp, CExpression *pexpr)
 		{
 			// normalize scalar predicate and construct a new expression
 			CExpression *pexprWithNormalizedPred = pexpr;
-			CExpression *pexprPred = (*pexpr)[pexpr->Arity() - 1];
+			const ULONG arity = pexpr->Arity();
+			CExpression *pexprPred = (*pexpr)[arity - 1];
 			CExpression *pexprPredNormalized =
 				PexprRecursiveNormalize(mp, pexprPred);
+			CExpressionArray *lazyChildArray = NULL;
 
-			if (pexprPredNormalized == pexprPred)
-			{
-				// no change while normalizing pred, continue with pexpr
-				GPOS_ASSERT(pexprPredNormalized->RefCount() > (ULONG_PTR) 1);
-				// we now own a refcount on pexprPredNormalized, which is really
-				// pexprPred, let go of it (pexpr still owns another refcount)
-				pexprPredNormalized->Release();
-			}
-			else
+			// build a new child array with the existing logical children plus
+			// the new and changed predicate, but only if the predicate actually changed
+			lazyChildArray = CUtils::BuildLazyChildArray(
+				mp, pexpr, arity - 1, pexprPredNormalized, lazyChildArray);
+
+			if (NULL != lazyChildArray)
 			{
 				// the predicate changed during normalization, make a new
 				// expression with the normalized pred to use in PushThru below
-
-				// add-ref all children except for the scalar predicate, for which
-				// we already own a refcount
-				const ULONG arity = pexpr->Arity();
-				CExpressionArray *pdrgpexpr = GPOS_NEW(mp) CExpressionArray(mp);
-				for (ULONG ul = 0; ul < arity - 1; ul++)
-				{
-					CExpression *pexprChild = (*pexpr)[ul];
-					pexprChild->AddRef();
-					pdrgpexpr->Append(pexprChild);
-				}
-
-				pdrgpexpr->Append(pexprPredNormalized);
 				COperator *pop = pexpr->Pop();
 				pop->AddRef();
 				pexprWithNormalizedPred =
-					GPOS_NEW(mp) CExpression(mp, pop, pdrgpexpr);
+					GPOS_NEW(mp) CExpression(mp, pop, lazyChildArray);
 			}
 
 			// push normalized predicate through

@@ -93,7 +93,7 @@ CXformResult::PexprNext()
 
 
 void
-CXformResult::assignCommonSubgroup(CExpression *subexpr,
+CXformResult::AssignCommonSubgroup(CExpression *subexpr,
 								   CXformResultSubGroup *subgroup)
 {
 	if (NULL == m_commonSubgroups)
@@ -109,7 +109,7 @@ CXformResult::assignCommonSubgroup(CExpression *subexpr,
 
 
 CXformResultSubGroup *
-CXformResult::getCommonSubgroup(CExpression *subexpr)
+CXformResult::GetCommonSubgroup(CExpression *subexpr)
 {
 	if (NULL == m_commonSubgroups)
 	{

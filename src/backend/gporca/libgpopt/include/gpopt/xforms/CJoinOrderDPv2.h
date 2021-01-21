@@ -317,7 +317,7 @@ private:
 	//		Struct containing a bitset, representing a group, its best expression, and cost
 	//
 	//---------------------------------------------------------------------------
-	struct SGroupInfo : public CXformResultSubGroup
+	struct SGroupInfo : public CRefCount
 	{
 		// the set of atoms, this uniquely identifies the group
 		CBitSet *m_atoms;
@@ -326,20 +326,20 @@ private:
 		SExpressionInfoArray *m_best_expr_info_array;
 		CDouble m_cardinality;
 		CDouble m_lowest_expr_cost;
+		CXformResultSubGroup *m_result_subgroup;
 
 		SGroupInfo(CMemoryPool *mp, CBitSet *atoms)
-			: CXformResultSubGroup(),
-			  m_atoms(atoms),
-			  m_cardinality(-1.0),
-			  m_lowest_expr_cost(-1.0)
+			: m_atoms(atoms), m_cardinality(-1.0), m_lowest_expr_cost(-1.0)
 		{
 			m_best_expr_info_array = GPOS_NEW(mp) SExpressionInfoArray(mp);
+			m_result_subgroup = GPOS_NEW(mp) CXformResultSubGroup();
 		}
 
 		~SGroupInfo() override
 		{
 			m_atoms->Release();
 			m_best_expr_info_array->Release();
+			m_result_subgroup->Release();
 		}
 
 		BOOL

@@ -1690,6 +1690,7 @@ CJoinOrderDPv2::AddCommonSubgroups()
 		{
 			SGroupInfo *groupInfo = (*levelInfo->m_groups)[g];
 
+
 			// Loop over the individual join expressions in the group.
 			// Example of 2 expressions in group { t1, t2, t3 }:
 			// (t1 join t2) join t3,     (t1 join t3) join t2
@@ -1701,7 +1702,8 @@ CJoinOrderDPv2::AddCommonSubgroups()
 
 				// associate the expression with its groupInfo, so that we
 				// can later associate it and groupInfo with the MEMO group
-				m_pxfres->assignCommonSubgroup(exprInfo->m_expr, groupInfo);
+				m_pxfres->AssignCommonSubgroup(exprInfo->m_expr,
+											   groupInfo->m_result_subgroup);
 			}
 		}
 	}
