@@ -12,6 +12,7 @@
 #define GPOPT_CXformResult_H
 
 #include "gpos/base.h"
+
 #include "gpopt/base/CUtils.h"
 #include "gpopt/operators/CExpression.h"
 #include "gpopt/xforms/CXformResultSubGroup.h"

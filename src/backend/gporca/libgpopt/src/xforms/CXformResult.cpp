@@ -10,9 +10,10 @@
 //---------------------------------------------------------------------------
 
 #include "gpopt/xforms/CXformResult.h"
-#include "gpopt/xforms/CXformResultSubGroup.h"
 
 #include "gpos/base.h"
+
+#include "gpopt/xforms/CXformResultSubGroup.h"
 
 using namespace gpopt;
 

@@ -18,15 +18,16 @@
 
 #include "gpopt/base/CKHeap.h"
 #include "gpopt/base/CUtils.h"
-#include "gpopt/xforms/CJoinOrder.h"
-#include "gpopt/xforms/CXformResultSubGroup.h"
 #include "gpopt/operators/CExpression.h"
 #include "gpopt/xforms/CJoinOrder.h"
+#include "gpopt/xforms/CXformResultSubGroup.h"
 
 
 namespace gpopt
 {
 using namespace gpos;
+
+class CXformResult;
 
 //---------------------------------------------------------------------------
 //	@class:

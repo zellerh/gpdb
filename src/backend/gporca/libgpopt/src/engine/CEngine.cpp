@@ -51,7 +51,6 @@
 #include "gpopt/search/CSchedulerContext.h"
 #include "gpopt/xforms/CXformFactory.h"
 #include "gpopt/xforms/CXformResultSubGroup.h"
-
 #include "naucrates/traceflags/traceflags.h"
 
 
