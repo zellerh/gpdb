@@ -13624,6 +13624,8 @@ select * from t_ao_btree where a = 3 and b = 3;
 (1 row)
 
 select * from tpart_ao_btree where a = 3 and b = 3;
+INFO:  GPORCA failed to produce a plan, falling back to planner
+DETAIL:  Feature not supported: Partitioned table with heterogeneous storage types
  a | b 
 ---+---
  3 | 3
@@ -13646,7 +13648,7 @@ explain (costs off) select * from tpart_dim d join t_ao_btree f on d.a=f.a where
 
 explain (costs off) select * from tpart_dim d join tpart_ao_btree f on d.a=f.a where d.b=1;
 INFO:  GPORCA failed to produce a plan, falling back to planner
-DETAIL:  DXL-to-PlStmt Translation: trivial eq filter not supported
+DETAIL:  Feature not supported: Partitioned table with heterogeneous storage types
                         QUERY PLAN                        
 ----------------------------------------------------------
  Gather Motion 3:1  (slice1; segments: 3)
@@ -13699,16 +13701,17 @@ explain (costs off) select * from t_ao_btree where a = 3 and b = 3;
 (4 rows)
 
 explain (costs off) select * from tpart_ao_btree where a = 3 and b = 3;
+INFO:  GPORCA failed to produce a plan, falling back to planner
+DETAIL:  Feature not supported: Partitioned table with heterogeneous storage types
                    QUERY PLAN                   
 ------------------------------------------------
  Gather Motion 1:1  (slice1; segments: 1)
-   ->  Sequence
-         ->  Result
-         ->  Dynamic Seq Scan on tpart_ao_btree
-               Number of partitions to scan: 1 
-               Filter: ((a = 3) AND (b = 3))
- Optimizer: Pivotal Optimizer (GPORCA)
-(7 rows)
+   ->  Bitmap Heap Scan on tpart_ao_btree_1_prt_1
+         Recheck Cond: ((a = 3) AND (b = 3))
+         ->  Bitmap Index Scan on tpart_ao_btree_1_prt_1_a_b_idx
+               Index Cond: ((a = 3) AND (b = 3))
+ Optimizer: Postgres query optimizer
+(6 rows)
 
 -- expect a fallback for all four of these queries
 select * from tpart_dim d join t_ao_btree f on d.a=f.a where d.b=1;
@@ -13721,7 +13724,7 @@ DETAIL:  No plan has been computed for required properties
 
 select * from tpart_dim d join tpart_ao_btree f on d.a=f.a where d.b=1;
 INFO:  GPORCA failed to produce a plan, falling back to planner
-DETAIL:  No plan has been computed for required properties
+DETAIL:  Feature not supported: Partitioned table with heterogeneous storage types
  a | b | a | b 
 ---+---+---+---
  1 | 1 | 1 | 1
