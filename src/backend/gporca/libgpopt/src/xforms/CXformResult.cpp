@@ -99,7 +99,7 @@ CXformResult::AssignCommonSubgroup(CExpression *subexpr,
 {
 	if (NULL == m_commonSubgroups)
 	{
-		m_commonSubgroups = GPOS_NEW(m_mp) CCommonSubgroups(m_mp);
+		m_commonSubgroups = GPOS_NEW(m_mp) CExprToSubGroupMap(m_mp);
 	}
 	if (m_commonSubgroups->Insert(subexpr, subgroup))
 	{

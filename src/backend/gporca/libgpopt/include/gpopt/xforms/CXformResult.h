@@ -21,11 +21,10 @@ namespace gpopt
 {
 using namespace gpos;
 
-typedef CHashMap<class CExpression, class CXformResultSubGroup,
-				 CExpression::HashValue, CUtils::Equals,
-				 CleanupRelease<CExpression>,
+typedef CHashMap<class CExpression, class CXformResultSubGroup, HashPtr,
+				 EqualPtr, CleanupRelease<CExpression>,
 				 CleanupRelease<CXformResultSubGroup> >
-	CCommonSubgroups;
+	CExprToSubGroupMap;
 
 //---------------------------------------------------------------------------
 //	@class:
@@ -47,7 +46,7 @@ private:
 	CMemoryPool *m_mp;
 
 	// optional subgroups
-	CCommonSubgroups *m_commonSubgroups;
+	CExprToSubGroupMap *m_commonSubgroups;
 
 public:
 	CXformResult(const CXformResult &) = delete;

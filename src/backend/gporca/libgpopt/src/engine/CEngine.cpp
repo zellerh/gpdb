@@ -278,7 +278,7 @@ CEngine::InsertExpressionChildren(CExpression *pexpr,
 				commonSubgroup = pxfres->GetCommonSubgroup(childExpr);
 			}
 
-			if (commonSubgroup != NULL && commonSubgroup->getGroup() != NULL)
+			if (commonSubgroup != NULL && commonSubgroup->GetGroup() != NULL)
 			{
 				// This is a subexpression of an xform alternative and it shares a
 				// common group with another expression that has already been inserted
@@ -286,14 +286,14 @@ CEngine::InsertExpressionChildren(CExpression *pexpr,
 				// this must not happen on the top-level expression, which has the
 				// original group as the target group.
 				GPOS_ASSERT(pgroupTarget == NULL);
-				pgroupTarget = commonSubgroup->getGroup();
+				pgroupTarget = commonSubgroup->GetGroup();
 			}
 
 			pgroupChild =
 				PgroupInsert(pgroupTarget, childExpr, exfidOrigin, pgexprOrigin,
 							 true /*fIntermediate*/, pxfres);
 
-			if (commonSubgroup != NULL && commonSubgroup->getGroup() == NULL)
+			if (commonSubgroup != NULL && commonSubgroup->GetGroup() == NULL)
 			{
 				// remember the assigned MEMO group, to be used when we see other
 				// expressions that share a common group with this one

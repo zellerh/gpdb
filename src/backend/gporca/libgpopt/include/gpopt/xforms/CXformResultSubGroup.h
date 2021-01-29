@@ -34,7 +34,7 @@ public:
 	}
 
 	CGroup *
-	getGroup()
+	GetGroup()
 	{
 		return m_group;
 	}
