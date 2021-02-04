@@ -642,7 +642,7 @@ select a,count(distinct a), count(distinct b) from t1 group by a
               </dxl:CTEProducer>
               <dxl:HashJoin JoinType="Inner">
                 <dxl:Properties>
-                  <dxl:Cost StartupCost="0" TotalCost="862.059504" Rows="110.999992" Width="20"/>
+                  <dxl:Cost StartupCost="0" TotalCost="862.059504" Rows="111.000000" Width="20"/>
                 </dxl:Properties>
                 <dxl:ProjList>
                   <dxl:ProjElem ColId="0" Alias="a">
