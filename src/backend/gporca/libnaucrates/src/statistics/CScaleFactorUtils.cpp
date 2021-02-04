@@ -271,10 +271,11 @@ CScaleFactorUtils::CumulativeJoinScaleFactor(
 			CScaleFactorUtils::CalcCumulativeScaleFactorSqrtAlg(
 				scale_factor_hashmap, independent_join_preds);
 
-		// Limit the scale factor, usually to the cardinality of the larger of
-		// the joined tables. The reason for this is that we want to assume
-		// a referential integrity constraint between the two joined tables, so
-		// a row in one table will match with at least one row in the other
+		// Limit the scale factor, usually to the cardinality of the larger of the
+		// joined tables. This causes the resulting join cardinality to be at least
+		// the size of the smaller table. The reason for this is that we want to
+		// assume a referential integrity constraint between the two joined tables,
+		// so a row in one table will match with at least one row in the other
 		// table. This makes multi-predicate joins more similar to single
 		// predicates, where we make the same assumption. This assumption is
 		// baked in the formula itself: When we divide the cartesian product
