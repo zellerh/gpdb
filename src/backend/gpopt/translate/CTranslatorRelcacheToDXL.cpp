@@ -885,6 +885,10 @@ CTranslatorRelcacheToDXL::RetrieveIndex(CMemoryPool *mp,
 	{
 		index_type = IMDIndex::EmdindGist;
 	}
+	else if (BRIN_AM_OID == index_rel->rd_rel->relam)
+	{
+		index_type = IMDIndex::EmdindBrin;
+	}
 	else if (BITMAP_AM_OID == index_rel->rd_rel->relam)
 	{
 		index_type = IMDIndex::EmdindBitmap;
@@ -2736,7 +2740,8 @@ CTranslatorRelcacheToDXL::IsIndexSupported(Relation index_rel)
 		   (BTREE_AM_OID == index_rel->rd_rel->relam ||
 			BITMAP_AM_OID == index_rel->rd_rel->relam ||
 			GIST_AM_OID == index_rel->rd_rel->relam ||
-			GIN_AM_OID == index_rel->rd_rel->relam);
+			GIN_AM_OID == index_rel->rd_rel->relam ||
+			BRIN_AM_OID == index_rel->rd_rel->relam);
 }
 
 //---------------------------------------------------------------------------

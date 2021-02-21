@@ -160,7 +160,8 @@ CLogical::PosFromIndex(CMemoryPool *mp, const IMDIndex *pmdindex,
 
 	// GiST & GIN indexes have no order, so return an empty order spec
 	if (pmdindex->IndexType() == IMDIndex::EmdindGist ||
-		pmdindex->IndexType() == IMDIndex::EmdindGin)
+		pmdindex->IndexType() == IMDIndex::EmdindGin ||
+		pmdindex->IndexType() == IMDIndex::EmdindBrin)
 		return pos;
 
 	const ULONG ulLenKeys = pmdindex->Keys();
