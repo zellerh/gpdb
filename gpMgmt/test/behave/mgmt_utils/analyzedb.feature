@@ -1411,7 +1411,8 @@ Feature: Incrementally analyze the database
         And the row "1,'2008-01-01'" is inserted into "public.sales" in "incr_analyze"
         And the row "2,'2008-01-02'" is inserted into "public.sales" in "incr_analyze"
         When the user runs "analyzedb -a -d incr_analyze -t public.sales --skip_orca_root_stats"
-        Then output should not contain "rootpartition"
+        Then analyzedb should return a return code of 0
+        And output should not contain "rootpartition"
 
     # entries exist for some parts in state files for partition tables
 
