@@ -1004,68 +1004,19 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterPartBound(
 
 //---------------------------------------------------------------------------
 //	@function:
-//		CTranslatorExprToDXLUtils::PdxlnRangeFilterDefaultAndOpenEnded
+//		CTranslatorExprToDXLUtils::PdxlnRangeFilterDefault
 //
 //	@doc:
-//		Construct predicates to cover the cases of default partition and
-//		open-ended partitions if necessary
+//		Construct predicates to cover the cases of default partition
 //
 //---------------------------------------------------------------------------
 CDXLNode *
-CTranslatorExprToDXLUtils::PdxlnRangeFilterDefaultAndOpenEnded(
-	CMemoryPool *mp, ULONG ulPartLevel, BOOL addCheckForOpenLowerBound,
-	BOOL addCheckForOpenUpperBound, BOOL fDefaultPart)
+CTranslatorExprToDXLUtils::PdxlnRangeFilterDefault(CMemoryPool *mp,
+												   ULONG ulPartLevel)
 {
-	CDXLNode *pdxlnResult = NULL;
-	if (addCheckForOpenLowerBound)
-	{
-		// add a condition to cover the cases of open-ended interval (-inf, x)
-		// for those cases where this hasn't been done yet on the individual predicates
-		pdxlnResult = GPOS_NEW(mp)
-			CDXLNode(mp, GPOS_NEW(mp) CDXLScalarPartBoundOpen(
-							 mp, ulPartLevel, true /*is_lower_bound*/));
-	}
-
-	if (addCheckForOpenUpperBound)
-	{
-		// add a condition to cover the cases of open-ended interval (x, inf)
-		// for those cases where this hasn't been done yet on the individual predicates
-		CDXLNode *pdxlnOpenMax = GPOS_NEW(mp)
-			CDXLNode(mp, GPOS_NEW(mp) CDXLScalarPartBoundOpen(
-							 mp, ulPartLevel, false /*is_lower_bound*/));
-
-		// construct a boolean OR expression over the two expressions
-		if (NULL != pdxlnResult)
-		{
-			pdxlnResult = GPOS_NEW(mp)
-				CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxlor),
-						 pdxlnResult, pdxlnOpenMax);
-		}
-		else
-		{
-			pdxlnResult = pdxlnOpenMax;
-		}
-	}
-
-	if (fDefaultPart)
-	{
-		// add a condition to cover the cases of default partition
-		CDXLNode *pdxlnDefault = GPOS_NEW(mp)
-			CDXLNode(mp, GPOS_NEW(mp) CDXLScalarPartDefault(mp, ulPartLevel));
-
-		if (NULL != pdxlnResult)
-		{
-			pdxlnResult = GPOS_NEW(mp)
-				CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxlor),
-						 pdxlnDefault, pdxlnResult);
-		}
-		else
-		{
-			pdxlnResult = pdxlnDefault;
-		}
-	}
-
-	return pdxlnResult;
+	// add a condition to cover the cases of default partition
+	return GPOS_NEW(mp)
+		CDXLNode(mp, GPOS_NEW(mp) CDXLScalarPartDefault(mp, ulPartLevel));
 }
 
 

@@ -220,9 +220,8 @@ public:
 
 	// construct predicates to cover the cases of default partition and
 	// open-ended partitions if necessary
-	static CDXLNode *PdxlnRangeFilterDefaultAndOpenEnded(
-		CMemoryPool *mp, ULONG ulPartLevel, BOOL addCheckForOpenLowerBound,
-		BOOL addCheckForOpenUpperBound, BOOL fDefaultPart);
+	static CDXLNode *PdxlnRangeFilterDefault(CMemoryPool *mp,
+											 ULONG ulPartLevel);
 
 	// construct a test for partial scan in the partial partition propagator
 	static CDXLNode *PdxlnPartialScanTest(CMemoryPool *mp,

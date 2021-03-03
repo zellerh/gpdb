@@ -5364,15 +5364,14 @@ CTranslatorExprToDXL::ConstructLevelFilters4PartitionSelector(
 			pdrgpexprConjuncts->Release();
 		}
 
-		if (NULL != filter_dxlnode && fRangePart)
+		if (NULL != filter_dxlnode && fRangePart && fDefaultPartition)
 		{
-			CDXLNode *pdxlnDefaultAndOpenEnded =
-				CTranslatorExprToDXLUtils::PdxlnRangeFilterDefaultAndOpenEnded(
-					m_mp, ulLevel, false /*check open lower bound*/,
-					false /*check open upper bound*/, fDefaultPartition);
+			CDXLNode *pdxlnDefault =
+				CTranslatorExprToDXLUtils::PdxlnRangeFilterDefault(m_mp,
+																   ulLevel);
 
 			filter_dxlnode = CTranslatorExprToDXLUtils::PdxlnCombineBoolean(
-				m_mp, filter_dxlnode, pdxlnDefaultAndOpenEnded, Edxlor);
+				m_mp, filter_dxlnode, pdxlnDefault, Edxlor);
 		}
 
 		if (NULL == filter_dxlnode)
@@ -5662,12 +5661,8 @@ CTranslatorExprToDXL::PdxlnScNullTestPartKey(IMDId *,
 
 	// select the default partition since in a range-partitioned table only it can contain
 	// the NULL value
-	return CTranslatorExprToDXLUtils::PdxlnRangeFilterDefaultAndOpenEnded(
-			m_mp, ulPartLevel,
-			false,  //add check for lower bound
-			false,  //add check for upper bound
-			true   //fDefaultPartition
-		);
+	return CTranslatorExprToDXLUtils::PdxlnRangeFilterDefault(m_mp,
+															  ulPartLevel);
 }
 
 //---------------------------------------------------------------------------
