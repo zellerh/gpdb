@@ -5368,8 +5368,8 @@ CTranslatorExprToDXL::ConstructLevelFilters4PartitionSelector(
 		{
 			CDXLNode *pdxlnDefaultAndOpenEnded =
 				CTranslatorExprToDXLUtils::PdxlnRangeFilterDefaultAndOpenEnded(
-					m_mp, ulLevel, true /*check open lower bound*/,
-					true /*check open upper bound*/, fDefaultPartition);
+					m_mp, ulLevel, false /*check open lower bound*/,
+					false /*check open upper bound*/, fDefaultPartition);
 
 			filter_dxlnode = CTranslatorExprToDXLUtils::PdxlnCombineBoolean(
 				m_mp, filter_dxlnode, pdxlnDefaultAndOpenEnded, Edxlor);

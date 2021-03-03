@@ -902,7 +902,8 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterScCmp(
 		GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxland),
 							  pdxlnInclusiveCmp, pdxlnInclusiveBoolPredicate);
 
-	// return the final predicate in the form "(point <= col and colIncluded) or point < col" / "(point >= col and colIncluded) or point > col"
+	// return the final predicate in the form "(point <= col and colIncluded) or point < col" or
+	//                                        "(point >= col and colIncluded) or point > col"
 	return GPOS_NEW(mp)
 		CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxlor),
 				 pdxlnPredicateInclusive, pdxlnPredicateExclusive);
@@ -922,6 +923,9 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterEqCmp(
 	IMDId *pmdidTypePartKey, IMDId *pmdidTypeOther, IMDId *pmdidTypeCastExpr,
 	IMDId *mdid_cast_func, ULONG ulPartLevel)
 {
+	// create a predicate of the form
+	// (lower_bound < part_key or lower_bound_is_open) and
+	// (upper_bound > part_key or upper_bound_is_open)
 	CDXLNode *pdxlnPredicateMin = PdxlnRangeFilterPartBound(
 		mp, md_accessor, pdxlnScalar, pmdidTypePartKey, pmdidTypeOther,
 		pmdidTypeCastExpr, mdid_cast_func, ulPartLevel, true /*fLowerBound*/,
@@ -1154,6 +1158,39 @@ CTranslatorExprToDXLUtils::PdxlnCmp(
 	}
 	pdxlnScCmp->AddChild(pdxlnPartBound);
 	pdxlnScCmp->AddChild(pdxlnScalar);
+
+	// We added a check for boundary op expr, but in many cases we also need
+	// to handle the case where there is an open boundary (-inf or inf).
+	// So, instead of (boundary op expr) return
+	// (boundary op expr) or boundary_is_open
+	CDXLNode *pdxlnOpenBound = GPOS_NEW(mp) CDXLNode(
+		mp, GPOS_NEW(mp) CDXLScalarPartBoundOpen(mp, ulPartLevel, fLowerBound));
+
+	// For certain cases we would have to negate the open boundary
+	// boolean value to get the right result, but those cases currently
+	// don't happen.
+	//
+	// comparison             result for an open bound
+	// ------------------   ----------------------------
+	// lower_bound < expr             true
+	// lower_bound = expr             false
+	// lower_bound > expr             false
+	// upper_bound < expr             false
+	// upper_bound = expr             false
+	// upper_bound > expr             true
+	// lower_bound <> expr            true
+	// upper_bound <> expr            true
+	// NOTE: <= and >= give the same result as < and >
+	GPOS_ASSERT(((fLowerBound && IMDType::EcmptEq != cmp_type &&
+				  IMDType::EcmptG != cmp_type &&
+				  IMDType::EcmptGEq != cmp_type) ||
+				 (!fLowerBound && IMDType::EcmptL != cmp_type &&
+				  IMDType::EcmptLEq != cmp_type &&
+				  IMDType::EcmptEq != cmp_type)));
+
+	pdxlnScCmp =
+		GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxlor),
+							  pdxlnScCmp, pdxlnOpenBound);
 
 	return pdxlnScCmp;
 }
