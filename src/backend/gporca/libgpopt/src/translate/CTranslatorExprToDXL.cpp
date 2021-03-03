@@ -5638,7 +5638,7 @@ CTranslatorExprToDXL::PdxlnScCmpPartKey(CExpression *pexprScCmp,
 //
 //---------------------------------------------------------------------------
 CDXLNode *
-CTranslatorExprToDXL::PdxlnScNullTestPartKey(IMDId *pmdidTypePartKey,
+CTranslatorExprToDXL::PdxlnScNullTestPartKey(IMDId *,
 											 ULONG ulPartLevel, BOOL fRangePart,
 											 BOOL is_null)
 {
@@ -5654,42 +5654,20 @@ CTranslatorExprToDXL::PdxlnScNullTestPartKey(IMDId *pmdidTypePartKey,
 					 pdxlnPartListNullTest, pdxlnDefault);
 	}
 
-	pmdidTypePartKey->AddRef();
-	CDXLNode *pdxlnPredicateMin = GPOS_NEW(m_mp) CDXLNode(
-		m_mp, GPOS_NEW(m_mp) CDXLScalarNullTest(m_mp, is_null),
-		GPOS_NEW(m_mp) CDXLNode(m_mp, GPOS_NEW(m_mp) CDXLScalarPartBound(
-										  m_mp, ulPartLevel, pmdidTypePartKey,
-										  true /*is_lower_bound*/)));
+	if (!is_null)
+	{
+		// IS NOT NULL can't easily eliminate any range partition
+		return CTranslatorExprToDXLUtils::PdxlnBoolConst(m_mp, m_pmda, true /*value*/);
+	}
 
-	pmdidTypePartKey->AddRef();
-	CDXLNode *pdxlnPredicateMax = GPOS_NEW(m_mp) CDXLNode(
-		m_mp, GPOS_NEW(m_mp) CDXLScalarNullTest(m_mp, is_null),
-		GPOS_NEW(m_mp) CDXLNode(m_mp, GPOS_NEW(m_mp) CDXLScalarPartBound(
-										  m_mp, ulPartLevel, pmdidTypePartKey,
-										  false /*is_lower_bound*/)));
-
-	// construct the conjunction of the predicate for the lower and upper bounds
-	CDXLNode *pdxlnNullTests = GPOS_NEW(m_mp)
-		CDXLNode(m_mp, GPOS_NEW(m_mp) CDXLScalarBoolExpr(m_mp, Edxland),
-				 pdxlnPredicateMin, pdxlnPredicateMax);
-
-	// AND that with the following: !(default || min_open || max_open)
-	CDXLNode *pdxlnDefaultOrOpenEnded =
-		CTranslatorExprToDXLUtils::PdxlnRangeFilterDefaultAndOpenEnded(
+	// select the default partition since in a range-partitioned table only it can contain
+	// the NULL value
+	return CTranslatorExprToDXLUtils::PdxlnRangeFilterDefaultAndOpenEnded(
 			m_mp, ulPartLevel,
-			true,	//fLTComparison
-			true,	//fGTComparison
-			false,	//fEQComparison
-			true	//fDefaultPartition
+			false,  //add check for lower bound
+			false,  //add check for upper bound
+			true   //fDefaultPartition
 		);
-
-	CDXLNode *pdxlnNotDefaultOrOpenEnded = GPOS_NEW(m_mp)
-		CDXLNode(m_mp, GPOS_NEW(m_mp) CDXLScalarBoolExpr(m_mp, Edxlnot),
-				 pdxlnDefaultOrOpenEnded);
-
-	return GPOS_NEW(m_mp)
-		CDXLNode(m_mp, GPOS_NEW(m_mp) CDXLScalarBoolExpr(m_mp, Edxland),
-				 pdxlnNotDefaultOrOpenEnded, pdxlnNullTests);
 }
 
 //---------------------------------------------------------------------------
