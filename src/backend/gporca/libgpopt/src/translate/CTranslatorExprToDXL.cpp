@@ -5637,9 +5637,8 @@ CTranslatorExprToDXL::PdxlnScCmpPartKey(CExpression *pexprScCmp,
 //
 //---------------------------------------------------------------------------
 CDXLNode *
-CTranslatorExprToDXL::PdxlnScNullTestPartKey(IMDId *,
-											 ULONG ulPartLevel, BOOL fRangePart,
-											 BOOL is_null)
+CTranslatorExprToDXL::PdxlnScNullTestPartKey(IMDId *, ULONG ulPartLevel,
+											 BOOL fRangePart, BOOL is_null)
 {
 	if (!fRangePart)  // list partition
 	{
@@ -5656,7 +5655,8 @@ CTranslatorExprToDXL::PdxlnScNullTestPartKey(IMDId *,
 	if (!is_null)
 	{
 		// IS NOT NULL can't easily eliminate any range partition
-		return CTranslatorExprToDXLUtils::PdxlnBoolConst(m_mp, m_pmda, true /*value*/);
+		return CTranslatorExprToDXLUtils::PdxlnBoolConst(m_mp, m_pmda,
+														 true /*value*/);
 	}
 
 	// select the default partition since in a range-partitioned table only it can contain

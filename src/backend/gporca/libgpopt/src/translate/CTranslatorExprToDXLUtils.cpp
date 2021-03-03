@@ -1132,12 +1132,11 @@ CTranslatorExprToDXLUtils::PdxlnCmp(
 	// lower_bound <> expr            true
 	// upper_bound <> expr            true
 	// NOTE: <= and >= give the same result as < and >
-	GPOS_ASSERT(((fLowerBound && IMDType::EcmptEq != cmp_type &&
-				  IMDType::EcmptG != cmp_type &&
-				  IMDType::EcmptGEq != cmp_type) ||
-				 (!fLowerBound && IMDType::EcmptL != cmp_type &&
-				  IMDType::EcmptLEq != cmp_type &&
-				  IMDType::EcmptEq != cmp_type)));
+	GPOS_ASSERT(
+		((fLowerBound && IMDType::EcmptEq != cmp_type &&
+		  IMDType::EcmptG != cmp_type && IMDType::EcmptGEq != cmp_type) ||
+		 (!fLowerBound && IMDType::EcmptL != cmp_type &&
+		  IMDType::EcmptLEq != cmp_type && IMDType::EcmptEq != cmp_type)));
 
 	pdxlnScCmp =
 		GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxlor),
