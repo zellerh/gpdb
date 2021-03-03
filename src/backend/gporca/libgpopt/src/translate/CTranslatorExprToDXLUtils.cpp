@@ -1009,21 +1009,23 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterPartBound(
 //---------------------------------------------------------------------------
 CDXLNode *
 CTranslatorExprToDXLUtils::PdxlnRangeFilterDefaultAndOpenEnded(
-	CMemoryPool *mp, ULONG ulPartLevel, BOOL fLTComparison, BOOL fGTComparison,
-	BOOL fEQComparison, BOOL fDefaultPart)
+	CMemoryPool *mp, ULONG ulPartLevel, BOOL addCheckForOpenLowerBound,
+	BOOL addCheckForOpenUpperBound, BOOL fDefaultPart)
 {
 	CDXLNode *pdxlnResult = NULL;
-	if (fLTComparison || fEQComparison)
+	if (addCheckForOpenLowerBound)
 	{
 		// add a condition to cover the cases of open-ended interval (-inf, x)
+		// for those cases where this hasn't been done yet on the individual predicates
 		pdxlnResult = GPOS_NEW(mp)
 			CDXLNode(mp, GPOS_NEW(mp) CDXLScalarPartBoundOpen(
 							 mp, ulPartLevel, true /*is_lower_bound*/));
 	}
 
-	if (fGTComparison || fEQComparison)
+	if (addCheckForOpenUpperBound)
 	{
 		// add a condition to cover the cases of open-ended interval (x, inf)
+		// for those cases where this hasn't been done yet on the individual predicates
 		CDXLNode *pdxlnOpenMax = GPOS_NEW(mp)
 			CDXLNode(mp, GPOS_NEW(mp) CDXLScalarPartBoundOpen(
 							 mp, ulPartLevel, false /*is_lower_bound*/));
