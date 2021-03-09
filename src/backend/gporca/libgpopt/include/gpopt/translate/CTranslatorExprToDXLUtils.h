@@ -218,11 +218,6 @@ public:
 		IMDId *pmdidTypeCastExpr, IMDId *mdid_cast_func, ULONG ulPartLevel,
 		ULONG fLowerBound, IMDType::ECmpType cmp_type);
 
-	// construct predicates to cover the cases of default partition and
-	// open-ended partitions if necessary
-	static CDXLNode *PdxlnRangeFilterDefault(CMemoryPool *mp,
-											 ULONG ulPartLevel);
-
 	// construct a test for partial scan in the partial partition propagator
 	static CDXLNode *PdxlnPartialScanTest(CMemoryPool *mp,
 										  CMDAccessor *md_accessor,

@@ -5366,9 +5366,9 @@ CTranslatorExprToDXL::ConstructLevelFilters4PartitionSelector(
 
 		if (NULL != filter_dxlnode && fRangePart && fDefaultPartition)
 		{
-			CDXLNode *pdxlnDefault =
-				CTranslatorExprToDXLUtils::PdxlnRangeFilterDefault(m_mp,
-																   ulLevel);
+			// add a condition to select the default partition
+			CDXLNode *pdxlnDefault = GPOS_NEW(m_mp) CDXLNode(
+				m_mp, GPOS_NEW(m_mp) CDXLScalarPartDefault(m_mp, ulLevel));
 
 			filter_dxlnode = CTranslatorExprToDXLUtils::PdxlnCombineBoolean(
 				m_mp, filter_dxlnode, pdxlnDefault, Edxlor);
@@ -5661,8 +5661,8 @@ CTranslatorExprToDXL::PdxlnScNullTestPartKey(IMDId *, ULONG ulPartLevel,
 
 	// select the default partition since in a range-partitioned table only it can contain
 	// the NULL value
-	return CTranslatorExprToDXLUtils::PdxlnRangeFilterDefault(m_mp,
-															  ulPartLevel);
+	return GPOS_NEW(m_mp)
+		CDXLNode(m_mp, GPOS_NEW(m_mp) CDXLScalarPartDefault(m_mp, ulPartLevel));
 }
 
 //---------------------------------------------------------------------------

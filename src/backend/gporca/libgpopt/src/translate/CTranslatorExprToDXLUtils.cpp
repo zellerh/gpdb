@@ -1004,24 +1004,6 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterPartBound(
 
 //---------------------------------------------------------------------------
 //	@function:
-//		CTranslatorExprToDXLUtils::PdxlnRangeFilterDefault
-//
-//	@doc:
-//		Construct predicates to cover the cases of default partition
-//
-//---------------------------------------------------------------------------
-CDXLNode *
-CTranslatorExprToDXLUtils::PdxlnRangeFilterDefault(CMemoryPool *mp,
-												   ULONG ulPartLevel)
-{
-	// add a condition to cover the cases of default partition
-	return GPOS_NEW(mp)
-		CDXLNode(mp, GPOS_NEW(mp) CDXLScalarPartDefault(mp, ulPartLevel));
-}
-
-
-//---------------------------------------------------------------------------
-//	@function:
 //		CTranslatorExprToDXLUtils::PdxlpropCopy
 //
 //	@doc:
@@ -1110,7 +1092,7 @@ CTranslatorExprToDXLUtils::PdxlnCmp(
 	pdxlnScCmp->AddChild(pdxlnPartBound);
 	pdxlnScCmp->AddChild(pdxlnScalar);
 
-	// We added a check for boundary op expr, but in many cases we also need
+	// We added a check for (boundary op expr), but in many cases we also need
 	// to handle the case where there is an open boundary (-inf or inf).
 	// So, instead of (boundary op expr) return
 	// (boundary op expr) or boundary_is_open
@@ -1132,7 +1114,11 @@ CTranslatorExprToDXLUtils::PdxlnCmp(
 	// lower_bound <> expr            true
 	// upper_bound <> expr            true
 	// NOTE: <= and >= give the same result as < and >
-	GPOS_ASSERT(
+
+	// Assert that we can use the positive condition <boundary_is_open>.
+	// If we ever hit this assert then we'll have to add a NOT on top
+	// of pdxlnOpenBound.
+	GPOS_RTL_ASSERT(
 		((fLowerBound && IMDType::EcmptEq != cmp_type &&
 		  IMDType::EcmptG != cmp_type && IMDType::EcmptGEq != cmp_type) ||
 		 (!fLowerBound && IMDType::EcmptL != cmp_type &&
