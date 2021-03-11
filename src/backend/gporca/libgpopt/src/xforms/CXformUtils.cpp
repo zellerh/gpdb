@@ -3108,9 +3108,11 @@ CXformUtils::PexprBitmapSelectBestIndex(
 				mp, pdrgpcrOutput, pmdindex, pmdrel);
 
 			// make sure the first key of index is included in the scalar predicate
+			// (except for BRIN, which are symmetrical)
 			const CColRef *pcrFirstIndexKey = (*indexColumns)[0];
 
-			if (!pcrsScalar->FMember(pcrFirstIndexKey))
+			if (!pcrsScalar->FMember(pcrFirstIndexKey) &&
+				pmdindex->IndexType() != IMDIndex::EmdindBrin)
 			{
 				indexColumns->Release();
 				pdrgpexprIndex->Release();
