@@ -27,7 +27,6 @@ CREATE TABLE brintest_aocs (byteacol bytea,
 	lsncol pg_lsn,
 	boxcol box
 ) WITH (appendonly = true, orientation=column);
-
 INSERT INTO brintest_aocs SELECT
 	repeat(stringu1, 8)::bytea,
 	substr(stringu1, 1, 1)::"char",
@@ -57,14 +56,12 @@ INSERT INTO brintest_aocs SELECT
 	format('%s/%s%s', odd, even, tenthous)::pg_lsn,
 	box(point(odd, even), point(thousand, twothousand))
 FROM tenk1 ORDER BY unique2 LIMIT 100;
-
 -- throw in some NULL's and different values
 INSERT INTO brintest_aocs (inetcol, cidrcol, int4rangecol) SELECT
 	inet 'fe80::6e40:8ff:fea9:8c46' + tenthous,
 	cidr 'fe80::6e40:8ff:fea9:8c46' + tenthous,
 	'empty'::int4range
 FROM tenk1 ORDER BY thousand, tenthous LIMIT 25;
-
 CREATE INDEX brinaocsidx ON brintest_aocs USING brin (
 	byteacol,
 	charcol,
@@ -97,12 +94,10 @@ CREATE INDEX brinaocsidx ON brintest_aocs USING brin (
 	lsncol,
 	boxcol
 ) with (pages_per_range = 1);
-
 CREATE TABLE brinopers_aocs (colname name, typ text,
 	op text[], value text[], matches int[],
 	check (cardinality(op) = cardinality(value)),
 	check (cardinality(op) = cardinality(matches)));
-
 INSERT INTO brinopers_aocs VALUES
 	('byteacol', 'bytea',
 	 '{>, >=, =, <=, <}',
@@ -288,7 +283,6 @@ INSERT INTO brinopers_aocs VALUES
 	 '{<<, &<, &&, &>, >>, <<|, &<|, |&>, |>>, @>, <@, ~=}',
 	 '{"((1000,2000),(3000,4000))","((1,2),(3000,4000))","((1,2),(3000,4000))","((1,2),(3000,4000))","((1,2),(3,4))","((1000,2000),(3000,4000))","((1,2000),(3,4000))","((1000,2),(3000,4))","((1,2),(3,4))","((1,2),(300,400))","((1,2),(3000,4000))","((222,1222),(44,45))"}',
 	 '{100, 100, 100, 99, 96, 100, 100, 99, 96, 1, 99, 1}');
-
 DO $x$
 DECLARE
 	r record;
@@ -406,12 +400,88 @@ BEGIN
 	END LOOP;
 END;
 $x$;
-
+WARNING:  ORCA did not produce a bitmap indexscan plan for (boxcol,&&,box,"((1,2),(3000,4000))",100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (boxcol,&<,box,"((1,2),(3000,4000))",100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (boxcol,<<,box,"((1000,2000),(3000,4000))",100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (boxcol,~=,box,"((222,1222),(44,45))",1)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (boxcol,&<|,box,"((1,2000),(3,4000))",100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (boxcol,<<|,box,"((1000,2000),(3000,4000))",100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (boxcol,>>,box,"((1,2),(3,4))",96)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (boxcol,&>,box,"((1,2),(3000,4000))",99)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (boxcol,|&>,box,"((1000,2),(3000,4))",99)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (boxcol,<@,box,"((1,2),(3000,4000))",99)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (boxcol,@>,box,"((1,2),(300,400))",1)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (boxcol,|>>,box,"((1,2),(3,4))",96)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (boxcol,@>,point,"(500,43)",11)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,<<=,cidr,fe80::/32,25)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,&&,cidr,10/8,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,<,cidr,255.255.255.255,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,<=,cidr,255.255.255.255,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,>,cidr,0.0.0.0,125)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,>=,cidr,0.0.0.0,125)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,>>=,cidr,10.2.14/24,2)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,>>,cidr,10.2.14/25,2)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,<<=,cidr,10/8,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,<<,cidr,0/0,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,&&,cidr,fe80::/32,25)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,>>=,cidr,fe80::6e40:8ff:fea9:8c46,1)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,&&,inet,10/8,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,<,inet,255.255.255.255,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,<=,inet,255.255.255.255,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,>,inet,0.0.0.0,125)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,>=,inet,0.0.0.0,125)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,>>=,inet,10.2.14.231/24,2)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,>>,inet,10.2.14.231/25,2)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,<<=,inet,10.2.14.231/8,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,<<,inet,0/0,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,&&,inet,fe80::6e40:8ff:fea9:a673/32,25)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,>>=,inet,fe80::6e40:8ff:fea9:8c46,1)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (cidrcol,<<=,inet,fe80::6e40:8ff:fea9:a673/32,25)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,<<,cidr,0/0,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,<<=,cidr,10/8,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,>>,cidr,10.2.14/25,2)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,>>=,cidr,10.2.14/24,2)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,>=,cidr,0.0.0.0,125)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,>,cidr,0.0.0.0,125)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,<=,cidr,255.255.255.255,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,&&,cidr,10/8,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,<,cidr,255.255.255.255,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,<<=,cidr,fe80::/32,25)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,>>=,cidr,fe80::6e40:8ff:fea9:8c46,1)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,&&,cidr,fe80::/32,25)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,&&,inet,fe80::6e40:8ff:fea9:a673/32,25)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,&&,inet,10/8,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,<,inet,255.255.255.255,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,<=,inet,255.255.255.255,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,>,inet,0.0.0.0,125)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,>=,inet,0.0.0.0,125)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,>>=,inet,10.2.14.231/24,2)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,>>,inet,10.2.14.231/25,2)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,<<=,inet,10.2.14.231/8,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,<<,inet,0/0,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,>>=,inet,fe80::6e40:8ff:fea9:8c46,1)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (inetcol,<<=,inet,fe80::6e40:8ff:fea9:a673/32,25)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (int4rangecol,@>,int4,1500,22)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (int4rangecol,@>,int4range,empty,125)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (int4rangecol,<<,int4range,"[10000,)",53)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (int4rangecol,&<,int4range,"[10000,)",53)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (int4rangecol,&&,int4range,"(,]",53)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (int4rangecol,&>,int4range,"[3,4)",53)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (int4rangecol,>>,int4range,"[36,44)",50)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (int4rangecol,@>,int4range,"(1500,1501]",22)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (int4rangecol,<@,int4range,"[3,4)",72)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (int4rangecol,<@,int4range,empty,72)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (lsncol,IS,pg_lsn,,25)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (lsncol,"IS NOT",pg_lsn,,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (namecol,>,name,AAAAAA,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (namecol,>=,name,AAAAAA,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (namecol,=,name,MAAAAA,2)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (namecol,<=,name,ZZAAAA,100)
+WARNING:  ORCA did not produce a bitmap indexscan plan for (namecol,<,name,ZZAAAA,100)
 RESET enable_seqscan;
 RESET enable_bitmapscan;
 RESET optimizer_enable_tablescan;
 RESET optimizer_enable_bitmapscan;
-
 INSERT INTO brintest_aocs SELECT
 	repeat(stringu1, 42)::bytea,
 	substr(stringu1, 1, 1)::"char",
@@ -441,21 +511,36 @@ INSERT INTO brintest_aocs SELECT
 	format('%s/%s%s', odd, even, tenthous)::pg_lsn,
 	box(point(odd, even), point(thousand, twothousand))
 FROM tenk1 ORDER BY unique2 LIMIT 5 OFFSET 5;
-
 VACUUM brintest_aocs;  -- force a summarization cycle in brinaocsidx
-
 UPDATE brintest_aocs SET int8col = int8col * int4col;
 UPDATE brintest_aocs SET textcol = '' WHERE textcol IS NOT NULL;
-
 -- Vaccum again so that a new segment file is created.
 VACUUM brintest_aocs;
 INSERT INTO brintest_aocs SELECT * FROM brintest_aocs;
 -- We should have two segment files per Greenplum segment (QE).
 -- start_ignore
 SELECT segment_id, segno, tupcount, state FROM gp_toolkit.__gp_aoseg('brintest_aocs');
--- end_ignore
+ segment_id | segno | tupcount | state 
+------------+-------+----------+-------
+          1 |     1 |       78 |     1
+          1 |     2 |       78 |     1
+          2 |     1 |       80 |     1
+          2 |     2 |       80 |     1
+          0 |     1 |      102 |     1
+          0 |     2 |      102 |     1
+(6 rows)
 
+-- end_ignore
 -- Tests for brin_summarize_new_values
 SELECT brin_summarize_new_values('brintest_aocs'); -- error, not an index
+ERROR:  "brintest_aocs" is not an index
+CONTEXT:  SQL function "brin_summarize_new_values" statement 1
 SELECT brin_summarize_new_values('tenk1_unique1'); -- error, not a BRIN index
+ERROR:  "tenk1_unique1" is not a BRIN index
+CONTEXT:  SQL function "brin_summarize_new_values" statement 1
 SELECT brin_summarize_new_values('brinaocsidx'); -- ok, no change expected
+ brin_summarize_new_values 
+---------------------------
+                         0
+(1 row)
+
