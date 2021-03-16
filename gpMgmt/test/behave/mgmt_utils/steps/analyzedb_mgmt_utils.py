@@ -102,6 +102,13 @@ def impl(context, qualified_table):
             assert False, "table %s not found in state file %s" % (qualified_table, os.path.basename(filename))
 
 
+@then('"{qualified_table}" should not appear in the latest state files')
+def impl(context, qualified_table):
+    found, filename = table_found_in_state_file(context.dbname, qualified_table)
+    if found:
+        assert False, "table %s found in state file %s" % (qualified_table, os.path.basename(filename))
+
+
 @given('"{expected_result}" should appear in the latest ao_state file in database "{dbname}"')
 @then('"{expected_result}" should appear in the latest ao_state file in database "{dbname}"')
 def impl(context, expected_result, dbname):

@@ -274,6 +274,7 @@ class AnalyzeDb(Operation):
         self.verbose = options.verbose
         self.clean_last = options.clean_last
         self.clean_all = options.clean_all
+        self.clean_old = options.clean_old
         self.orca_rootstats = options.orca_rootstats
         self.gen_profile_only = options.gen_profile_only
         self.analyze_gucs = ANALYZE_GUCS
@@ -292,8 +293,8 @@ class AnalyzeDb(Operation):
         if not self.dbname:
             raise ProgramArgumentValidationException("option -d required. Please see 'analyzedb -?' for usage.")
 
-        if self.clean_all + self.clean_last > 1:
-            raise ProgramArgumentValidationException('options --clean_last and --clean_all are mutually exclusive')
+        if self.clean_all + self.clean_last + self.clean_old > 1:
+            raise ProgramArgumentValidationException('options --clean_last, --clean_all and --clean_old are mutually exclusive')
 
         if (self.schema is not None) + (self.single_table is not None) \
                 + (self.config_file is not None) > 1:
@@ -328,7 +329,7 @@ class AnalyzeDb(Operation):
                 logger.warning("Folder %s does not exist. Exiting...")
 
         if self.clean_last:
-            last_analyze_timestamp = get_lastest_analyze_timestamp(self.master_datadir, self.analyze_dir, self.dbname)
+            last_analyze_timestamp = get_latest_analyze_timestamp(self.master_datadir, self.analyze_dir, self.dbname)
             if last_analyze_timestamp is not None:
                 analyze_folder = os.path.join(self.master_datadir, self.analyze_dir, self.dbname,
                                               last_analyze_timestamp)
@@ -344,6 +345,32 @@ class AnalyzeDb(Operation):
             else:
                 logger.warning("No valid state files directories exist. Exiting...")
 
+        if self.clean_old:
+            # get the timestamp of the last good analyzedb run, if there is one saved
+            last_analyze_timestamp = get_latest_analyze_timestamp(self.master_datadir, self.analyze_dir, self.dbname)
+            if last_analyze_timestamp is not None:
+                # Now walk through all the saved runs from newest to oldest. Once we passed by
+                # the latest good one, delete any directories that are older
+                analyze_dirs = get_analyze_dirs(self.master_datadir, self.analyze_dir, self.dbname)
+                found_latest_good_run = False
+                for analyze_dir in analyze_dirs:
+                    if not found_latest_good_run:
+                        if last_analyze_timestamp == os.path.basename(analyze_dir):
+                            found_latest_good_run = True
+                        continue
+
+                    # this directory is older than the most recent valid analyze directory, remove it
+                    old_analyze_folder = os.path.join(self.master_datadir, self.analyze_dir, self.dbname, analyze_dir)
+                    if os.path.exists(old_analyze_folder):
+                        if not self.silent \
+                                and not userinput.ask_yesno(None,
+                                                         "\nDeleting folder %s and all files inside?" % old_analyze_folder,
+                                                         'N'):
+                            raise UserAbortedException()
+                        shutil.rmtree(old_analyze_folder)
+                    else:
+                        logger.warning("Folder %s does not exist. Exiting...")
+
         if self.include_cols is not None:
             self.include_cols = self.include_cols.strip().split(',')
 
@@ -358,7 +385,7 @@ class AnalyzeDb(Operation):
 
     def execute(self):
         try:
-            if self.clean_all or self.clean_last:
+            if self.clean_all or self.clean_last or self.clean_old:
                 return 0
 
             # The input_col_dict keeps track of the requested columns to analyze.
@@ -533,7 +560,7 @@ class AnalyzeDb(Operation):
                         (len(self.success_list), total_to_analyze))
 
     def read_last_analyzedb_output(self):
-        last_analyze_timestamp = get_lastest_analyze_timestamp(self.master_datadir, self.analyze_dir, self.dbname)
+        last_analyze_timestamp = get_latest_analyze_timestamp(self.master_datadir, self.analyze_dir, self.dbname)
         prev_ao_state = get_prev_ao_state(last_analyze_timestamp, self.master_datadir, self.analyze_dir, self.dbname)
         prev_col_dict = get_prev_col_state(last_analyze_timestamp, self.master_datadir, self.analyze_dir, self.dbname)
         prev_last_op = get_prev_last_op(last_analyze_timestamp, self.master_datadir, self.analyze_dir, self.dbname)
@@ -982,7 +1009,7 @@ def get_heap_tables_set(conn, input_tables_set):
     return dirty_tables
 
 
-def get_lastest_analyze_timestamp(master_datadir, statefile_dir, dbname):
+def get_latest_analyze_timestamp(master_datadir, statefile_dir, dbname):
     analyze_dirs = get_analyze_dirs(master_datadir, statefile_dir, dbname)
 
     for analyze_dir in analyze_dirs:
@@ -1301,9 +1328,11 @@ def create_parser():
     parser.add_option('--full', action='store_true', dest='full_analyze', default=False,
                       help="Analyze without using incremental. All tables requested by the user will be analyzed.")
     parser.add_option('--clean_last', action='store_true', dest='clean_last', default=False,
-                      help="Clean the state files generated by last analyzedb run. All other options except -d will be ignored.")
+                      help="Clean the state files generated by last analyzedb run. All other options except -d and -a will be ignored.")
     parser.add_option('--clean_all', action='store_true', dest='clean_all', default=False,
-                      help="Clean all the state files generated by analyzedb. All other options except -d will be ignored.")
+                      help="Clean all the state files generated by analyzedb. All other options except -d and -a will be ignored.")
+    parser.add_option('--clean_old', action='store_true', dest='clean_old', default=False,
+                      help="Clean all the state files generated by analyzedb except the most recent one. All other options except -d and -a will be ignored.")
     parser.add_option('-h', '-?', '--help', action='help',
                       help='Show this help message and exit.')
     parser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='Print debug messages.')
