@@ -166,29 +166,29 @@ Feature: Incrementally analyze the database
         When the user runs "analyzedb -l -d incr_analyze -t '"my schema"."my ao"'"
         Then analyzedb should print "-"my schema"."my ao" to stdout
 
-    Scenario: Cleaning all state files
+    Scenario: Clean all state files
         Given no state files exist for database "incr_analyze"
         When the user runs "analyzedb -a -d incr_analyze -t public.t1_ao"
         And some data is inserted into table "t1_ao" in schema "public" with column type list "int,text,real"
         And the user runs "analyzedb -a -d incr_analyze -t public.t1_ao"
         And the user runs "analyzedb -a -d incr_analyze --clean_all"
         And the user runs "analyzedb -a -d incr_analyze -l"
-        # when running analyzedb, the analyze target will be printed with a prefix dash
         Then analyzedb should return a return code of 0
         And output should print "-public.t1_ao" to stdout
         And "public.t1_ao" should not appear in the latest state files
 
-    Scenario: Cleaning stale state files
+    Scenario: Clean latest state files
         Given no state files exist for database "incr_analyze"
         When the user runs "analyzedb -a -d incr_analyze -t public.t1_ao"
-        And some data is inserted into table "t1_ao" in schema "public" with column type list "int,text,real"
-        And the user runs "analyzedb -a -d incr_analyze -t public.t1_ao"
-        And the user runs "analyzedb -a -d incr_analyze --clean_stale"
+        And some data is inserted into table "t3_ao" in schema "public" with column type list "int,text,real"
+        And the user runs "analyzedb -a -d incr_analyze -t public.t3_ao"
+        And the user runs "analyzedb -a -d incr_analyze --clean_last"
         And the user runs "analyzedb -a -d incr_analyze -l"
-        # when running analyzedb, the analyze target will be printed with a prefix dash
         Then analyzedb should return a return code of 0
-        And output should not print "-public.t1_ao" to stdout
+        And analyzedb should print "-public.t3_ao" to stdout
+        And output should not contain "-public.t1_ao"
         And "public.t1_ao" should appear in the latest state files
+        And "public.t3_ao" should not appear in the latest state files
 
     Scenario: Incremental analyze, no dirty tables
         Given no state files exist for database "incr_analyze"
