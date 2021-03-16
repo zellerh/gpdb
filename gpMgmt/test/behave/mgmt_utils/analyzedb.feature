@@ -178,12 +178,12 @@ Feature: Incrementally analyze the database
         And output should print "-public.t1_ao" to stdout
         And "public.t1_ao" should not appear in the latest state files
 
-    Scenario: Cleaning old state files
+    Scenario: Cleaning stale state files
         Given no state files exist for database "incr_analyze"
         When the user runs "analyzedb -a -d incr_analyze -t public.t1_ao"
         And some data is inserted into table "t1_ao" in schema "public" with column type list "int,text,real"
         And the user runs "analyzedb -a -d incr_analyze -t public.t1_ao"
-        And the user runs "analyzedb -a -d incr_analyze --clean_old"
+        And the user runs "analyzedb -a -d incr_analyze --clean_stale"
         And the user runs "analyzedb -a -d incr_analyze -l"
         # when running analyzedb, the analyze target will be printed with a prefix dash
         Then analyzedb should return a return code of 0
