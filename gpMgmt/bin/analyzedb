@@ -43,7 +43,8 @@ WRITE_LOCK_FILE_NAME = "write_lock_semaphore"
 ANALYZE_GUCS = "set optimizer_analyze_enable_merge_of_leaf_stats=off; "
 ANALYZE_SQL = """analyze %s"""
 ANALYZE_ROOT_SQL = """analyze rootpartition %s"""
-REPORTS_ARE_STALE_AFTER_N_DAYS = 7
+REPORTS_ARE_STALE_AFTER_N_DAYS = 8
+NUM_REPORTS_TO_SAVE = 3
 
 PG_PARTITIONS_SURROGATE = """
 SELECT n.nspname AS schemaname, cl.relname AS tablename, n2.nspname AS partitionschemaname, cl2.relname AS partitiontablename, cl3.relname AS parentpartitiontablename
@@ -923,17 +924,22 @@ class AnalyzeDb(Operation):
     def _clean_stale_directories(self, current_time_str):
         # extract the date and time from the string of the form yyyymmddhhmmss
         current_analyze_time = datetime.strptime(current_time_str, '%Y%m%d%H%M%S')
+        num_previous_statefiles = 0
         # Now walk through the log directories and delete those that are more than
-        # REPORTS_ARE_STALE_AFTER_N_DAYS days older than the current analyze timestamp
+        # REPORTS_ARE_STALE_AFTER_N_DAYS days older than the current analyze timestamp,
+        # but leave at least NUM_REPORTS_TO_SAVE, even if they are older than the threshold
         analyze_dirs = get_analyze_dirs(self.master_datadir, self.analyze_dir, self.dbname)
         for saved_analyze_dir in analyze_dirs:
             try:
                 time_of_saved_analyze = datetime.strptime(os.path.basename(saved_analyze_dir), '%Y%m%d%H%M%S')
-                if current_analyze_time - time_of_saved_analyze > timedelta(days=REPORTS_ARE_STALE_AFTER_N_DAYS):
+                time_diff = current_analyze_time - time_of_saved_analyze
+                if num_previous_statefiles >= NUM_REPORTS_TO_SAVE and time_diff > timedelta(days=REPORTS_ARE_STALE_AFTER_N_DAYS):
                     # this directory more than a week older than the most recent valid analyze directory, remove it
                     if os.path.exists(saved_analyze_dir):
                         shutil.rmtree(saved_analyze_dir)
                         logger.info("Deleted archived log directory %s" % saved_analyze_dir)
+                if time_diff > timedelta(seconds=0):
+                    num_previous_statefiles += 1
             except:
                 logger.info("Ignoring log directory that does not conform to naming convention: %s" % saved_analyze_dir)
 
