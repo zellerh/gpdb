@@ -874,24 +874,24 @@ CTranslatorRelcacheToDXL::RetrieveIndex(CMemoryPool *mp,
 	CMDIdGPDB *mdid_rel = GPOS_NEW(mp) CMDIdGPDB(rel_oid);
 
 	md_rel = md_accessor->RetrieveRel(mdid_rel);
-
-	index_type = IMDIndex::EmdindBtree;
 	mdid_item_type = GPOS_NEW(mp) CMDIdGPDB(GPDB_ANY);
-	if (GIN_AM_OID == index_rel->rd_rel->relam)
+	switch (index_rel->rd_rel->relam)
 	{
-		index_type = IMDIndex::EmdindGin;
-	}
-	else if (GIST_AM_OID == index_rel->rd_rel->relam)
-	{
-		index_type = IMDIndex::EmdindGist;
-	}
-	else if (BRIN_AM_OID == index_rel->rd_rel->relam)
-	{
-		index_type = IMDIndex::EmdindBrin;
-	}
-	else if (BITMAP_AM_OID == index_rel->rd_rel->relam)
-	{
-		index_type = IMDIndex::EmdindBitmap;
+		case BITMAP_AM_OID:
+			index_type = IMDIndex::EmdindBitmap;
+			break;
+		case BRIN_AM_OID:
+			index_type = IMDIndex::EmdindBrin;
+			break;
+		case GIN_AM_OID:
+			index_type = IMDIndex::EmdindGin;
+			break;
+		case GIST_AM_OID:
+			index_type = IMDIndex::EmdindGist;
+			break;
+		default:
+			index_type = IMDIndex::EmdindBtree;
+			break;
 	}
 
 	// get the index name
