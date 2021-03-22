@@ -394,6 +394,12 @@ BEGIN
 	END LOOP;
 END;
 $x$;
+-- Note: ORCA does not support all of the above operators:
+--       - standard comparison operators on inet and cidr columns
+--         because ORCA does not look at the second occurrence of a column in an index,
+--         even if it uses a different operator class
+--       - IS NULL and IS NOT NULL operators, because ORCA supports only binary operators
+--       - namecol predicates, falls back because of the use of a non-default collation
 
 RESET enable_seqscan;
 RESET enable_bitmapscan;
