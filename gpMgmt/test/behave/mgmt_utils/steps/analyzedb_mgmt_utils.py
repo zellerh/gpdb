@@ -1,6 +1,8 @@
 import re
 import os
 import shutil
+import time
+from datetime import datetime, timedelta
 from gppylib.db import dbconn
 from test.behave_utils.utils import check_schema_exists, check_table_exists, drop_table_if_exists
 from behave import given, when, then
@@ -231,6 +233,32 @@ def impl(context, tablename, dbname):
         num_tuples = dbconn.execSQLForSingleton(conn, query)
         if num_tuples == 0:
             raise Exception("Expected partition table %s to contain root statistics" % tablename)
+
+@given('the state files for "{dbname}" are artificially aged by {num_days} days')
+@when('the state files for "{dbname}" are artificially aged by {num_days} days')
+def impl(context, dbname, num_days):
+    analyze_dir = get_analyze_dir(dbname)
+    folders = get_list_of_analyze_dirs(dbname)
+    for f in folders:
+        time_of_analyze = datetime.strptime(os.path.basename(f), '%Y%m%d%H%M%S')
+        aged_time_of_analyze = time_of_analyze - timedelta(days=int(num_days))
+        new_folder_name = os.path.join(analyze_dir, aged_time_of_analyze.strftime('%Y%m%d%H%M%S'))
+        shutil.move(f, new_folder_name)
+
+@then('there should be {num_dirs} state directories for database "{dbname}"')
+@then('there should be {num_dirs} state directory for database "{dbname}"')
+def impl(context, num_dirs, dbname):
+    folders = get_list_of_analyze_dirs(dbname)
+    if len(folders) != int(num_dirs):
+        raise Exception("Found %d state directories, expected %s" % (len(folders), num_dirs))
+
+@given('the user waits {num_secs} seconds')
+@when('the user waits {num_secs} seconds')
+@given('the user waits {num_secs} second')
+@when('the user waits {num_secs} second')
+def impl(context, num_secs):
+    time.sleep(int(num_secs))
+
 
 def get_mod_count_in_state_file(dbname, schema, table):
     file = get_latest_aostate_file(dbname)
