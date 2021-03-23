@@ -102,6 +102,17 @@ for inc_dir in inc_dirs:
                 if m:
                     fileset[fname].append(m.group(1))
 
+# Handle newer MacOS versions (Catalina and later) that relocated /usr/include
+macos_usr_include = ''
+
+try:
+    macos_usr_include = subprocess.check_output(['xcrun', '--show-sdk-path']).strip()
+    macos_usr_include = os.path.join(macos_usr_include,'usr/include')
+    if not os.path.isdir(macos_usr_include):
+        macos_usr_include = ''
+except:
+    # probably not on MacOS or on an older version
+    macos_usr_include = ''
 
 # For all files, check to see if the list of includes is in the list
 missing = False
@@ -119,7 +130,11 @@ for f in keys:
         if os.path.exists(os.path.join('/usr/include',i)):
             continue
 
-        # 3. It might not have been well qualified
+        # 3. It might be in the MacOS include location
+        if macos_usr_include != '' and os.path.exists(os.path.join(macos_usr_include,i)):
+            continue
+
+        # 4. It might not have been well qualified
         (d,s) = os.path.split(f)
         if fileset.get(os.path.join(d,i)):
             continue
