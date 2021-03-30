@@ -877,6 +877,9 @@ CTranslatorRelcacheToDXL::RetrieveIndex(CMemoryPool *mp,
 	mdid_item_type = GPOS_NEW(mp) CMDIdGPDB(GPDB_ANY);
 	switch (index_rel->rd_rel->relam)
 	{
+		case BTREE_AM_OID:
+			index_type = IMDIndex::EmdindBtree;
+			break;
 		case BITMAP_AM_OID:
 			index_type = IMDIndex::EmdindBitmap;
 			break;
@@ -890,8 +893,8 @@ CTranslatorRelcacheToDXL::RetrieveIndex(CMemoryPool *mp,
 			index_type = IMDIndex::EmdindGist;
 			break;
 		default:
-			index_type = IMDIndex::EmdindBtree;
-			break;
+			GPOS_RAISE(gpdxl::ExmaMD, gpdxl::ExmiMDObjUnsupported,
+					   GPOS_WSZ_LIT("Index access method"));
 	}
 
 	// get the index name
