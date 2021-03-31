@@ -289,7 +289,10 @@ def dump_stats(cur, oid_str, f_out, inclHLL):
             if val is None:
                 val = 'NULL'
             elif isinstance(val, (str, unicode)) and val[0] == '{':
-                val = "E'%s'" % E(val)
+                # use an Escape string for array constants and also add one
+                # more layer of backslash escape symbols, since the string
+                # will go through two layers of escape processing
+                val = "E'%s'" % E(val.replace('\\', '\\\\'))
             if i == 25 and hll == True:
                 # the actual HLL value in stavalues5
                 if inclHLL == True:
