@@ -242,7 +242,7 @@ def dump_stats(cur, oid_str, f_out, inclHLL):
         if schemaname != 'pg_catalog':
             linecomment = '-- ' # This will comment out the DELETE query
 
-        f_out.writelines(pstring.format(Escape(vals[0]), Escape(vals[2]), linecomment, starelid, vals[5], ',\n'.join(rowVals)))
+        f_out.writelines(pstring.format(Escape(vals[0]), Escape(vals[2]), linecomment, starelid, vals[6], ',\n'.join(rowVals)))
 
 def main():
     parser = parse_cmd_line()
