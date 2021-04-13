@@ -114,7 +114,7 @@ protected:
 		GPOS_CATCH_EX(ex)
 		{
 			gpos::clib::Free(alloc_internal);
-			CException::Reraise(ex, false /*propagate*/);
+			GPOS_RETHROW(ex);
 		}
 		GPOS_CATCH_END;
 		return GPOS_OK;
