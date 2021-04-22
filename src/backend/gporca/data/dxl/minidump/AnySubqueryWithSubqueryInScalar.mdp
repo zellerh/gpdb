@@ -101,6 +101,14 @@
         <dxl:SumAgg Mdid="0.0.0.0"/>
         <dxl:CountAgg Mdid="0.2147.1.0"/>
       </dxl:Type>
+      <dxl:GPDBScalarOp Mdid="0.91.1.0" Name="=" ComparisonType="Eq">
+        <dxl:LeftType Mdid="0.16.1.0"/>
+        <dxl:RightType Mdid="0.16.1.0"/>
+        <dxl:ResultType Mdid="0.16.1.0"/>
+        <dxl:OpFunc Mdid="0.60.1.0"/>
+        <dxl:Commutator Mdid="0.91.1.0"/>
+        <dxl:InverseOp Mdid="0.85.1.0"/>
+      </dxl:GPDBScalarOp>
       <dxl:Type Mdid="0.20.1.0" Name="Int8" IsRedistributable="true" IsHashable="true" IsMergeJoinable="true" IsComposite="false" IsFixedLength="true" Length="8" PassByValue="true">
         <dxl:EqualityOp Mdid="0.410.1.0"/>
         <dxl:InequalityOp Mdid="0.411.1.0"/>

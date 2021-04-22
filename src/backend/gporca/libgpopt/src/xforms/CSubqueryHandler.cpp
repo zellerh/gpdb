@@ -1654,13 +1654,15 @@ CSubqueryHandler::FRemoveAllSubquery(CExpression *pexprOuter,
 		}
 	}
 
+	// We want to convert the ALL subquery to an ANY subquery, so that we can
+	// use an anti-semijoin to process it:
+	// col op ALL (SQ)  ==>  NOT (col inv-op ANY(SQ))
+	// In this first step, we create the inverse predicate.
 	CExpression *pexprInversePred =
 		CXformUtils::PexprInversePred(mp, pexprSubquery);
 	// generate a select with the inverse predicate as the selection predicate
 	// TODO: Handle the case where pexprInversePred == NULL
 	pexprPredicate = pexprInversePred;
-	pexprInnerSelect =
-		CUtils::PexprLogicalSelect(mp, pexprInner, pexprPredicate);
 
 	if (EsqctxtValue == esqctxt)
 	{
@@ -1679,11 +1681,8 @@ CSubqueryHandler::FRemoveAllSubquery(CExpression *pexprOuter,
 				fUseCorrelated = true;
 		}
 
-		CExpression *pexprNewInnerSelect = PexprInnerSelect(
+		pexprInnerSelect = PexprInnerSelect(
 			mp, colref, pexprInner, pexprPredicate, &fUseNotNullOptimization);
-
-		pexprInnerSelect->Release();
-		pexprInnerSelect = pexprNewInnerSelect;
 
 		if (!fUseCorrelated)
 		{
@@ -1699,10 +1698,48 @@ CSubqueryHandler::FRemoveAllSubquery(CExpression *pexprOuter,
 				mp, pexprOuter, pexprSubquery, esqctxt, ppexprNewOuter,
 				ppexprResidualScalar);
 		}
+		pexprInner->Release();
+		pexprPredicate->Release();
 	}
 	else
 	{
 		GPOS_ASSERT(EsqctxtFilter == esqctxt);
+
+		// We are going to use an anti-semijoin to process the
+		// NOT (col inv-op ANY(SQ)) query. We need to take special care of
+		// what happens when the subquery evaluates to NULL. Since we are
+		// in a filter context, this needs to be treated the same as a
+		// FALSE result. Now, for the anti-semijoin, if we produce nothing
+		// from the inner, that's the equivalent of the subquery
+		// evaluating to TRUE. Therefore, we want the inner to produce
+		// rows in case the subquery evaluates to FALSE or to NULL
+		// (meaning that the inverse predicate evaluates to TRUE or NULL).
+		// To achieve this, we use the following anti-semijoin predicate:
+		// (col inv-op sq-select val) IS NOT FALSE. This is only needed
+		// if we are dealing with nullable columns.
+
+		// check that inner row in filter is nullable
+		CColRefSet *pcrsNotNullInner = GPOS_NEW(mp) CColRefSet(mp);
+		pcrsNotNullInner->Include(pexprInner->DeriveNotNullColumns());
+		CColRefSet *pcrsUsedInner = GPOS_NEW(mp) CColRefSet(mp);
+		pcrsUsedInner->Include(colref);
+		pcrsUsedInner->Intersection(pexprPredicate->DeriveUsedColumns());
+		pcrsNotNullInner->Intersection(pcrsUsedInner);
+		BOOL fInnerUsesNullableCol =
+			pcrsNotNullInner->Size() != pcrsUsedInner->Size();
+		pcrsNotNullInner->Release();
+		pcrsUsedInner->Release();
+
+		if (fInnerUsesNullableCol)
+		{
+			pexprInnerSelect = CUtils::PexprLogicalSelect(
+				mp, pexprInner, CUtils::PexprIsNotFalse(mp, pexprPredicate));
+		}
+		else
+		{
+			pexprInnerSelect =
+				CUtils::PexprLogicalSelect(mp, pexprInner, pexprPredicate);
+		}
 
 		*ppexprResidualScalar = CUtils::PexprScalarConstBool(mp, true);
 		*ppexprNewOuter =
